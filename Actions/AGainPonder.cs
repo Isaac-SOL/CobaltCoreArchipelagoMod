@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using DemoMod.Artifacts;
 using DemoMod.Cards;
 using Nickel;
 
@@ -89,6 +90,8 @@ public class AGainPonder : CardAction
 
     private static Upgrade GetNextUpgrade(State s)
     {
-        return Upgrade.None;
+        if (s.EnumerateAllArtifacts().Find(a => a is Lexicon) is not Lexicon lexicon)
+            return Upgrade.None;
+        return lexicon.PullAndFlip();
     }
 }

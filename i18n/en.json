@@ -45,5 +45,15 @@
         "Ponder": {
             "name": "Ponder"
         }
+    },
+    "artifact": {
+        "BuriedKnowledge": {
+            "name": "BURIED KNOWLEDGE",
+            "desc": "At the start of combat, add 3 <c=card>Ponder</c>s to the discard pile."
+        },
+        "Lexicon": {
+            "name": "LEXICON",
+            "desc": "Whenever you gain a <c=card>Ponder</c> during combat, it is given the A or B upgrade, alternating."
+        }
     }
 }

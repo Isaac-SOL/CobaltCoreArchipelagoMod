@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using DemoMod.Actions;
+using DemoMod.Artifacts;
 using DemoMod.Cards;
 using DemoMod.External;
 using DemoMod.Features;
@@ -17,7 +18,7 @@ internal class ModEntry : SimpleMod
 {
     internal static ModEntry Instance { get; private set; } = null!;
     internal Harmony Harmony;
-    internal IKokoroApi KokoroApi;
+    internal IKokoroApi.IV2 KokoroApi;
     internal IDeckEntry DemoDeck;
     internal IStatusEntry KnowledgeStatus;
     internal IStatusEntry LessonStatus;
@@ -27,7 +28,7 @@ internal class ModEntry : SimpleMod
     /*
      * The following lists contain references to all types that will be registered to the game.
      * All cards and artifacts must be registered before they may be used in the game.
-     * In theory only one collection could be used, containing all registerable types, but it is seperated this way for ease of organization.
+     * In theory only one collection could be used, containing all registrable types, but it is seperated this way for ease of organization.
      */
     private static List<Type> DemoCommonCardTypes = [
         typeof(LessonPlan),
@@ -49,8 +50,10 @@ internal class ModEntry : SimpleMod
             .Concat(DemoSpecialCardTypes);
 
     private static List<Type> DemoCommonArtifacts = [
+        typeof(BuriedKnowledge)
     ];
     private static List<Type> DemoBossArtifacts = [
+        typeof(Lexicon)
     ];
     private static IEnumerable<Type> DemoArtifactTypes =
         DemoCommonArtifacts
@@ -70,7 +73,7 @@ internal class ModEntry : SimpleMod
          * The following is an example of a required dependency - the code would have unexpected errors if Kokoro was not present.
          * Dependencies can (and should) be defined within the nickel.json file, to ensure proper load mod load order.
          */
-        KokoroApi = helper.ModRegistry.GetApi<IKokoroApi>("Shockah.Kokoro")!;
+        KokoroApi = helper.ModRegistry.GetApi<IKokoroApi>("Shockah.Kokoro")!.V2;
 
         AnyLocalizations = new JsonLocalizationProvider(
             tokenExtractor: new SimpleLocalizationTokenExtractor(),
@@ -190,7 +193,8 @@ internal class ModEntry : SimpleMod
          * Managers are typically made to register themselves when constructed.
          * _ = makes the compiler not complain about the fact that you are constructing something for seemingly no reason.
          */
-        _ = new KnowledgeManager();
+        _ = new KnowledgeManager(package, helper);
+        _ = new SilentStatusManager();
 
         /*
          * Some classes require so little management that a manager may not be worth writing.

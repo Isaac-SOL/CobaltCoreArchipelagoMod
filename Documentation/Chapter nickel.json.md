@@ -33,13 +33,13 @@ The following is an exhaustive list of their fields:
 
 Mods can load at various phases of the game's initialization, for various purposes.
 
-BeforeGameAssembly loads the mod before the game's assembly.
+`BeforeGameAssembly` loads the mod before the game's assembly.
 This is helpful if you wish to use Mono.Cecil to modify the game's assembly before it loads.
 
-AfterGameAssembly loads the mod after the game's assembly, but before the database has been initialized.
+`AfterGameAssembly` loads the mod after the game's assembly, but before the database has been initialized.
 This is the default load phase.
 
-AfterDbInit loads the mod after the game's database has been initialized, right before the game is launched.
+`AfterDbInit` loads the mod after the game's database has been initialized, right before the game is launched.
 
 ## Submods
 

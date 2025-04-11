@@ -4,20 +4,19 @@ using System.Collections.Immutable;
 using System.Linq;
 using DemoMod.External;
 using HarmonyLib;
+using Nanoray.PluginManager;
+using Nickel;
 
 namespace DemoMod.Features;
 
-public class KnowledgeManager : IStatusRenderHook
+public class KnowledgeManager : IKokoroApi.IV2.IStatusRenderingApi.IHook
 {
-    public KnowledgeManager()
+    private static IModSoundEntry _lessonLearnedSound = null!;
+    
+    public KnowledgeManager(IPluginPackage<IModManifest> package, IModHelper helper)
     {
-        ModEntry.Instance.KokoroApi.RegisterStatusRenderHook(this, 0);
-        /*
-         * It is occasionally helpful to utilize an Artifact hook, while not being an Artifact.
-         * Nickel offers methods for hooking into this lifecycle.
-         * RegisterBefore allows it to activate before any player-owner artifacts, while RegisterAfter actives after.
-         */
-        // ModEntry.Instance.Helper.Events.RegisterAfterArtifactsHook("AfterPlayerStatusAction", AfterPlayerStatusAction, 0);
+        ModEntry.Instance.KokoroApi.StatusRendering.RegisterHook(this);
+        
         /*
          * There are times in which you need to hook code onto after a method.
          * Harmony allows us to achieve this on any method.
@@ -27,21 +26,20 @@ public class KnowledgeManager : IStatusRenderHook
             original: AccessTools.DeclaredMethod(typeof(AStatus), nameof(AStatus.Begin)),
             postfix: new HarmonyMethod(GetType(), nameof(AStatus_Begin_Postfix))
         );
+
+        _lessonLearnedSound = helper.Content.Audio.RegisterSound(package.PackageRoot.GetRelativeFile("assets/LessonLearned.wav"));
     }
 
     /*
-     * As an IStatusRenderHook, the KnowledgeManager has the power to make any status render as bars.
-     * However, it only knows how to render Knowledge as bars - so it says true to it, and null to anything else.
+     * As an IStatusRenderingApi.IHook, the KnowledgeManager has the power to make any status render as bars.
+     * However, it only knows how to render Knowledge as bars - so it has its definition for Knowledge,
+     * and returns null for everything else.
      */
-    public bool? ShouldOverrideStatusRenderingAsBars(State state, Combat combat, Ship ship, Status status, int amount)
+    public (IReadOnlyList<Color> Colors, int? BarSegmentWidth)? OverrideStatusRenderingAsBars(IKokoroApi.IV2.IStatusRenderingApi.IHook.IOverrideStatusRenderingAsBarsArgs args)
     {
-        if (status != ModEntry.Instance.KnowledgeStatus.Status) return null;
-        return true;
-    }
+        if (args.Status != ModEntry.Instance.KnowledgeStatus.Status) return null;
 
-    public (IReadOnlyList<Color> Colors, int? BarTickWidth) OverrideStatusRendering(State state, Combat combat, Ship ship, Status status,
-        int amount)
-    {
+        var ship = args.Ship;
         var expected = GetKnowledgeLimit(ship);
         var current = ship.Get(ModEntry.Instance.KnowledgeStatus.Status);
 
@@ -58,7 +56,7 @@ public class KnowledgeManager : IStatusRenderHook
 
     /*
      * Harmony Postfixes have access to all the arguments of the original method.
-     * The arguments must be the exact same name and type as the original.
+     * The arguments must be the exact same name as the original, but the type can either be the type or any supertype.
      * There are also special arguments that can be added.
      * __instance is the "this" in the original call.
      */
@@ -74,21 +72,24 @@ public class KnowledgeManager : IStatusRenderHook
             {
                 status = Status.powerdrive,
                 statusAmount = 1,
-                targetPlayer = __instance.targetPlayer
-            },
+                targetPlayer = __instance.targetPlayer,
+                timer = 0
+            }.Silent(),
             new AStatus
             {
                 status = ModEntry.Instance.LessonStatus.Status,
                 statusAmount = 1,
-                targetPlayer = __instance.targetPlayer
-            },
+                targetPlayer = __instance.targetPlayer,
+                timer = 0
+            }.Silent(),
             new AStatus
             {
                 status = ModEntry.Instance.KnowledgeStatus.Status,
                 statusAmount = -GetKnowledgeLimit(ship),
                 targetPlayer = __instance.targetPlayer
-            }
+            }.Silent()
         ]);
+        _lessonLearnedSound.CreateInstance();
     }
 
     public static int GetKnowledgeLimit(Ship ship)

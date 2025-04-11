@@ -2,3 +2,4 @@
 
 [Chapter 02 - Card Basics](./Chapter%2002.md)
 
+[Chapter 03 - Artifacts](./Chapter%2003.md)

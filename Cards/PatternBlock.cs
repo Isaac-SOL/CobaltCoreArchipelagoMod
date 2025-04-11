@@ -12,7 +12,7 @@ public class PatternBlock : Card, IRegisterable
     /*
      * This exists for the sake of brevity, as it is used a lot in this card's actions.
      */
-    private static IKokoroApi.IConditionalActionApi Conditional => ModEntry.Instance.KokoroApi.ConditionalActions;
+    private static IKokoroApi.IV2.IConditionalApi Conditional => ModEntry.Instance.KokoroApi.Conditional;
     
     public static void Register(IPluginPackage<IModManifest> package, IModHelper helper)
     {
@@ -51,7 +51,7 @@ public class PatternBlock : Card, IRegisterable
                  * an IBooleanExpression, describing when the action should occur
                  * and a CardAction, dictating what the action is
                  */
-                Conditional.Make(
+                Conditional.MakeAction(
                     /*
                      * HasStatus will allow its action to occur if the player has any amount of the status.
                      * It has a targetPlayer argument that defaults to true, in case the query should be against the enemy.
@@ -64,7 +64,7 @@ public class PatternBlock : Card, IRegisterable
                         statusAmount = 2,
                         targetPlayer = true
                     }
-                )
+                ).AsCardAction
             ],
             Upgrade.B => [
                 new AStatus
@@ -73,7 +73,7 @@ public class PatternBlock : Card, IRegisterable
                     statusAmount = 1,
                     targetPlayer = true
                 },
-                Conditional.Make(
+                Conditional.MakeAction(
                     Conditional.HasStatus(ModEntry.Instance.LessonStatus.Status),
                     new AStatus
                     {
@@ -81,8 +81,8 @@ public class PatternBlock : Card, IRegisterable
                         statusAmount = 2,
                         targetPlayer = true
                     }
-                ),
-                Conditional.Make(
+                ).AsCardAction,
+                Conditional.MakeAction(
                     /*
                      * Equations allow for very specific conditions to occur.
                      * It takes an IIntExpression, an EquationOperator, another IIntExpression, and an EquationStyle.
@@ -90,9 +90,9 @@ public class PatternBlock : Card, IRegisterable
                      */
                     Conditional.Equation(
                         Conditional.Status(ModEntry.Instance.LessonStatus.Status),
-                        IKokoroApi.IConditionalActionApi.EquationOperator.GreaterThanOrEqual,
+                        IKokoroApi.IV2.IConditionalApi.EquationOperator.GreaterThanOrEqual,
                         Conditional.Constant(2),
-                        IKokoroApi.IConditionalActionApi.EquationStyle.Formal
+                        IKokoroApi.IV2.IConditionalApi.EquationStyle.Formal
                     ),
                     new AStatus
                     {
@@ -100,7 +100,7 @@ public class PatternBlock : Card, IRegisterable
                         statusAmount = 2,
                         targetPlayer = true
                     }
-                )
+                ).AsCardAction
             ],
             _ => [
                 new AStatus
@@ -109,7 +109,7 @@ public class PatternBlock : Card, IRegisterable
                     statusAmount = 1,
                     targetPlayer = true
                 },
-                Conditional.Make(
+                Conditional.MakeAction(
                     Conditional.HasStatus(ModEntry.Instance.LessonStatus.Status),
                     new AStatus
                     {
@@ -117,7 +117,7 @@ public class PatternBlock : Card, IRegisterable
                         statusAmount = 2,
                         targetPlayer = true
                     }
-                )
+                ).AsCardAction
             ]
         };
     }
