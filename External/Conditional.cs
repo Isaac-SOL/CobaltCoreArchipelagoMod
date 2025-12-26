@@ -2,7 +2,7 @@
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 
-namespace DemoMod.External;
+namespace CobaltCoreArchipelago.External;
 
 public partial interface IKokoroApi
 {

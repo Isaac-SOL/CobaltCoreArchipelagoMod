@@ -1,4 +1,4 @@
-﻿namespace DemoMod.External;
+﻿namespace CobaltCoreArchipelago.External;
 
 /// <summary>
 /// Allows accessing all of Kokoro library APIs.

@@ -1,8 +1,8 @@
 ﻿using System.Collections.Generic;
-using DemoMod.Cards;
+using CobaltCoreArchipelago.Cards;
 using Nickel;
 
-namespace DemoMod.Actions;
+namespace CobaltCoreArchipelago.Actions;
 
 public class AOverthink : CardAction
 {

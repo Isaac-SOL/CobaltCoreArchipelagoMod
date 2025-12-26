@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Reflection;
-using DemoMod.External;
+using CobaltCoreArchipelago.External;
 using Nanoray.PluginManager;
 using Nickel;
 
-namespace DemoMod.Cards;
+namespace CobaltCoreArchipelago.Cards;
 
 public class PatternBlock : Card, IRegisterable
 {

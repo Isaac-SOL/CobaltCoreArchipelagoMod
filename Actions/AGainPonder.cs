@@ -1,10 +1,10 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using DemoMod.Artifacts;
-using DemoMod.Cards;
+using CobaltCoreArchipelago.Artifacts;
+using CobaltCoreArchipelago.Cards;
 using Nickel;
 
-namespace DemoMod.Actions;
+namespace CobaltCoreArchipelago.Actions;
 
 /*
  * There are times where custom activity must be separated away into an action. The reasons to do so include:

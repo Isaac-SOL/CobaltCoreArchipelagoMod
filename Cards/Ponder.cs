@@ -1,10 +1,10 @@
 ﻿using System.Collections.Generic;
 using System.Reflection;
-using DemoMod.Actions;
+using CobaltCoreArchipelago.Actions;
 using Nanoray.PluginManager;
 using Nickel;
 
-namespace DemoMod.Cards;
+namespace CobaltCoreArchipelago.Cards;
 
 public class Ponder : Card, IRegisterable
 {

@@ -2,12 +2,12 @@
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
-using DemoMod.External;
+using CobaltCoreArchipelago.External;
 using HarmonyLib;
 using Nanoray.PluginManager;
 using Nickel;
 
-namespace DemoMod.Features;
+namespace CobaltCoreArchipelago.Features;
 
 public class KnowledgeManager : IKokoroApi.IV2.IStatusRenderingApi.IHook
 {

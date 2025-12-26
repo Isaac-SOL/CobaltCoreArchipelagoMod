@@ -1,9 +1,9 @@
 ﻿using System.Reflection;
-using DemoMod.Actions;
+using CobaltCoreArchipelago.Actions;
 using Nanoray.PluginManager;
 using Nickel;
 
-namespace DemoMod.Artifacts;
+namespace CobaltCoreArchipelago.Artifacts;
 
 /*
  * Artifacts are a nice way to accentuate a character's potential.

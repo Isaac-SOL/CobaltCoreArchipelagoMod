@@ -1,10 +1,10 @@
 {
-  "UniqueName": "rft.DemoMod",
+  "UniqueName": "SaltyIsaac.CobaltCoreArchipelago",
   "Version": "0.1.0",
-  "Author": "rft50",
+  "Author": "SaltyIsaac",
   "Description": "A mod demonstrating the basics of modding Cobalt Core.",
   "RequiredApiVersion": "1.5.7",
-  "EntryPointAssembly": "DemoMod.dll",
+  "EntryPointAssembly": "CobaltCoreArchipelago.dll",
   "LoadPhase": "AfterDbInit",
   "Dependencies": [
     {

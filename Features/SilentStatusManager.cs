@@ -5,7 +5,7 @@ using HarmonyLib;
 using Nanoray.Shrike;
 using Nanoray.Shrike.Harmony;
 
-namespace DemoMod.Features;
+namespace CobaltCoreArchipelago.Features;
 
 public class SilentStatusManager
 {

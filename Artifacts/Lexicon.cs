@@ -2,7 +2,7 @@
 using Nanoray.PluginManager;
 using Nickel;
 
-namespace DemoMod.Artifacts;
+namespace CobaltCoreArchipelago.Artifacts;
 
 /*
  * Some Artifacts do not use any of the many hooks available. It may not even utilize the one for setting its sprite.

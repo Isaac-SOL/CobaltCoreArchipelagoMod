@@ -3,7 +3,7 @@ using System.Reflection;
 using Nanoray.PluginManager;
 using Nickel;
 
-namespace DemoMod.Cards;
+namespace CobaltCoreArchipelago.Cards;
 
 public class DeepStudy : Card, IRegisterable
 {

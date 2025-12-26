@@ -1,7 +1,7 @@
 ﻿using Nanoray.PluginManager;
 using Nickel;
 
-namespace DemoMod;
+namespace CobaltCoreArchipelago;
 
 internal interface IRegisterable
 {

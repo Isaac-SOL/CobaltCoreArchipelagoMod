@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace DemoMod.External;
+namespace CobaltCoreArchipelago.External;
 
 public partial interface IKokoroApi
 {

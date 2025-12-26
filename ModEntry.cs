@@ -6,13 +6,13 @@ using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
-using DemoMod.Actions;
-using DemoMod.Artifacts;
-using DemoMod.Cards;
-using DemoMod.External;
-using DemoMod.Features;
+using CobaltCoreArchipelago.Actions;
+using CobaltCoreArchipelago.Artifacts;
+using CobaltCoreArchipelago.Cards;
+using CobaltCoreArchipelago.External;
+using CobaltCoreArchipelago.Features;
 
-namespace DemoMod;
+namespace CobaltCoreArchipelago;
 
 internal class ModEntry : SimpleMod
 {
@@ -66,7 +66,7 @@ internal class ModEntry : SimpleMod
     public ModEntry(IPluginPackage<IModManifest> package, IModHelper helper, ILogger logger) : base(package, helper, logger)
     {
         Instance = this;
-        Harmony = new Harmony("rft.DemoMod");
+        Harmony = new Harmony("SaltyIsaac.CobaltCoreArchipelago");
         
         /*
          * Some mods provide an API, which can be requested from the ModRegistry.
