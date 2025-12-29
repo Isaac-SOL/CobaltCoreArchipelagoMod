@@ -42,52 +42,52 @@ public class Archipelago
         { "Momentum", typeof(MomentumCard) },
         { "Shield Surge", typeof(BlockParty) },
         { "Stun Charge", typeof(StunCharge) },
-        { "Stun Shot",  typeof(StunShot) },
+        { "Stun Shot", typeof(StunShot) },
         // Dizzy Uncommon
         { "Acid Cannon", typeof(AcidCannon) },
-        { "Blocker Burnout",  typeof(BlockerBurnout) },
-        { "Converter",   typeof(Converter) },
+        { "Blocker Burnout", typeof(BlockerBurnout) },
+        { "Converter", typeof(Converter) },
         { "EMP", typeof(EMPCard) },
         { "Multi Stun", typeof(DualStun) },
         { "Pulse Barrier", typeof(PulseBarrierCard) },
-        { "Refresh Interval",  typeof(RefreshInterval) },
+        { "Refresh Interval", typeof(RefreshInterval) },
         // Dizzy Rare
-        { "Corrosion Beam",  typeof(CorrosionBeam) },
+        { "Corrosion Beam", typeof(CorrosionBeam) },
         { "Mitosis", typeof(MitosisCard) },
-        { "Payback",  typeof(PaybackCard) },
+        { "Payback", typeof(PaybackCard) },
         { "Shield Gun", typeof(ShieldGun) },
         { "Stun Source", typeof(StunSourceCard) },
-        
+
         // Riggs Common
-        { "Bolt",    typeof(BoltCard) },
+        { "Bolt", typeof(BoltCard) },
         { "Draw Shot", typeof(DrawCannon) },
-        { "Evasive Shot",  typeof(EvasiveShot) },
+        { "Evasive Shot", typeof(EvasiveShot) },
         { "Juke", typeof(Juke) },
         { "Options", typeof(OptionsCard) },
         { "Panic", typeof(Panic) },
         { "Quick Thinking", typeof(DrawThree) },
         { "Scramble", typeof(Scramble) },
-        { "Whiplash",  typeof(Whiplash) },
+        { "Whiplash", typeof(Whiplash) },
         // Riggs Uncommon
-        { "Charge Beam",   typeof(ChargeBeam) },
-        { "Echo",  typeof(EchoCard) },
+        { "Charge Beam", typeof(ChargeBeam) },
+        { "Echo", typeof(EchoCard) },
         { "Fleetfoot", typeof(FleetfootCard) },
-        { "Now Or Never",   typeof(NowOrNeverCard) },
+        { "Now Or Never", typeof(NowOrNeverCard) },
         { "Prepare", typeof(PrepareCard) },
         { "Selective Memory", typeof(SelectiveMemory) },
         { "Vamoose", typeof(Vamoose) },
         // Riggs Rare
         { "Ace", typeof(Ace) },
         { "Hand Cannon", typeof(HandCannon) },
-        { "Second Opinions",  typeof(SecondOpinions) },
+        { "Second Opinions", typeof(SecondOpinions) },
         { "Strafe", typeof(Strafe) },
         { "Think Twice", typeof(ThinkTwice) },
-        
+
         // Peri Common
         { "Escalate", typeof(Overdrive) },
         { "Extra Battery", typeof(SpareBattery) },
-        { "Feint",  typeof(Feint) },
-        { "Lunge",  typeof(Lunge) },
+        { "Feint", typeof(Feint) },
+        { "Lunge", typeof(Lunge) },
         { "Multi Blast", typeof(BigGun) },
         { "Multi Shot", typeof(MultiShot) },
         { "Overpower", typeof(Overpower) },
@@ -107,7 +107,7 @@ public class Archipelago
         { "Parry", typeof(Parry) },
         { "Table Flip", typeof(TableFlipCard) },
         { "Weaken Hull", typeof(WeakenHull) },
-        
+
         // Isaac Common
         { "Attack Drone", typeof(AttackDroneCard) },
         { "Flex Move", typeof(FlexMove) },
@@ -129,14 +129,14 @@ public class Archipelago
         // Isaac Rare
         { "Bay Overload", typeof(BayOverload) },
         { "Energy Drone", typeof(EnergyDroneCard) },
-        { "Jupiter Drone", typeof(MiniMe)},
+        { "Jupiter Drone", typeof(MiniMe) },
         { "Rock Factory", typeof(RockFactory) },
         { "Scattershot", typeof(ScatterShot) },
-        
+
         // Drake Common
         { "Combustion Engine", typeof(CombustionEngine) },
         { "Desperate Measures", typeof(DesperateMeasures) },
-        { "EMP Slug",  typeof(EMPSlug) },
+        { "EMP Slug", typeof(EMPSlug) },
         { "Exothermic Release", typeof(ExothermicRelease) },
         { "Explosive Slug", typeof(HESlug) },
         { "Firewall", typeof(Firewall) },
@@ -157,7 +157,7 @@ public class Archipelago
         { "Pillage and Plunder", typeof(HealthCannon) },
         { "Serenity", typeof(Serenity) },
         { "Thermal Battery", typeof(ThermalBattery) },
-        
+
         // Max Common
         { "Admin Deploy", typeof(AdminDeployCard) },
         { "Cloud Save", typeof(CloudSaveCard) },
@@ -170,19 +170,19 @@ public class Archipelago
         { "Worm", typeof(WormFood) },
         // Max Uncommon
         { "Branch Prediction", typeof(BranchPrediction) },
-        { "Enrage",  typeof(Enrage) },
+        { "Enrage", typeof(Enrage) },
         { "Escape Artist", typeof(EscapeArtist) },
         { "Lazy Barrage", typeof(LazyBarrage) },
         { "Memory Leak", typeof(MaxTrashGeneration) },
         { "Root Access", typeof(RootAccess) },
-        { "Spacer",  typeof(Spacer) },
+        { "Spacer", typeof(Spacer) },
         // Max Rare
         { "Backup Stick", typeof(BackupStick) },
         { "Clean Exhaust", typeof(CleanExhaustCard) },
         { "Overclock", typeof(Overclock) },
         { "Save State", typeof(SaveStateCard) },
         { "Total Cache Wipe", typeof(ExhaustHandCard) },
-        
+
         // Books Common
         { "Glimmer Shot", typeof(Glimmershot) },
         { "Mage Hand", typeof(MageHand) },
@@ -190,9 +190,9 @@ public class Archipelago
         { "Meteor", typeof(MeteorCard) },
         { "Mining Drill", typeof(MiningDrillCard) },
         { "Sapphire Shield", typeof(Shardsource) },
-        { "Swizzle Shift",  typeof(SwizzleShift) },
+        { "Swizzle Shift", typeof(SwizzleShift) },
         { "Unpolished Crystal", typeof(UnpoweredShardCard) },
-        { "Zircon Zip",  typeof(ZirconZip) },
+        { "Zircon Zip", typeof(ZirconZip) },
         // Books Uncommon
         { "Avid Reader", typeof(AvidReader) },
         { "Block Evolution", typeof(BlockEvolution) },
@@ -200,14 +200,14 @@ public class Archipelago
         { "Catch", typeof(CatchCard) },
         { "Mineral Deposit", typeof(MineralDeposit) },
         { "Ol' Reliable", typeof(GeodeCard) },
-        { "Shardpack",  typeof(ShardPack) },
+        { "Shardpack", typeof(ShardPack) },
         // Books Rare
         { "Medusa Field", typeof(MedusaField) },
         { "Overflowing Power", typeof(OverflowingPower) },
         { "Perfect Specimen", typeof(PerfectSpecimen) },
         { "Quantum Quarry", typeof(QuantumQuarryCard) },
         { "Zero Draw", typeof(ZeroDraw) },
-        
+
         // CAT Common
         { "Defensive Mode", typeof(DefensiveMode) },
         { "Dizzy.EXE", typeof(ColorlessDizzySummon) },
@@ -217,16 +217,16 @@ public class Archipelago
         { "Peri.EXE", typeof(ColorlessPeriSummon) },
         { "Riggs.EXE", typeof(ColorlessRiggsSummon) },
         // CAT Uncommon
-        { "Aegis",  typeof(AegisCard) },
+        { "Aegis", typeof(AegisCard) },
         { "Books.EXE", typeof(ColorlessBooksSummon) },
         { "CAT.EXE", typeof(ColorlessCATSummon) },
         { "I Frames", typeof(IFrameCard) },
         { "Jack of All Trades", typeof(JackOfAllTrades) },
         { "Quick Fix", typeof(CATTempFixCard) },
-        { "Temporal Anomaly",  typeof(TemporalAnomalyCard) },
+        { "Temporal Anomaly", typeof(TemporalAnomalyCard) },
         // CAT Rare
         { "Adaptability", typeof(AdaptabilityCard) },
-        { "AI Overflow",  typeof(AIOverflowCard) },
+        { "AI Overflow", typeof(AIOverflowCard) },
         { "Prism", typeof(PrismAttackCard) },
         { "Time Skip", typeof(TimestopCard) }
     };
