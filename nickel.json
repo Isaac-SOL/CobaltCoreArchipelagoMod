@@ -2,7 +2,7 @@
   "UniqueName": "SaltyIsaac.CobaltCoreArchipelago",
   "Version": "0.1.0",
   "Author": "SaltyIsaac",
-  "Description": "A mod demonstrating the basics of modding Cobalt Core.",
+  "Description": "Archipelago multiworld randomizer integration for Cobalt Core.",
   "RequiredApiVersion": "1.5.7",
   "EntryPointAssembly": "CobaltCoreArchipelago.dll",
   "LoadPhase": "AfterDbInit",

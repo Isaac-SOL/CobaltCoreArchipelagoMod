@@ -6,11 +6,15 @@ using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
+using System.Reflection;
 using CobaltCoreArchipelago.Actions;
 using CobaltCoreArchipelago.Artifacts;
 using CobaltCoreArchipelago.Cards;
 using CobaltCoreArchipelago.External;
 using CobaltCoreArchipelago.Features;
+using Archipelago.MultiClient.Net;
+using Archipelago.MultiClient.Net.Enums;
+using Microsoft.Xna.Framework;
 
 namespace CobaltCoreArchipelago;
 
@@ -25,6 +29,8 @@ internal class ModEntry : SimpleMod
     internal ILocalizationProvider<IReadOnlyList<string>> AnyLocalizations { get; }
     internal ILocaleBoundNonNullLocalizationProvider<IReadOnlyList<string>> Localizations { get; }
 
+    internal Archipelago Archipelago;
+    
     /*
      * The following lists contain references to all types that will be registered to the game.
      * All cards and artifacts must be registered before they may be used in the game.
@@ -67,6 +73,8 @@ internal class ModEntry : SimpleMod
     {
         Instance = this;
         Harmony = new Harmony("SaltyIsaac.CobaltCoreArchipelago");
+        Harmony.PatchAll(Assembly.GetExecutingAssembly());
+        Archipelago = new Archipelago();
         
         /*
          * Some mods provide an API, which can be requested from the ModRegistry.
@@ -205,7 +213,7 @@ internal class ModEntry : SimpleMod
         
         AOverthink.Spr = RegisterSprite(package, "assets/overthink.png").Sprite;
     }
-
+    
     /*
      * assets must also be registered before they may be used.
      * Unlike cards and artifacts, however, they are very simple to register, and often do not need to be referenced in more than one place.
