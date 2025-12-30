@@ -1,9 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using Archipelago.MultiClient.Net;
 using Archipelago.MultiClient.Net.Enums;
 using Archipelago.MultiClient.Net.Helpers;
+using HarmonyLib;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json.Linq;
 
 namespace CobaltCoreArchipelago;
 
@@ -19,7 +22,8 @@ public class Archipelago
         { "Isaac", Deck.goat },
         { "Drake", Deck.eunice },
         { "Max",   Deck.hacker },
-        { "CAT",   Deck.catartifact }
+        { "Books", Deck.shard },
+        { "CAT",   Deck.colorless }
     };
 
     public static Dictionary<string, string> ItemToStartingShip = new()
@@ -348,6 +352,8 @@ public class Archipelago
 
     public Dictionary<string, object>? SlotData { get; set; }
     
+    public SlotDataHelper? SlotDataHelper { get; set; }
+    
     public ILogger Logger => ModEntry.Instance.Logger;
 
     public Archipelago()
@@ -373,6 +379,8 @@ public class Archipelago
         {
             Logger.LogInformation("{key} : {value}", kvp.Key, kvp.Value);
         }
+
+        SlotDataHelper = CobaltCoreArchipelago.SlotDataHelper.FromSlotData(SlotData);
         
         Session.Items.ItemReceived += OnItemReceived;
     }
@@ -392,6 +400,10 @@ public class Archipelago
         {
             Logger.LogWarning("Error when disconnecting from Archipelago host");
         }
+        
+        Session = null;
+        SlotData = null;
+        SlotDataHelper = null;
     }
 
     public void Reconnect(string hostname, int port, string slot)
@@ -402,6 +414,87 @@ public class Archipelago
 
     private void OnItemReceived(ReceivedItemsHelper helper)
     {
-        Logger.LogInformation("Received {item}", helper.PeekItem().ItemName);
+        var item = helper.PeekItem();
+        var name = item.ItemName;
+        Logger.LogInformation("Received {item}", name);
+        if (ItemToStartingShip.ContainsKey(name))
+        {
+            
+        }
+        else if (ItemToDeck.ContainsKey(name))
+        {
+            
+        }
+        else if (ItemToCard.ContainsKey(name))
+        {
+            
+        }
+        else if (ItemToArtifact.ContainsKey(name))
+        {
+            
+        }
+    }
+}
+
+public enum WinCondition
+{
+    TotalMemories = 0,
+    MemoryPerCharacter
+}
+
+public enum CardRewardsMode
+{
+    Never = 0,
+    IfHasDeck,
+    IfLocal,
+    IfLocalAndHasDeck,
+    Always
+}
+
+public class SlotDataInvalidException(string message) : Exception(message);
+
+public struct SlotDataHelper
+{
+    public List<Deck> StartingCharacters { get; set; }
+    public StarterShip StartingShip { get; set; }
+    public List<Type> StartingCards { get; set; }
+    public NewRunOptions.DifficultyLevel MinimumDifficulty { get; set; }
+    public WinCondition WinCondition { get; set; }
+    public int WinReqTotal { get; set; }
+    public int WinReqPerChar { get; set; }
+    public bool AddCharacterMemories { get; set; }
+    public bool DoFutureMemory { get; set; }
+    public CardRewardsMode ImmediateCardRewards { get; set; }
+    public int FixedRandSeed { get; set; }
+
+    public static SlotDataHelper FromSlotData(Dictionary<string, object> slotData)
+    {
+        var res = new SlotDataHelper();
+        try
+        {
+            var startingCharacters = (JArray)slotData["starting_characters"];
+            res.StartingCharacters = [];
+            res.StartingCharacters.AddRange(startingCharacters.Select(s => Archipelago.ItemToDeck[s.ToString()]));
+            var startingShip = Archipelago.ItemToStartingShip[(string)slotData["starting_ship"]];
+            res.StartingShip = StarterShip.ships[startingShip];
+            var startingCards = (JArray)slotData["starting_cards"];
+            res.StartingCards = [];
+            res.StartingCards.AddRange(startingCards.Select(s => Archipelago.ItemToCard[s.ToString()]));
+            res.MinimumDifficulty = NewRunOptions.difficulties[Convert.ToInt32(slotData["minimum_difficulty"])];
+            res.WinCondition = (WinCondition)Convert.ToInt32(slotData["win_condition"]);
+            res.WinReqTotal = Convert.ToInt32(slotData["memories_required_total"]);
+            res.WinReqPerChar = Convert.ToInt32(slotData["memories_required_per_character"]);
+            res.DoFutureMemory = Convert.ToBoolean(slotData["do_future_memory"]);
+            res.AddCharacterMemories = Convert.ToBoolean(slotData["add_character_memories"]);
+            res.ImmediateCardRewards = (CardRewardsMode)Convert.ToInt32(slotData["immediate_card_rewards"]);
+            res.FixedRandSeed = 5318008; // TODO define that server-side
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            throw new SlotDataInvalidException(e.Message);
+        }
+
+        return res;
     }
 }
