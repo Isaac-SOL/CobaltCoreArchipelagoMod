@@ -17,8 +17,6 @@ public class FileLoadPatch
 [HarmonyPatch(typeof(State), nameof(State.NewGame))]
 public class NewGamePatch
 {
-    private static string test_field = "";
-    
     // ReSharper disable once RedundantAssignment
     static void Prefix(int? slot, uint? seed, MapBase? map, ref bool skipTutorial)
     {
@@ -60,16 +58,57 @@ public class NewGamePatch
 
     public static string GetArchipelagoStartingShipName()
     {
-        return Archipelago.Instance.SlotDataHelper!.Value.StartingShip.ship.key;
+        return Archipelago.InstanceSlotData.StartingShip.ship.key;
     }
 
     public static int GetArchipelagoStartingCharacter(int pos)
     {
-        return (int)Archipelago.Instance.SlotDataHelper!.Value.StartingCharacters[pos];
+        return (int)Archipelago.InstanceSlotData.StartingCharacters[pos];
+    }
+    
+}
+
+[HarmonyPatch(typeof(State), nameof(State.PopulateRun))]
+public class PopulateRunPatch
+{
+    static void Prefix(State __instance, ref IEnumerable<Deck>? chars)
+    {
+        if (chars == null)
+        {
+            chars = Archipelago.InstanceSlotData.StartingCharacters;
+        }
+        __instance.storyVars.unlockedChars = new HashSet<Deck>(chars);
+        __instance.storyVars.unlockedShips = [Archipelago.InstanceSlotData.StartingShip.ship.key];
     }
 
-    static void Postfix()
-    {
-        
-    }
+    // static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions, ILGenerator generator)
+    // {
+    //     List<CodeInstruction> storedInstructions = new(instructions);
+    //     var codeMatcher = new CodeMatcher(storedInstructions, generator);
+    //     codeMatcher.MatchEndForward(
+    //             CodeMatch.WithOpcodes([OpCodes.Br_S]),
+    //             CodeMatch.WithOpcodes([OpCodes.Ldloc_S]),
+    //             CodeMatch.WithOpcodes([OpCodes.Callvirt]),
+    //             CodeMatch.WithOpcodes([OpCodes.Stloc_S]),
+    //             CodeMatch.WithOpcodes([OpCodes.Ldarg_0]),
+    //             CodeMatch.WithOpcodes([OpCodes.Ldloc_S]),
+    //             CodeMatch.WithOpcodes([OpCodes.Call])
+    //         ).ThrowIfInvalid("Could not find add starters call in instructions")
+    //         .Advance(-1)
+    //         .RemoveInstruction()
+    //         .InsertAndAdvance(
+    //             CodeInstruction.Call((State state, Deck deck) => ArchipelagoAddStartersForCharacter(state, deck))
+    //         );
+    //     
+    //     return codeMatcher.Instructions();
+    // }
+
+    // static void ArchipelagoAddStartersForCharacter(State state, Deck deck)
+    // {
+    //     foreach (var card in Archipelago.InstanceSlotData.DeckStartingCards[deck])
+    //     {
+    //         state.SendCardToDeck((Card)card.CreateInstance());
+    //     }
+    // }
+    
 }

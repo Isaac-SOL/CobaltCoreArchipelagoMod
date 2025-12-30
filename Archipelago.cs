@@ -353,7 +353,9 @@ public class Archipelago
     public Dictionary<string, object>? SlotData { get; set; }
     
     public SlotDataHelper? SlotDataHelper { get; set; }
-    
+
+    public static SlotDataHelper InstanceSlotData => Instance.SlotDataHelper!.Value;
+
     public ILogger Logger => ModEntry.Instance.Logger;
 
     public Archipelago()
@@ -381,6 +383,21 @@ public class Archipelago
         }
 
         SlotDataHelper = CobaltCoreArchipelago.SlotDataHelper.FromSlotData(SlotData);
+        
+        // Patch starting decks
+        foreach (var deck in ItemToDeck.Values)
+        {
+            StarterDeck.starterSets[deck].cards = new List<Card>();
+            foreach (var card in SlotDataHelper.Value.DeckStartingCards[deck])
+            {
+                StarterDeck.starterSets[deck].cards.Add((Card)card.CreateInstance());
+            }
+        }
+        // Patch starting ships
+        foreach (var ship in StarterShip.ships.Values)
+        {
+            ship.ship.parts = new List<Part>(ship.ship.parts.Shuffle(new Rand(SlotDataHelper.Value.FixedRandSeed)));
+        }
         
         Session.Items.ItemReceived += OnItemReceived;
     }
@@ -458,6 +475,7 @@ public struct SlotDataHelper
     public List<Deck> StartingCharacters { get; set; }
     public StarterShip StartingShip { get; set; }
     public List<Type> StartingCards { get; set; }
+    public Dictionary<Deck, List<Type>> DeckStartingCards { get; set; }
     public NewRunOptions.DifficultyLevel MinimumDifficulty { get; set; }
     public WinCondition WinCondition { get; set; }
     public int WinReqTotal { get; set; }
@@ -465,7 +483,7 @@ public struct SlotDataHelper
     public bool AddCharacterMemories { get; set; }
     public bool DoFutureMemory { get; set; }
     public CardRewardsMode ImmediateCardRewards { get; set; }
-    public int FixedRandSeed { get; set; }
+    public uint FixedRandSeed { get; set; }
 
     public static SlotDataHelper FromSlotData(Dictionary<string, object> slotData)
     {
@@ -480,6 +498,15 @@ public struct SlotDataHelper
             var startingCards = (JArray)slotData["starting_cards"];
             res.StartingCards = [];
             res.StartingCards.AddRange(startingCards.Select(s => Archipelago.ItemToCard[s.ToString()]));
+            res.DeckStartingCards = new Dictionary<Deck, List<Type>>();
+            foreach (var card in res.StartingCards)
+            {
+                var deck = ((CardMeta)Attribute.GetCustomAttribute(card, typeof(CardMeta))!).deck;
+                if (!res.DeckStartingCards.ContainsKey(deck))
+                    res.DeckStartingCards[deck] = new List<Type> { card };
+                else
+                    res.DeckStartingCards[deck].Add(card);
+            }
             res.MinimumDifficulty = NewRunOptions.difficulties[Convert.ToInt32(slotData["minimum_difficulty"])];
             res.WinCondition = (WinCondition)Convert.ToInt32(slotData["win_condition"]);
             res.WinReqTotal = Convert.ToInt32(slotData["memories_required_total"]);
