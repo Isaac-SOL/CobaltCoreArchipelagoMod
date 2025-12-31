@@ -396,10 +396,11 @@ public class Archipelago
         // Patch starting ships
         foreach (var ship in StarterShip.ships.Values)
         {
+            // TODO store the base ships somewhere and apply the shuffle on them instead
             ship.ship.parts = new List<Part>(ship.ship.parts.Shuffle(new Rand(SlotDataHelper.Value.FixedRandSeed)));
         }
         
-        Session.Items.ItemReceived += OnItemReceived;
+        Session.Items.ItemReceived += helper => OnItemReceived(helper);
     }
     
     public void Disconnect()
@@ -415,7 +416,7 @@ public class Archipelago
         }
         catch (AggregateException e)
         {
-            Logger.LogWarning("Error when disconnecting from Archipelago host");
+            Logger.LogWarning(e, "Error when disconnecting from Archipelago host");
         }
         
         Session = null;
@@ -429,7 +430,7 @@ public class Archipelago
         Connect(hostname, port, slot);
     }
 
-    private void OnItemReceived(ReceivedItemsHelper helper)
+    private void OnItemReceived(ReceivedItemsHelper helper, bool animate = true)
     {
         var item = helper.PeekItem();
         var name = item.ItemName;

@@ -14,6 +14,24 @@ public class FileLoadPatch
     }
 }
 
+[HarmonyPatch(typeof(G), nameof(G.LoadSavegameOnStartup))]
+public class StartupFileLoadPatch
+{
+    static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions,  ILGenerator generator)
+    {
+        List<CodeInstruction> storedInstructions = new(instructions);
+        var codeMatcher = new CodeMatcher(storedInstructions, generator);
+        // Remove the branch, so that the game always starts on the profile select screen
+        codeMatcher.MatchStartForward(
+                CodeMatch.LoadsLocal(),
+                CodeMatch.WithOpcodes([OpCodes.Ldfld]),
+                CodeMatch.Branches()
+            ).ThrowIfInvalid("Could not find branch in instructions")
+            .RemoveInstructions(3);
+        return codeMatcher.Instructions();
+    }
+}
+
 [HarmonyPatch(typeof(State), nameof(State.NewGame))]
 public class NewGamePatch
 {
@@ -76,9 +94,10 @@ public class PopulateRunPatch
         if (chars == null)
         {
             chars = Archipelago.InstanceSlotData.StartingCharacters;
+            // TODO these things probably shouldn't happen every time we start a run, on file creation instead
+            __instance.storyVars.unlockedChars = new HashSet<Deck>(chars);
+            __instance.storyVars.unlockedShips = [Archipelago.InstanceSlotData.StartingShip.ship.key];
         }
-        __instance.storyVars.unlockedChars = new HashSet<Deck>(chars);
-        __instance.storyVars.unlockedShips = [Archipelago.InstanceSlotData.StartingShip.ship.key];
     }
 
     // static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions, ILGenerator generator)
