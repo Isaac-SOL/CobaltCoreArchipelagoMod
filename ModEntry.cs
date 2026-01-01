@@ -30,6 +30,7 @@ internal class ModEntry : SimpleMod
     internal ILocaleBoundNonNullLocalizationProvider<IReadOnlyList<string>> Localizations { get; }
 
     internal Archipelago Archipelago;
+    internal static Dictionary<string, StarterShip> BaseShips { get; set; } = new();
     
     /*
      * The following lists contain references to all types that will be registered to the game.
@@ -75,6 +76,7 @@ internal class ModEntry : SimpleMod
         Harmony = new Harmony("SaltyIsaac.CobaltCoreArchipelago");
         Harmony.PatchAll(Assembly.GetExecutingAssembly());
         Archipelago = new Archipelago();
+        BaseShips = Mutil.DeepCopy(StarterShip.ships);
         
         /*
          * Some mods provide an API, which can be requested from the ModRegistry.

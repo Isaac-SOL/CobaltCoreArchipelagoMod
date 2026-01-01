@@ -93,8 +93,8 @@ public class PopulateRunPatch
     {
         if (chars == null)
         {
+            // Should only happen in a new game
             chars = Archipelago.InstanceSlotData.StartingCharacters;
-            // TODO these things probably shouldn't happen every time we start a run, on file creation instead
             __instance.storyVars.unlockedChars = new HashSet<Deck>(chars);
             __instance.storyVars.unlockedShips = [Archipelago.InstanceSlotData.StartingShip.ship.key];
         }

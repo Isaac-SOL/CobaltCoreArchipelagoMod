@@ -394,10 +394,11 @@ public class Archipelago
             }
         }
         // Patch starting ships
-        foreach (var ship in StarterShip.ships.Values)
+        foreach (var shipName in StarterShip.ships.Keys)
         {
-            // TODO store the base ships somewhere and apply the shuffle on them instead
-            ship.ship.parts = new List<Part>(ship.ship.parts.Shuffle(new Rand(SlotDataHelper.Value.FixedRandSeed)));
+            var shuffledParts = ModEntry.BaseShips[shipName].ship.parts
+                .Shuffle(new Rand(SlotDataHelper.Value.FixedRandSeed));
+            StarterShip.ships[shipName].ship.parts = Mutil.DeepCopy(new List<Part>(shuffledParts));
         }
         
         Session.Items.ItemReceived += helper => OnItemReceived(helper);
