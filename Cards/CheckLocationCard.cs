@@ -26,7 +26,7 @@ public class CheckLocationCard : Card, IRegisterable
             {
                 deck = ModEntry.Instance.ArchipelagoDeck.Deck,
                 rarity = Rarity.common,
-                upgradesTo = [Upgrade.A]
+                upgradesTo = [Upgrade.A, Upgrade.B]
             },
             Name = ModEntry.Instance.AnyLocalizations.Bind(["card", "CheckLocationCard", "name"]).Localize,
         });
@@ -47,7 +47,8 @@ public class CheckLocationCard : Card, IRegisterable
                 {
                     status = Status.shield,
                     statusAmount = Shield,
-                    mode = AStatusMode.Add
+                    mode = AStatusMode.Add,
+                    targetPlayer = true
                 });
                 break;
             case Upgrade.B:
