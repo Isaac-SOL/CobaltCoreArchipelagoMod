@@ -35,10 +35,13 @@ public class CheckLocationCard : Card, IRegisterable
     public override List<CardAction> GetActions(State s, Combat c)
     {
         Debug.Assert(Archipelago.Instance.Session != null, "Archipelago.Instance.Session != null");
-        var list = new List<CardAction>
+        var checkAction = new AArchipelagoCheckLocation { locationName = locationName };
+        if (IsLocal() && Archipelago.ItemToCard.ContainsKey(locationItemName!))
         {
-            new AArchipelagoCheckLocation { locationName = locationName }
-        };
+            checkAction.givenCard = locationItemName;
+        }
+        
+        var list = new List<CardAction> { checkAction };
 
         switch (upgrade)
         {
@@ -110,7 +113,7 @@ public class CheckLocationCard : Card, IRegisterable
     private bool IsLocal()
     {
         Debug.Assert(Archipelago.Instance.APSaveData != null, "Archipelago.Instance.APSaveData != null");
-        return locationItemName == Archipelago.Instance.APSaveData.Slot;
+        return locationSlotName == Archipelago.Instance.APSaveData.Slot;
     }
 
     internal void ScoutTextInfo()

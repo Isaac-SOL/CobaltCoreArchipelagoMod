@@ -59,7 +59,7 @@
             "descBase": "Send <c=card>{0}</c> to <c=attack>{1}</c>.",
             "descSelf": "Unlock <c=card>{0}</c>.",
             "descContA": " <c=healthBarShield>Shield {0}</c>.",
-            "descContB": " <c=attack>Attack for {0}, {1} times</c>."
+            "descContB": " <c=attack>Attack {0} x{1}</c>."
         }
     },
     "artifact": {

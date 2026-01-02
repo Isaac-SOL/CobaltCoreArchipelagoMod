@@ -1,6 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using CobaltCoreArchipelago.Cards;
+using HarmonyLib;
 using Nickel;
 
 namespace CobaltCoreArchipelago.Actions;
@@ -10,6 +12,7 @@ public class AArchipelagoCheckLocation : CardAction
     public static Spr Spr;
 
     public string? locationName;
+    public string? givenCard;
 
     public override void Begin(G g, State s, Combat c)
     {
@@ -27,7 +30,7 @@ public class AArchipelagoCheckLocation : CardAction
     
     public override List<Tooltip> GetTooltips(State s)
     {
-        return
+        List<Tooltip> tooltips =
         [
             new GlossaryTooltip($"AArchipelagoCheckLocation")
             {
@@ -35,11 +38,17 @@ public class AArchipelagoCheckLocation : CardAction
                 Title = ModEntry.Instance.Localizations.Localize(["action", "AArchipelagoCheckLocation", "title"]),
                 TitleColor = Colors.card,
                 Description = ModEntry.Instance.Localizations.Localize(["action", "AArchipelagoCheckLocation", "desc"])
-            },
-            new TTCard
-            {
-                card = new Ponder()
             }
         ];
+        
+        if (givenCard != null)
+        {
+            tooltips.Add(new TTCard
+            {
+                card = (Card) Archipelago.ItemToCard[givenCard].CreateInstance()
+            });
+        }
+
+        return tooltips;
     }
 }
