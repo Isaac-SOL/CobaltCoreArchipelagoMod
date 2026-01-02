@@ -1,9 +1,13 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Threading.Tasks;
 using Archipelago.MultiClient.Net;
 using Archipelago.MultiClient.Net.Enums;
 using Archipelago.MultiClient.Net.Helpers;
+using Archipelago.MultiClient.Net.MessageLog.Messages;
 using HarmonyLib;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json.Linq;
@@ -348,30 +352,41 @@ public class Archipelago
         { "Summon Control", typeof(SummonControl) },
     };
     
+    public APSaveData? APSaveData { get; set; }
     public ArchipelagoSession? Session { get; set; }
-
     public Dictionary<string, object>? SlotData { get; set; }
-    
     public SlotDataHelper? SlotDataHelper { get; set; }
-
     public static SlotDataHelper InstanceSlotData => Instance.SlotDataHelper!.Value;
-
     public ILogger Logger => ModEntry.Instance.Logger;
+
+    private static ConcurrentBag<string> receivedItemsToProcess = [];
+    private static readonly object itemReceivedLock = new();
 
     public Archipelago()
     {
         Instance = this;
     }
 
-    public void Connect(string hostname, int port, string slot)
+    public void LoadSaveData(int slot)
     {
-        Session = ArchipelagoSessionFactory.CreateSession(hostname, port);
+        APSaveData = APSaveData.LoadFromSlot(slot);
+    }
+
+    public LoginResult Connect()
+    {
+        Debug.Assert(APSaveData != null, nameof(APSaveData) + " != null");
+        Debug.Assert(Session == null, nameof(Session) + " == null");
+        Session = ArchipelagoSessionFactory.CreateSession(APSaveData.Hostname, APSaveData.Port);
         var loginResult =
-            Session.TryConnectAndLogin("Cobalt Core", slot, ItemsHandlingFlags.AllItems);
+            Session.TryConnectAndLogin(
+                "Cobalt Core",
+                APSaveData.Slot,
+                ItemsHandlingFlags.AllItems,
+                password: APSaveData.Password);
         if (!loginResult.Successful)
         {
             Logger.LogError("Failed to connect to Archipelago host");
-            throw new Exception("Archipelago connection error");
+            return loginResult;
         }
 
         SlotData = (loginResult as LoginSuccessful)!.SlotData;
@@ -382,6 +397,21 @@ public class Archipelago
             Logger.LogInformation("{key} : {value}", kvp.Key, kvp.Value);
         }
 
+        if (APSaveData.RoomId is not null && APSaveData.RoomId != Session.RoomState.Seed)
+        {
+            Logger.LogError("Stored seed is different from Archipelago host seed");
+        }
+        APSaveData.RoomId = Session.RoomState.Seed;
+        
+        ApplyArchipelagoConnection();
+        return loginResult;
+    }
+
+    private void ApplyArchipelagoConnection()
+    {
+        Debug.Assert(SlotData != null, nameof(SlotData) + " != null");
+        Debug.Assert(Session != null, nameof(Session) + " != null");
+        Debug.Assert(APSaveData != null, nameof(APSaveData) + " != null");
         SlotDataHelper = CobaltCoreArchipelago.SlotDataHelper.FromSlotData(SlotData);
         
         // Patch starting decks
@@ -400,10 +430,13 @@ public class Archipelago
                 .Shuffle(new Rand(SlotDataHelper.Value.FixedRandSeed));
             StarterShip.ships[shipName].ship.parts = Mutil.DeepCopy(new List<Part>(shuffledParts));
         }
+
+        APSaveData.SyncWithHost();
         
-        Session.Items.ItemReceived += helper => OnItemReceived(helper);
+        Session.Items.ItemReceived += OnItemReceived;
+        Session.MessageLog.OnMessageReceived += OnMessageReceived;
     }
-    
+
     public void Disconnect()
     {
         if (Session == null) return;
@@ -425,32 +458,65 @@ public class Archipelago
         SlotDataHelper = null;
     }
 
-    public void Reconnect(string hostname, int port, string slot)
+    public LoginResult Reconnect()
     {
         Disconnect();
-        Connect(hostname, port, slot);
+        return Connect();
     }
 
-    private void OnItemReceived(ReceivedItemsHelper helper, bool animate = true)
+    public void CheckLocationsForced(params long[] address)
     {
-        var item = helper.PeekItem();
-        var name = item.ItemName;
-        Logger.LogInformation("Received {item}", name);
-        if (ItemToStartingShip.ContainsKey(name))
+        Debug.Assert(Session != null, nameof(Session) + " != null");
+        _ = Task.Run(() =>
         {
-            
+            var checkLocationTask = Session.Locations.CompleteLocationChecksAsync(address);
+            if (!checkLocationTask.Wait(TimeSpan.FromSeconds(2)))
+            {
+                Logger.LogWarning("Failed to check location {location} on the Archipelago host", address);
+            }
+        });
+    }
+
+    public void CheckLocation(string name)
+    {
+        Debug.Assert(Session != null, nameof(Session) + " != null");
+        Debug.Assert(APSaveData != null, nameof(APSaveData) + " != null");
+        if (APSaveData.LocationsChecked.Contains(name))
+            return;
+        CheckLocationsForced(Session.Locations.GetLocationIdFromName("Cobalt Core", name));
+        APSaveData.AddCheckedLocation(name);
+    }
+
+    private void OnItemReceived(ReceivedItemsHelper helper)
+    {
+        lock (itemReceivedLock)  // TODO is that lock redundant with the ConcurrentBag?
+        {
+            while (helper.PeekItem() != null)
+            {
+                var name = helper.PeekItem().ItemName;
+                // We are currently on the websocket thread.
+                // To prevent concurrency issues we store received items in a thread-safe list to process on the main thread.
+                receivedItemsToProcess.Add(name);
+                helper.DequeueItem();
+            }
         }
-        else if (ItemToDeck.ContainsKey(name))
+    }
+
+    private void OnMessageReceived(LogMessage message)
+    {
+        Logger.LogInformation("Received message: {message}", message);
+    }
+
+    internal void SafeUpdate(State state)
+    {
+        lock (itemReceivedLock)
         {
-            
-        }
-        else if (ItemToCard.ContainsKey(name))
-        {
-            
-        }
-        else if (ItemToArtifact.ContainsKey(name))
-        {
-            
+            ItemApplier.ApplyDeferredItems(state);
+            while (receivedItemsToProcess.TryTake(out var item))
+            {
+                Logger.LogInformation("Received {item}", item);
+                ItemApplier.ApplyReceivedItem(item, state);
+            }
         }
     }
 }
@@ -475,7 +541,7 @@ public class SlotDataInvalidException(string message) : Exception(message);
 public struct SlotDataHelper
 {
     public List<Deck> StartingCharacters { get; set; }
-    public StarterShip StartingShip { get; set; }
+    public string StartingShip { get; set; }
     public List<Type> StartingCards { get; set; }
     public Dictionary<Deck, List<Type>> DeckStartingCards { get; set; }
     public NewRunOptions.DifficultyLevel MinimumDifficulty { get; set; }
@@ -495,8 +561,7 @@ public struct SlotDataHelper
             var startingCharacters = (JArray)slotData["starting_characters"];
             res.StartingCharacters = [];
             res.StartingCharacters.AddRange(startingCharacters.Select(s => Archipelago.ItemToDeck[s.ToString()]));
-            var startingShip = Archipelago.ItemToStartingShip[(string)slotData["starting_ship"]];
-            res.StartingShip = StarterShip.ships[startingShip];
+            res.StartingShip = Archipelago.ItemToStartingShip[(string)slotData["starting_ship"]];
             var startingCards = (JArray)slotData["starting_cards"];
             res.StartingCards = [];
             res.StartingCards.AddRange(startingCards.Select(s => Archipelago.ItemToCard[s.ToString()]));

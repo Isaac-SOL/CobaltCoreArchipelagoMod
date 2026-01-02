@@ -8,9 +8,14 @@ namespace CobaltCoreArchipelago.ConnectionInfoMenu;
 [HarmonyPatch(typeof(State), nameof(State.LoadOrNew))]
 public class FileLoadPatch
 {
-    static void Prefix()
+    static void Prefix(int slot)
     {
-        ModEntry.Instance.Archipelago.Reconnect("localhost", 38281, "Time Crystal");
+        ModEntry.Instance.Archipelago.LoadSaveData(slot);
+        var loginResult = ModEntry.Instance.Archipelago.Reconnect();
+        if (!loginResult.Successful)
+        {
+            throw new Exception("Could not connect to Archipelago host");
+        }
     }
 }
 
@@ -76,7 +81,7 @@ public class NewGamePatch
 
     public static string GetArchipelagoStartingShipName()
     {
-        return Archipelago.InstanceSlotData.StartingShip.ship.key;
+        return Archipelago.InstanceSlotData.StartingShip;
     }
 
     public static int GetArchipelagoStartingCharacter(int pos)
@@ -89,14 +94,15 @@ public class NewGamePatch
 [HarmonyPatch(typeof(State), nameof(State.PopulateRun))]
 public class PopulateRunPatch
 {
-    static void Prefix(State __instance, ref IEnumerable<Deck>? chars)
+    static void Prefix(State __instance, ref IEnumerable<Deck>? chars, ref bool giveRunStartRewards)
     {
+        // giveRunStartRewards = true;
         if (chars == null)
         {
             // Should only happen in a new game
             chars = Archipelago.InstanceSlotData.StartingCharacters;
             __instance.storyVars.unlockedChars = new HashSet<Deck>(chars);
-            __instance.storyVars.unlockedShips = [Archipelago.InstanceSlotData.StartingShip.ship.key];
+            __instance.storyVars.unlockedShips = [Archipelago.InstanceSlotData.StartingShip];
         }
     }
 
