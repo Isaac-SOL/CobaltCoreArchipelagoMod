@@ -40,6 +40,12 @@ public class APSaveData
     
     internal static IModStorage ModStorage => ModEntry.Instance.Helper.Storage;
 
+    [JsonConstructor]
+    private APSaveData(): this(0, "localhost", 38281, "Time Crystal")
+    {
+        
+    }
+    
     internal APSaveData(int saveSlot, string hostname, int port, string slot, string? password = null)
     {
         SaveSlot = saveSlot;
@@ -53,6 +59,7 @@ public class APSaveData
 
     internal static void LoadAllSaves()
     {
+        ModEntry.Instance.Logger.LogInformation(ModStorage.GetMainStorageFile("json").FullName);
         if (!ModStorage.TryLoadJson(ModStorage.GetMainStorageFile("json"), out _allApSaveStorage) || _allApSaveStorage is null)
         {
             ModEntry.Instance.Logger.LogWarning("Couldn't load mod storage json, creating new one");

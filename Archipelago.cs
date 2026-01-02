@@ -519,6 +519,25 @@ public class Archipelago
             }
         }
     }
+
+    internal async Task<(string itemName, string slotName)> CheckLocationInfo(string locationName)
+    {
+        Debug.Assert(Session != null, nameof(Session) + " != null");
+        (string itemName, string slotName) res;
+        var address = Session.Locations.GetLocationIdFromName("Cobalt Core", locationName);
+        var info = await Session.Locations.ScoutLocationsAsync(HintCreationPolicy.CreateAndAnnounceOnce, address);
+        if (info.TryGetValue(address, out var value))
+        {
+            res.itemName = value.ItemName;
+            res.slotName = value.Player.Name;
+        }
+        else
+        {
+            res.itemName = "[]";
+            res.slotName = "[]";
+        }
+        return (res.itemName, res.slotName);
+    }
 }
 
 public enum WinCondition

@@ -1,4 +1,7 @@
 ﻿{
+    "deck": {
+        "name": "Archipelago"
+    },
     "character": {
         "name": "Professor",
         "desc": "Your professor. They will teach you how to write your own character, as well as the power of <c=status>POWERDRIVE</c>."
@@ -22,6 +25,10 @@
         "AOverthink": {
             "title": "Overthink",
             "desc": "Discard a <c=card>Ponder</c> in hand, or in the draw pile."
+        },
+        "AArchipelagoCheckLocation": {
+            "title": "Archipelago Check",
+            "desc": "Check an <c=boldPink>Archipelago</c> location and give an item to someone."
         }
     },
     "card": {
@@ -44,6 +51,15 @@
         
         "Ponder": {
             "name": "Ponder"
+        },
+        
+        "CheckLocationCard": {
+            "name": "Archipelago Check!",
+            "descNotFound": "Send an Archipelago item.",
+            "descBase": "Send <c=card>{0}</c> to <c=attack>{1}</c>.",
+            "descSelf": "Unlock <c=card>{0}</c>.",
+            "descContA": " <c=healthBarShield>Shield {0}</c>.",
+            "descContB": " <c=attack>Attack for {0}, {1} times</c>."
         }
     },
     "artifact": {

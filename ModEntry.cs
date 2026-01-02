@@ -31,6 +31,8 @@ internal class ModEntry : SimpleMod
 
     internal Archipelago Archipelago;
     internal static Dictionary<string, StarterShip> BaseShips { get; set; } = new();
+
+    internal IDeckEntry ArchipelagoDeck;
     
     /*
      * The following lists contain references to all types that will be registered to the game.
@@ -39,7 +41,8 @@ internal class ModEntry : SimpleMod
      */
     private static List<Type> DemoCommonCardTypes = [
         typeof(LessonPlan),
-        typeof(PatternBlock)
+        typeof(PatternBlock),
+        typeof(CheckLocationCard)
     ];
     private static List<Type> DemoUncommonCardTypes = [
         typeof(DeepStudy)
@@ -114,6 +117,18 @@ internal class ModEntry : SimpleMod
             DefaultCardArt = StableSpr.cards_colorless,
             BorderSprite = RegisterSprite(package, "assets/frame_dave.png").Sprite,
             Name = AnyLocalizations.Bind(["character", "name"]).Localize
+        });
+
+        ArchipelagoDeck = helper.Content.Decks.RegisterDeck("Archipelago", new DeckConfiguration
+        {
+            Definition = new DeckDef
+            {
+                color = new Color("F763FF"),
+                titleColor = new Color("000000")
+            },
+            DefaultCardArt = StableSpr.cards_colorless,
+            BorderSprite = RegisterSprite(package, "assets/frame_ap.png").Sprite,
+            Name = AnyLocalizations.Bind(["deck", "name"]).Localize
         });
 
         /*
@@ -214,6 +229,8 @@ internal class ModEntry : SimpleMod
         AGainPonder.DiscardSpr = RegisterSprite(package, "assets/ponder_discard.png").Sprite;
         
         AOverthink.Spr = RegisterSprite(package, "assets/overthink.png").Sprite;
+
+        AArchipelagoCheckLocation.Spr = RegisterSprite(package, "assets/ap_action.png").Sprite;
     }
     
     /*
