@@ -39,7 +39,7 @@ public class CardOfferingPatch
         var targetCount = __result.Count;
         List<Card> archipelagoCards = [];
         var attempts = 0;
-        while (archipelagoCards.Count < targetCount && attempts++ < 100)
+        while (archipelagoCards.Count < targetCount && attempts++ < 5)
         {
             var deck = limitDeck ?? availableDecks.Random(s.rngCardOfferings);
             var deckName = Archipelago.ItemToDeck.First(kvp => kvp.Value == deck).Key;

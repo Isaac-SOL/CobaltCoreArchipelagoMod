@@ -112,7 +112,8 @@ public class CheckLocationCard : Card, IRegisterable
         {
             cost = upgrade == Upgrade.A ? 0 : 1,
             singleUse = true,
-            description = description
+            description = description,
+            artTint = "CCCCCC"
         };
     }
     

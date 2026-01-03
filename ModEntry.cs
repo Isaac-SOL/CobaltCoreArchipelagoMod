@@ -130,7 +130,7 @@ internal class ModEntry : SimpleMod
                 color = new Color("F763FF"),
                 titleColor = new Color("000000")
             },
-            DefaultCardArt = StableSpr.cards_colorless,
+            DefaultCardArt = RegisterSprite(package, "assets/Card/ArchipelagoBack.png").Sprite,
             BorderSprite = RegisterSprite(package, "assets/frame_ap.png").Sprite,
             Name = AnyLocalizations.Bind(["deck", "name"]).Localize
         });
