@@ -10,6 +10,9 @@ public class FileLoadPatch
 {
     static void Prefix(int slot)
     {
+        // TODO Double load to see if the slot is new, can be better?
+        if (State.Load(slot).state is null)
+            APSaveData.Erase(slot);
         ModEntry.Instance.Archipelago.LoadSaveData(slot);
         var loginResult = ModEntry.Instance.Archipelago.Reconnect();
         if (!loginResult.Successful)
