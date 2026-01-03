@@ -596,13 +596,14 @@ public struct SlotDataHelper
             res.StartingCards = [];
             res.StartingCards.AddRange(startingCards.Select(s => Archipelago.ItemToCard[s.ToString()]));
             res.DeckStartingCards = new Dictionary<Deck, List<Type>>();
+            foreach (var deck in Archipelago.ItemToDeck.Values)
+            {
+                res.DeckStartingCards[deck] = [];
+            }
             foreach (var card in res.StartingCards)
             {
                 var deck = ((CardMeta)Attribute.GetCustomAttribute(card, typeof(CardMeta))!).deck;
-                if (!res.DeckStartingCards.ContainsKey(deck))
-                    res.DeckStartingCards[deck] = new List<Type> { card };
-                else
-                    res.DeckStartingCards[deck].Add(card);
+                res.DeckStartingCards[deck].Add(card);
             }
             res.MinimumDifficulty = Convert.ToInt32(slotData["minimum_difficulty"]);
             res.WinCondition = (WinCondition)Convert.ToInt32(slotData["win_condition"]);
