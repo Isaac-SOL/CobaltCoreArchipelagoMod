@@ -41,7 +41,7 @@ public class StartupFileLoadPatch
 public class NewGamePatch
 {
     // ReSharper disable once RedundantAssignment
-    static void Prefix(int? slot, uint? seed, MapBase? map, ref bool skipTutorial)
+    static void Prefix(ref bool skipTutorial)
     {
         skipTutorial = true;
     }

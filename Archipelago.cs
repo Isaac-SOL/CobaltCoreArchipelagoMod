@@ -424,11 +424,14 @@ public class Archipelago
             }
         }
         // Patch starting ships
-        foreach (var shipName in StarterShip.ships.Keys)
+        if (SlotDataHelper.Value.ShuffleShipParts)
         {
-            var shuffledParts = ModEntry.BaseShips[shipName].ship.parts
-                .Shuffle(new Rand(SlotDataHelper.Value.FixedRandSeed));
-            StarterShip.ships[shipName].ship.parts = Mutil.DeepCopy(new List<Part>(shuffledParts));
+            foreach (var shipName in StarterShip.ships.Keys)
+            {
+                var shuffledParts = ModEntry.BaseShips[shipName].ship.parts
+                    .Shuffle(new Rand(SlotDataHelper.Value.FixedRandSeed));
+                StarterShip.ships[shipName].ship.parts = Mutil.DeepCopy(new List<Part>(shuffledParts));
+            }
         }
 
         APSaveData.SyncWithHost();
@@ -561,6 +564,7 @@ public struct SlotDataHelper
 {
     public List<Deck> StartingCharacters { get; set; }
     public string StartingShip { get; set; }
+    public bool ShuffleShipParts { get; set; }
     public List<Type> StartingCards { get; set; }
     public Dictionary<Deck, List<Type>> DeckStartingCards { get; set; }
     public NewRunOptions.DifficultyLevel MinimumDifficulty { get; set; }
@@ -581,6 +585,7 @@ public struct SlotDataHelper
             res.StartingCharacters = [];
             res.StartingCharacters.AddRange(startingCharacters.Select(s => Archipelago.ItemToDeck[s.ToString()]));
             res.StartingShip = Archipelago.ItemToStartingShip[(string)slotData["starting_ship"]];
+            res.ShuffleShipParts = Convert.ToBoolean(slotData["shuffle_ship_parts"]);
             var startingCards = (JArray)slotData["starting_cards"];
             res.StartingCards = [];
             res.StartingCards.AddRange(startingCards.Select(s => Archipelago.ItemToCard[s.ToString()]));
@@ -600,7 +605,7 @@ public struct SlotDataHelper
             res.DoFutureMemory = Convert.ToBoolean(slotData["do_future_memory"]);
             res.AddCharacterMemories = Convert.ToBoolean(slotData["add_character_memories"]);
             res.ImmediateCardRewards = (CardRewardsMode)Convert.ToInt32(slotData["immediate_card_rewards"]);
-            res.FixedRandSeed = 5318008; // TODO define that server-side
+            res.FixedRandSeed = Convert.ToUInt32(slotData["fixed_client_seed"]);
         }
         catch (Exception e)
         {

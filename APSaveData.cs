@@ -86,6 +86,7 @@ public class APSaveData
 
     internal static void Erase(int slot)
     {
+        ModEntry.Instance.Logger.LogInformation("Erasing AP data in slot {slot}", slot);
         AllAPSaves.Remove(slot);
         Save();
     }
