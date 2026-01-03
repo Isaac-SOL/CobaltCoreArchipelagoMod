@@ -15,7 +15,7 @@ public class CheckLocationCard : Card, IRegisterable
 
     private const int Shield = 3;
     private const int Damage = 2;
-    private const int DamageTimes = 3;
+    private const int DamageTimes = 2;
     
     public static void Register(IPluginPackage<IModManifest> package, IModHelper helper)
     {
@@ -116,13 +116,13 @@ public class CheckLocationCard : Card, IRegisterable
         return locationSlotName == Archipelago.Instance.APSaveData.Slot;
     }
 
-    internal void ScoutTextInfo()
+    internal void SetTextInfo(string itemName, string slotName)
     {
-        Archipelago.Instance.CheckLocationInfo(locationName).ContinueWith(task =>
-        {
-            var (itemName, slotName) = task.Result;
-            locationItemName = itemName;
-            locationSlotName = slotName;
-        });
+        locationItemName = itemName;
+        locationSlotName = slotName;
     }
 }
+
+public class CheckLocationCardUncommon : CheckLocationCard;
+
+public class CheckLocationCardRare : CheckLocationCard;

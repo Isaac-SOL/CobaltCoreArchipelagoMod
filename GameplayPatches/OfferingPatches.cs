@@ -5,6 +5,7 @@ using System.Linq;
 using Archipelago.MultiClient.Net.Helpers;
 using CobaltCoreArchipelago.Cards;
 using HarmonyLib;
+using Microsoft.Extensions.Logging;
 
 namespace CobaltCoreArchipelago.GameplayPatches;
 
@@ -70,13 +71,17 @@ public class CardOfferingPatch
             __result.RemoveAt(s.rngCardOfferings.NextInt() % __result.Count);
         }
         
-        // Scout proposed cards
-        foreach (var card in __result)
+        // Scout proposed archipelago cards
+        var checkCards = __result.Where(card => card is CheckLocationCard).Cast<CheckLocationCard>().ToList();
+        var locations = checkCards.Select(card => card.locationName).ToArray();
+        
+        Archipelago.Instance.CheckLocationInfo(locations).ContinueWith(task =>
         {
-            if (card is CheckLocationCard checkLocationCard)
+            for (var i = 0; i < checkCards.Count; i++)
             {
-                checkLocationCard.ScoutTextInfo();
+                var (itemName, slotName) = task.Result[i];
+                checkCards[i].SetTextInfo(itemName, slotName);
             }
-        }
+        });
     }
 }

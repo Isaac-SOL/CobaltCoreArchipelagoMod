@@ -529,23 +529,16 @@ public class Archipelago
         }
     }
 
-    internal async Task<(string itemName, string slotName)> CheckLocationInfo(string locationName)
+    internal async Task<(string itemName, string slotName)[]> CheckLocationInfo(params string[] locationNames)
     {
         Debug.Assert(Session != null, nameof(Session) + " != null");
-        (string itemName, string slotName) res;
-        var address = Session.Locations.GetLocationIdFromName("Cobalt Core", locationName);
-        var info = await Session.Locations.ScoutLocationsAsync(HintCreationPolicy.CreateAndAnnounceOnce, address);
-        if (info.TryGetValue(address, out var value))
+        var addresses = locationNames.Select(s => Session.Locations.GetLocationIdFromName("Cobalt Core", s)).ToArray();
+        var info = await Session.Locations.ScoutLocationsAsync(HintCreationPolicy.CreateAndAnnounceOnce, addresses);
+        var res = addresses.Select<long, (string itemName, string slotName)>(a =>
         {
-            res.itemName = value.ItemName;
-            res.slotName = value.Player.Name;
-        }
-        else
-        {
-            res.itemName = "[]";
-            res.slotName = "[]";
-        }
-        return (res.itemName, res.slotName);
+            return info.TryGetValue(a, out var value) ? (value.ItemName, value.Player.Name) : ("[]", "[]");
+        });
+        return res.ToArray();
     }
 }
 
