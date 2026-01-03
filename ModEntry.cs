@@ -46,10 +46,12 @@ internal class ModEntry : SimpleMod
         typeof(CheckLocationCard)
     ];
     private static List<Type> DemoUncommonCardTypes = [
-        typeof(DeepStudy)
+        typeof(DeepStudy),
+        typeof(CheckLocationCardUncommon)
     ];
     private static List<Type> DemoRareCardTypes = [
-        typeof(ExtractKnowledge)
+        typeof(ExtractKnowledge),
+        typeof(CheckLocationCardRare)
     ];
     private static List<Type> DemoSpecialCardTypes = [
         typeof(Ponder)

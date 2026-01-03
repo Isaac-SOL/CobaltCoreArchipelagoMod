@@ -43,7 +43,7 @@ public class CardOfferingPatch
         {
             var deck = limitDeck ?? availableDecks.Random(s.rngCardOfferings);
             var deckName = Archipelago.ItemToDeck.First(kvp => kvp.Value == deck).Key;
-            var rarity = rarityOverride ?? CardReward.GetRandomRarity(s.rngCardOfferings, battleType);
+            var rarity = rarityOverride ?? GetRandomAPCheckRarity(s, battleType);
             var rarityName = rarity switch
             {
                 Rarity.common => "Common",
@@ -56,7 +56,12 @@ public class CardOfferingPatch
             if (locationChoices.Count <= 0) continue;
             
             var location = locationChoices.Random(s.rngCardOfferings)!;
-            CheckLocationCard card = new();
+            var card = rarity switch
+            {
+                Rarity.common => new CheckLocationCard(),
+                Rarity.uncommon => new CheckLocationCardUncommon(),
+                _ => new CheckLocationCardRare()
+            };
             card.locationName = location;
             card.drawAnim = 1.0;
             card.upgrade = CardReward.GetUpgrade(s, s.rngCardOfferings, s.map, card, s.GetDifficulty() >= 1 ? 0.5 : 1.0, overrideUpgradeChances);
@@ -83,5 +88,23 @@ public class CardOfferingPatch
                 checkCards[i].SetTextInfo(itemName, slotName);
             }
         });
+    }
+
+    private static Rarity GetRandomAPCheckRarity(State s, BattleType battleType)
+    {
+        var roll = s.rngCardOfferings.Next();
+        var power = s.map switch
+        {
+            MapFirst => 2.0,
+            MapLawless => 1.0,
+            _ => 0.5
+        };
+        roll = Math.Pow(roll, power);
+        return battleType switch
+        {
+            BattleType.Elite => Mutil.Roll(roll, (0.35, Rarity.common), (0.45, Rarity.uncommon), (0.2, Rarity.rare)),
+            BattleType.Boss => Rarity.rare,
+            _ => Mutil.Roll(roll, (0.75, Rarity.common), (0.2, Rarity.uncommon), (0.05, Rarity.rare))
+        };
     }
 }

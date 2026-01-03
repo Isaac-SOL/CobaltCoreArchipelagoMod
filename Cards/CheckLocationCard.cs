@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Reflection;
 using CobaltCoreArchipelago.Actions;
@@ -19,13 +20,18 @@ public class CheckLocationCard : Card, IRegisterable
     
     public static void Register(IPluginPackage<IModManifest> package, IModHelper helper)
     {
+        RegisterWithRarity(package, helper, Rarity.common, typeof(CheckLocationCard));
+    }
+
+    internal static void RegisterWithRarity(IPluginPackage<IModManifest> package, IModHelper helper, Rarity rarity, Type cardType)
+    {
         helper.Content.Cards.RegisterCard(new CardConfiguration
         {
-            CardType = MethodBase.GetCurrentMethod()!.DeclaringType!,
+            CardType = cardType,
             Meta = new CardMeta
             {
                 deck = ModEntry.Instance.ArchipelagoDeck.Deck,
-                rarity = Rarity.common,
+                rarity = rarity,
                 upgradesTo = [Upgrade.A, Upgrade.B]
             },
             Name = ModEntry.Instance.AnyLocalizations.Bind(["card", "CheckLocationCard", "name"]).Localize,
@@ -123,6 +129,18 @@ public class CheckLocationCard : Card, IRegisterable
     }
 }
 
-public class CheckLocationCardUncommon : CheckLocationCard;
+public class CheckLocationCardUncommon : CheckLocationCard
+{
+    public new static void Register(IPluginPackage<IModManifest> package, IModHelper helper)
+    {
+        RegisterWithRarity(package, helper, Rarity.uncommon, typeof(CheckLocationCardUncommon));
+    }
+}
 
-public class CheckLocationCardRare : CheckLocationCard;
+public class CheckLocationCardRare : CheckLocationCard
+{
+    public new static void Register(IPluginPackage<IModManifest> package, IModHelper helper)
+    {
+        RegisterWithRarity(package, helper, Rarity.rare, typeof(CheckLocationCardRare));
+    }
+}
