@@ -435,9 +435,9 @@ public class Archipelago
         }
         // Patch difficulties
         NewRunOptions.difficulties = Mutil.DeepCopy(ModEntry.BaseDifficulties);
-        if (SlotDataHelper.Value.MinimumDifficulty.level > 0)
+        if (SlotDataHelper.Value.MinimumDifficulty > 0)
         {
-            NewRunOptions.difficulties = NewRunOptions.difficulties.Where(difficulty => difficulty.level >= SlotDataHelper.Value.MinimumDifficulty.level).ToList();
+            NewRunOptions.difficulties = NewRunOptions.difficulties.Where(difficulty => difficulty.level >= SlotDataHelper.Value.MinimumDifficulty).ToList();
         }
 
         APSaveData.SyncWithHost();
@@ -573,7 +573,7 @@ public struct SlotDataHelper
     public bool ShuffleShipParts { get; set; }
     public List<Type> StartingCards { get; set; }
     public Dictionary<Deck, List<Type>> DeckStartingCards { get; set; }
-    public NewRunOptions.DifficultyLevel MinimumDifficulty { get; set; }
+    public int MinimumDifficulty { get; set; }
     public WinCondition WinCondition { get; set; }
     public int WinReqTotal { get; set; }
     public int WinReqPerChar { get; set; }
@@ -604,7 +604,7 @@ public struct SlotDataHelper
                 else
                     res.DeckStartingCards[deck].Add(card);
             }
-            res.MinimumDifficulty = NewRunOptions.difficulties[Convert.ToInt32(slotData["minimum_difficulty"])];
+            res.MinimumDifficulty = Convert.ToInt32(slotData["minimum_difficulty"]);
             res.WinCondition = (WinCondition)Convert.ToInt32(slotData["win_condition"]);
             res.WinReqTotal = Convert.ToInt32(slotData["memories_required_total"]);
             res.WinReqPerChar = Convert.ToInt32(slotData["memories_required_per_character"]);

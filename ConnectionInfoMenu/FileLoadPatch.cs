@@ -106,7 +106,7 @@ public class PopulateRunPatch
             chars = Archipelago.InstanceSlotData.StartingCharacters;
             __instance.storyVars.unlockedChars = new HashSet<Deck>(chars);
             __instance.storyVars.unlockedShips = [Archipelago.InstanceSlotData.StartingShip];
-            difficulty = Archipelago.InstanceSlotData.MinimumDifficulty.level;
+            difficulty = Archipelago.InstanceSlotData.MinimumDifficulty;
         }
     }
 
