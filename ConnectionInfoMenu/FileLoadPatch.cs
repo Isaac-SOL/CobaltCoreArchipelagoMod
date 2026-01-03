@@ -97,7 +97,7 @@ public class NewGamePatch
 [HarmonyPatch(typeof(State), nameof(State.PopulateRun))]
 public class PopulateRunPatch
 {
-    static void Prefix(State __instance, ref IEnumerable<Deck>? chars, ref bool giveRunStartRewards)
+    static void Prefix(State __instance, ref IEnumerable<Deck>? chars, ref bool giveRunStartRewards, ref int difficulty)
     {
         // giveRunStartRewards = true;
         if (chars == null)
@@ -106,6 +106,7 @@ public class PopulateRunPatch
             chars = Archipelago.InstanceSlotData.StartingCharacters;
             __instance.storyVars.unlockedChars = new HashSet<Deck>(chars);
             __instance.storyVars.unlockedShips = [Archipelago.InstanceSlotData.StartingShip];
+            difficulty = Archipelago.InstanceSlotData.MinimumDifficulty.level;
         }
     }
 
