@@ -31,6 +31,7 @@ internal class ModEntry : SimpleMod
 
     internal Archipelago Archipelago;
     internal static Dictionary<string, StarterShip> BaseShips { get; set; } = new();
+    internal static List<NewRunOptions.DifficultyLevel> BaseDifficulties { get; set; } = [];
 
     internal IDeckEntry ArchipelagoDeck;
     
@@ -80,6 +81,7 @@ internal class ModEntry : SimpleMod
         Harmony.PatchAll(Assembly.GetExecutingAssembly());
         Archipelago = new Archipelago();
         BaseShips = Mutil.DeepCopy(StarterShip.ships);
+        BaseDifficulties = Mutil.DeepCopy(NewRunOptions.difficulties);
         
         /*
          * Some mods provide an API, which can be requested from the ModRegistry.

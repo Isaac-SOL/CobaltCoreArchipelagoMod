@@ -433,6 +433,12 @@ public class Archipelago
                 StarterShip.ships[shipName].ship.parts = Mutil.DeepCopy(new List<Part>(shuffledParts));
             }
         }
+        // Patch difficulties
+        NewRunOptions.difficulties = Mutil.DeepCopy(ModEntry.BaseDifficulties);
+        if (SlotDataHelper.Value.MinimumDifficulty.level > 0)
+        {
+            NewRunOptions.difficulties = NewRunOptions.difficulties.Where(difficulty => difficulty.level >= SlotDataHelper.Value.MinimumDifficulty.level).ToList();
+        }
 
         APSaveData.SyncWithHost();
         
