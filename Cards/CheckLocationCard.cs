@@ -16,7 +16,11 @@ public class CheckLocationCard : Card, IRegisterable
 
     private const int Shield = 3;
     private const int Damage = 2;
-    private const int DamageTimes = 2;
+    private const int DamageTimes = 3;
+
+    internal static Spr ArtCommon;
+    internal static Spr ArtUncommon;
+    internal static Spr ArtRare;
     
     public static void Register(IPluginPackage<IModManifest> package, IModHelper helper)
     {
@@ -110,9 +114,20 @@ public class CheckLocationCard : Card, IRegisterable
         
         return new CardData
         {
-            cost = upgrade == Upgrade.A ? 0 : 1,
+            cost = upgrade switch
+            {
+                Upgrade.A => 1,
+                Upgrade.B => 2,
+                _ => 3
+            },
             singleUse = true,
             description = description,
+            art = this switch
+            {
+                CheckLocationCardUncommon => ArtUncommon,
+                CheckLocationCardRare => ArtRare,
+                _ => ArtCommon
+            },
             artTint = "CCCCCC"
         };
     }

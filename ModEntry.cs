@@ -235,6 +235,10 @@ internal class ModEntry : SimpleMod
         AOverthink.Spr = RegisterSprite(package, "assets/overthink.png").Sprite;
 
         AArchipelagoCheckLocation.Spr = RegisterSprite(package, "assets/ap_action.png").Sprite;
+
+        CheckLocationCard.ArtCommon = RegisterSprite(package, "assets/Card/ArchipelagoBack2.png").Sprite;
+        CheckLocationCard.ArtUncommon = RegisterSprite(package, "assets/Card/ArchipelagoBack5.png").Sprite;
+        CheckLocationCard.ArtRare = RegisterSprite(package, "assets/Card/ArchipelagoBack4.png").Sprite;
     }
     
     /*
