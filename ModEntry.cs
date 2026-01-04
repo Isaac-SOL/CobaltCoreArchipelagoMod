@@ -63,10 +63,12 @@ internal class ModEntry : SimpleMod
             .Concat(DemoSpecialCardTypes);
 
     private static List<Type> DemoCommonArtifacts = [
-        typeof(BuriedKnowledge)
+        typeof(BuriedKnowledge),
+        typeof(CheckLocationArtifact)
     ];
     private static List<Type> DemoBossArtifacts = [
-        typeof(Lexicon)
+        typeof(Lexicon),
+        typeof(CheckLocationArtifactBoss)
     ];
     private static IEnumerable<Type> DemoArtifactTypes =
         DemoCommonArtifacts

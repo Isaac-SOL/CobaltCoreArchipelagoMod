@@ -70,6 +70,13 @@
         "Lexicon": {
             "name": "LEXICON",
             "desc": "Whenever you gain a <c=card>Ponder</c> during combat, it is given the A or B upgrade, alternating."
+        },
+
+        "CheckLocationArtifact": {
+            "name": "Archipelago Check!",
+            "descNotFound": "Send an Archipelago item.",
+            "descBase": "Send <c=card>{0}</c> to <c=attack>{1}</c>.",
+            "descSelf": "Unlock <c=card>{0}</c>."
         }
     }
 }

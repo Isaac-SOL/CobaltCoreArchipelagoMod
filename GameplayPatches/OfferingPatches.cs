@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using Archipelago.MultiClient.Net.Helpers;
+using CobaltCoreArchipelago.Artifacts;
 using CobaltCoreArchipelago.Cards;
 using HarmonyLib;
 using Microsoft.Extensions.Logging;
@@ -106,5 +107,64 @@ public class CardOfferingPatch
             BattleType.Boss => Rarity.rare,
             _ => Mutil.Roll(roll, (0.75, Rarity.common), (0.2, Rarity.uncommon), (0.05, Rarity.rare))
         };
+    }
+}
+
+[HarmonyPatch(typeof(ArtifactReward), nameof(ArtifactReward.GetOffering))]
+public class ArtifactOfferingPatch
+{
+    private static ILocationCheckHelper Locations
+    {
+        get
+        {
+            Debug.Assert(Archipelago.Instance.Session != null, "Archipelago.Instance.Session != null");
+            return Archipelago.Instance.Session.Locations;
+        }
+    }
+
+    static void Postfix(
+        ref List<Artifact> __result,
+        State s,
+        int count,
+        Deck? limitDeck = null,
+        List<ArtifactPool>? limitPools = null,
+        Rand? rngOverride = null)
+    {
+        var rng = rngOverride ?? s.rngArtifactOfferings;
+        var availableDecks = s.characters.Select(c => c.deckType).ToList();
+        var effPools = limitPools ?? [ArtifactPool.Common];
+        
+        // Attempt to add a single artifact, cancel if it fails
+        var deck = limitDeck ?? availableDecks.Random(rng);
+        var deckName = Archipelago.ItemToDeck.First(kvp => kvp.Value == deck).Key;
+        string rarityName;
+        if (effPools.Contains(ArtifactPool.Boss))
+            rarityName = "Boss";
+        else if (effPools.Contains(ArtifactPool.Common))
+            rarityName = "Common";
+        else
+            rarityName = "N/A";
+        var locationChoices = Locations.AllMissingLocations
+            .Select(address => Locations.GetLocationNameFromId(address))
+            .Where(name => name.StartsWith($"{deckName} {rarityName}")).ToList();
+        if (locationChoices.Count <= 0) return;
+        
+        var location = locationChoices.Random(s.rngCardOfferings)!;
+        var artifact = rarityName == "Boss" ? new CheckLocationArtifactBoss() : new CheckLocationArtifact();
+        artifact.locationName = location;
+        
+        // Add the artifact then remove one at random to keep count
+        __result.Add(artifact);
+        __result.RemoveAt(s.rngCardOfferings.NextInt() % __result.Count);
+
+        // If it was picked, scout its location
+        if (__result.Contains(artifact))
+        {
+            Archipelago.Instance.CheckLocationInfo(location).ContinueWith(task =>
+            {
+                var (itemName, slotName) = task.Result[0];
+                artifact.SetTextInfo(itemName, slotName);
+            });
+        }
     }
 }
