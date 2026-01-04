@@ -34,7 +34,21 @@ public class CardOfferingPatch
         bool inCombat,
         bool isEvent)
     {
+        Debug.Assert(Archipelago.Instance.APSaveData != null, "Archipelago.Instance.APSaveData != null");
+        // Make given card unusable if it is an item but not unlocked
+        foreach (var card in __result)
+        {
+            var cardType = card.GetType();
+            if (!Archipelago.CardToItem.TryGetValue(cardType, out var itemName)) continue;
+            if (Archipelago.Instance.APSaveData.AppliedInventory.TryGetValue(
+                    itemName, out var itemCount) && itemCount != 0) continue;
+            card.unplayableOverride = true;
+            card.unplayableOverrideIsPermanent = true;
+        }
+        
         if (inCombat || isEvent) return;
+        
+        // Add archipelago check cards
         
         var availableDecks = s.characters.Select(c => c.deckType).ToList();
         var targetCount = __result.Count;

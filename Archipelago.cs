@@ -239,6 +239,8 @@ public class Archipelago
         { "Time Skip", typeof(TimestopCard) }
     };
 
+    public static Dictionary<Type, string> CardToItem = new();
+
     public static Dictionary<string, Type> ItemToArtifact = new()
     {
         // Basic Common
@@ -351,6 +353,8 @@ public class Archipelago
         // CAT Boss
         { "Summon Control", typeof(SummonControl) },
     };
+
+    public static Dictionary<Type, string> ArtifactToItem = new();
     
     public APSaveData? APSaveData { get; set; }
     public ArchipelagoSession? Session { get; set; }

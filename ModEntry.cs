@@ -84,8 +84,12 @@ internal class ModEntry : SimpleMod
         Harmony = new Harmony("SaltyIsaac.CobaltCoreArchipelago");
         Harmony.PatchAll(Assembly.GetExecutingAssembly());
         Archipelago = new Archipelago();
+        
+        // Fill out static data
         BaseShips = Mutil.DeepCopy(StarterShip.ships);
         BaseDifficulties = Mutil.DeepCopy(NewRunOptions.difficulties);
+        foreach (var kvp in Archipelago.ItemToCard) Archipelago.CardToItem[kvp.Value] = kvp.Key;
+        foreach (var kvp in Archipelago.ItemToArtifact) Archipelago.ArtifactToItem[kvp.Value] = kvp.Key;
         
         /*
          * Some mods provide an API, which can be requested from the ModRegistry.
