@@ -34,6 +34,7 @@ internal class ModEntry : SimpleMod
     internal static List<NewRunOptions.DifficultyLevel> BaseDifficulties { get; set; } = [];
 
     internal IDeckEntry ArchipelagoDeck;
+    internal IDeckEntry LockedDeck;
     
     /*
      * The following lists contain references to all types that will be registered to the game.
@@ -64,11 +65,13 @@ internal class ModEntry : SimpleMod
 
     private static List<Type> DemoCommonArtifacts = [
         typeof(BuriedKnowledge),
-        typeof(CheckLocationArtifact)
+        typeof(CheckLocationArtifact),
+        typeof(LockedArtifact)
     ];
     private static List<Type> DemoBossArtifacts = [
         typeof(Lexicon),
-        typeof(CheckLocationArtifactBoss)
+        typeof(CheckLocationArtifactBoss),
+        typeof(LockedArtifactBoss)
     ];
     private static IEnumerable<Type> DemoArtifactTypes =
         DemoCommonArtifacts
@@ -139,6 +142,18 @@ internal class ModEntry : SimpleMod
             DefaultCardArt = RegisterSprite(package, "assets/Card/ArchipelagoBack.png").Sprite,
             BorderSprite = RegisterSprite(package, "assets/frame_ap.png").Sprite,
             Name = AnyLocalizations.Bind(["deck", "name"]).Localize
+        });
+
+        LockedDeck = helper.Content.Decks.RegisterDeck("Locked", new DeckConfiguration
+        {
+            Definition = new DeckDef
+            {
+                color = new Color("333333"),
+                titleColor = new Color("000000")
+            },
+            DefaultCardArt = StableSpr.cards_colorless,
+            BorderSprite = StableSpr.cardShared_border_colorless,
+            Name = AnyLocalizations.Bind(["deck", "lockedName"]).Localize
         });
 
         /*

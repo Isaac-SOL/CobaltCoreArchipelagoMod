@@ -1,6 +1,7 @@
 ﻿{
     "deck": {
-        "name": "Archipelago"
+        "name": "Archipelago",
+        "lockedName": "Locked"
     },
     "character": {
         "name": "Professor",
@@ -77,6 +78,11 @@
             "descNotFound": "Send an Archipelago item.",
             "descBase": "Send <c=card>{0}</c> to <c=attack>{1}</c>.",
             "descSelf": "Unlock <c=card>{0}</c>."
+        },
+
+        "LockedArtifact": {
+            "name": "LOCKED ARTIFACT",
+            "desc": "You haven't unlocked this artifact yet."
         }
     }
 }

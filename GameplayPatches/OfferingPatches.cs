@@ -144,6 +144,29 @@ public class ArtifactOfferingPatch
         List<ArtifactPool>? limitPools = null,
         Rand? rngOverride = null)
     {
+        Debug.Assert(Archipelago.Instance.APSaveData != null, "Archipelago.Instance.APSaveData != null");
+        // Make given artifact unusable if it is an item but not unlocked
+        var artifactsTemp = new List<Artifact>(__result);
+        __result.Clear();
+        foreach (var artifact in artifactsTemp)
+        {
+            var artifactType = artifact.GetType();
+            if (Archipelago.ArtifactToItem.TryGetValue(artifactType, out var itemName))
+            {
+                if (!Archipelago.Instance.APSaveData.AppliedInventory.TryGetValue(
+                        itemName, out var itemCount) || itemCount == 0)
+                {
+                    var lockedArtifact = artifact.GetMeta().pools.Contains(ArtifactPool.Boss)
+                        ? new LockedArtifactBoss()
+                        : new LockedArtifact();
+                    lockedArtifact.SetUnderlyingArtifact(artifact);
+                    __result.Add(lockedArtifact);
+                    continue;
+                }
+            }
+            __result.Add(artifact);
+        }
+        
         var rng = rngOverride ?? s.rngArtifactOfferings;
         var availableDecks = s.characters.Select(c => c.deckType).ToList();
         var effPools = limitPools ?? [ArtifactPool.Common];
@@ -164,20 +187,20 @@ public class ArtifactOfferingPatch
         if (locationChoices.Count <= 0) return;
         
         var location = locationChoices.Random(s.rngCardOfferings)!;
-        var artifact = rarityName == "Boss" ? new CheckLocationArtifactBoss() : new CheckLocationArtifact();
-        artifact.locationName = location;
+        var newArtifact = rarityName == "Boss" ? new CheckLocationArtifactBoss() : new CheckLocationArtifact();
+        newArtifact.locationName = location;
         
         // Add the artifact then remove one at random to keep count
-        __result.Add(artifact);
+        __result.Add(newArtifact);
         __result.RemoveAt(s.rngCardOfferings.NextInt() % __result.Count);
 
         // If it was picked, scout its location
-        if (__result.Contains(artifact))
+        if (__result.Contains(newArtifact))
         {
             Archipelago.Instance.CheckLocationInfo(location).ContinueWith(task =>
             {
                 var (itemName, slotName) = task.Result[0];
-                artifact.SetTextInfo(itemName, slotName);
+                newArtifact.SetTextInfo(itemName, slotName);
             });
         }
     }
