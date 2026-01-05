@@ -155,6 +155,8 @@ internal class ModEntry : SimpleMod
             BorderSprite = StableSpr.cardShared_border_colorless,
             Name = AnyLocalizations.Bind(["deck", "lockedName"]).Localize
         });
+        
+        CheckLocationArtifact.BaseSpr = RegisterSprite(package, "assets/Artifact/Artifact_ap.png").Sprite;
 
         /*
          * All the IRegisterable types placed into the static lists at the start of the class are initialized here.
@@ -259,7 +261,7 @@ internal class ModEntry : SimpleMod
 
         CheckLocationCard.ArtCommon = RegisterSprite(package, "assets/Card/ArchipelagoBack2.png").Sprite;
         CheckLocationCard.ArtUncommon = RegisterSprite(package, "assets/Card/ArchipelagoBack5.png").Sprite;
-        CheckLocationCard.ArtRare = RegisterSprite(package, "assets/Card/ArchipelagoBack4.png").Sprite;
+        CheckLocationCard.ArtRare = RegisterSprite(package, "assets/Card/ArchipelagoBack7.png").Sprite;
     }
     
     /*

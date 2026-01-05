@@ -4,12 +4,16 @@ using System.Diagnostics;
 using System.Reflection;
 using HarmonyLib;
 using Nanoray.PluginManager;
+using Newtonsoft.Json;
 using Nickel;
 
 namespace CobaltCoreArchipelago.Artifacts;
 
 public class CheckLocationArtifact : Artifact, IRegisterable
 {
+    [JsonIgnore]
+    public static Spr BaseSpr;
+    
     public string locationName = "";
     public string? locationSlotName;
     public string? locationItemName;
@@ -36,7 +40,7 @@ public class CheckLocationArtifact : Artifact, IRegisterable
             /*
              * For Artifacts with just one sprite, registering them at the place of usage helps simplify things.
              */
-            Sprite = helper.Content.Sprites.RegisterSprite(package.PackageRoot.GetRelativeFile("assets/Artifact/Artifact_ap.png")).Sprite
+            Sprite = BaseSpr
         });
     }
 
@@ -44,7 +48,6 @@ public class CheckLocationArtifact : Artifact, IRegisterable
     {
         // Do the check, then remove the artifact
         Archipelago.Instance.CheckLocation(locationName);
-        state.artifacts.Remove(this);
     }
 
     public override List<Tooltip>? GetExtraTooltips()

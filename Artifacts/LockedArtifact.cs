@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using CobaltCoreArchipelago.Features;
 using HarmonyLib;
 using Nanoray.PluginManager;
 using Nickel;
@@ -8,21 +9,11 @@ namespace CobaltCoreArchipelago.Artifacts;
 
 public class LockedArtifact : Artifact, IRegisterable
 {
-    internal Artifact? underlying;
-    internal string? itemName;
+    public string? itemName;
 
     // Auto-recreate an instance of the artifact if it was lost (if the game was closed for example)
-    internal Artifact? UnderlyingArtifact
-    {
-        get
-        {
-            if (underlying is not null) return underlying;
-            if (itemName is null) return null;
-            underlying = Archipelago.ItemToArtifact[itemName].CreateInstance() as Artifact;
-            return underlying;
-        }
-    }
-    
+    internal Artifact? UnderlyingArtifact => itemName is null ? null : LockedArtifactInstanceCache.Get(itemName);
+
     public static void Register(IPluginPackage<IModManifest> package, IModHelper helper)
     {
         RegisterWithPool(package, helper, ArtifactPool.Common, typeof(LockedArtifact));
@@ -70,7 +61,6 @@ public class LockedArtifact : Artifact, IRegisterable
 
     internal void SetUnderlyingArtifact(Artifact artifact)
     {
-        underlying = artifact;
         itemName = Archipelago.ArtifactToItem[artifact.GetType()];
     }
 }
