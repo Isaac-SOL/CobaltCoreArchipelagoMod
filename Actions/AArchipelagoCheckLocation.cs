@@ -53,12 +53,9 @@ public class AArchipelagoCheckLocation : CardAction
         if (givenArtifact != null)
         {
             var artifact = (Artifact) Archipelago.ItemToArtifact[givenArtifact].CreateInstance();
-            tooltips.AddRange([
-                new TTDivider(),
-                new TTText("<c=artifact>" + artifact.Name() + "</c>"),
-                new TTText(artifact.Description()),
-                new TTDivider()
-            ]);
+            tooltips.Add(new TTDivider());
+            tooltips.AddRange(artifact.GetTooltips());
+            tooltips.Add(new TTDivider());
         }
 
         return tooltips;

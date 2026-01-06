@@ -82,11 +82,8 @@ public class CheckLocationArtifact : Artifact, IRegisterable
         if (givenArtifact != null)
         {
             var artifact = (Artifact) Archipelago.ItemToArtifact[givenArtifact].CreateInstance();
-            tooltips.AddRange([
-                new TTDivider(),
-                new TTText("<c=artifact>" + artifact.Name() + "</c>"),
-                new TTText(artifact.Description())
-            ]);
+            tooltips.Add(new TTDivider());
+            tooltips.AddRange(artifact.GetTooltips());
         }
             
         return tooltips;
