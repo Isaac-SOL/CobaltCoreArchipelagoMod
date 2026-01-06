@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using Archipelago.MultiClient.Net;
+using Archipelago.MultiClient.Net.BounceFeatures.DeathLink;
 using Archipelago.MultiClient.Net.Enums;
 using Archipelago.MultiClient.Net.Helpers;
 using Archipelago.MultiClient.Net.MessageLog.Messages;
@@ -236,7 +237,9 @@ public class Archipelago
         { "Time Skip", typeof(TimestopCard) }
     };
 
-    public static Dictionary<Type, string> CardToItem = new();
+    public static Dictionary<Type, string> CardToItem = ItemToCard
+        .Select(pair => (pair.Value, pair.Key))
+        .ToDictionary();
 
     public static Dictionary<string, Type> ItemToArtifact = new()
     {
@@ -351,7 +354,9 @@ public class Archipelago
         { "Summon Control", typeof(SummonControl) },
     };
 
-    public static Dictionary<Type, string> ArtifactToItem = new();
+    public static Dictionary<Type, string> ArtifactToItem = ItemToArtifact
+        .Select(pair => (pair.Value, pair.Key))
+        .ToDictionary();
     
     public APSaveData? APSaveData { get; set; }
     public ArchipelagoSession? Session { get; set; }
@@ -359,6 +364,9 @@ public class Archipelago
     public SlotDataHelper? SlotDataHelper { get; set; }
     public static SlotDataHelper InstanceSlotData => Instance.SlotDataHelper!.Value;
     public ILogger Logger => ModEntry.Instance.Logger;
+    public bool Ready { get; private set; } = false;
+    public DeathLinkService? DeathLinkService { get; set; }
+    public bool PreventDeathLink { get; set; } = false;
 
     private static ConcurrentBag<string> receivedItemsToProcess = [];
     private static readonly object itemReceivedLock = new();
@@ -441,7 +449,9 @@ public class Archipelago
             NewRunOptions.difficulties = NewRunOptions.difficulties.Where(difficulty => difficulty.level >= SlotDataHelper.Value.MinimumDifficulty).ToList();
         }
 
+        Ready = true;
         APSaveData.SyncWithHost();
+        OnItemReceived((ReceivedItemsHelper) Session.Items);  // We need to do that for initial items I think ?
         
         Session.Items.ItemReceived += OnItemReceived;
         Session.MessageLog.OnMessageReceived += OnMessageReceived;
@@ -450,6 +460,7 @@ public class Archipelago
     public void Disconnect()
     {
         if (Session == null) return;
+        Ready = false;
         
         var task = Session.Socket.DisconnectAsync();
         

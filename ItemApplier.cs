@@ -9,12 +9,12 @@ public static class ItemApplier
 {
     internal static List<string> DeferredUnappliedItems { get; } = [];
     
-    internal static bool CanApplyItems() => true;
+    internal static bool CanApplyItems => Archipelago.Instance.Ready;
     
     internal static void ApplyReceivedItem(string name, State? state = null)
     {
         Debug.Assert(Archipelago.Instance.APSaveData != null, "Archipelago.Instance.APSaveData != null");
-        if (state is null || !CanApplyItems())
+        if (state is null || !CanApplyItems)
         {
             DeferredUnappliedItems.Add(name);
             return;
@@ -48,7 +48,7 @@ public static class ItemApplier
 
     internal static void ApplyDeferredItems(State state)
     {
-        if (!CanApplyItems())
+        if (!CanApplyItems)
             ModEntry.Instance.Logger.LogWarning("Trying to apply deferred items while unable to apply them");
         var toApply = DeferredUnappliedItems;
         DeferredUnappliedItems.Clear();

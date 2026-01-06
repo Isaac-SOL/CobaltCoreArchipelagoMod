@@ -68,13 +68,21 @@ public class UnlockOneMemoryPatch
 [HarmonyPatch(typeof(State), nameof(State.OnHasCard))]
 public class OnHasCardPatch
 {
-    static bool Prefix() => false;
+    static bool Prefix(Card card)
+    {
+        // Allow unlocking cards that aren't archipelago items
+        return !Archipelago.CardToItem.ContainsKey(card.GetType());
+    }
 }
 
 [HarmonyPatch(typeof(State), nameof(State.OnHasArtifact))]
 public class OnHasArtifactPatch
 {
-    static bool Prefix() => false;
+    static bool Prefix(Artifact r)
+    {
+        // Allow unlocking artifacts that aren't archipelago items
+        return !Archipelago.ArtifactToItem.ContainsKey(r.GetType());
+    }
 }
 
 // Then we rewrite our own versions so we can actually unlock stuff ourselves
