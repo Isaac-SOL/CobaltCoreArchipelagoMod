@@ -41,3 +41,23 @@ public class GetUnlockedShipsPatch
         return codeMatcher.Instructions();
     }
 }
+
+// Kill all unlocks directly at the method call, should be easier
+
+[HarmonyPatch(typeof(StoryVars), nameof(StoryVars.UnlockChar))]
+public class UnlockCharPatch
+{
+    static bool Prefix() => false;
+}
+
+[HarmonyPatch(typeof(StoryVars), nameof(StoryVars.UnlockShip))]
+public class UnlockShipPatch
+{
+    static bool Prefix() => false;
+}
+
+[HarmonyPatch(typeof(StoryVars), nameof(StoryVars.UnlockOneMemory))]
+public class UnlockOneMemoryPatch
+{
+    static bool Prefix() => false;
+}
