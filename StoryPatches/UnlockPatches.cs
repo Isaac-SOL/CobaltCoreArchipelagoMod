@@ -61,3 +61,15 @@ public class UnlockOneMemoryPatch
 {
     static bool Prefix() => false;
 }
+
+[HarmonyPatch(typeof(State), nameof(State.OnHasCard))]
+public class OnHasCardPatch
+{
+    static bool Prefix() => false;
+}
+
+[HarmonyPatch(typeof(State), nameof(State.OnHasArtifact))]
+public class OnHasArtifactPatch
+{
+    static bool Prefix() => false;
+}
