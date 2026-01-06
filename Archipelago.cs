@@ -222,15 +222,8 @@ public class Archipelago
 
         // CAT Common
         { "Defensive Mode", typeof(DefensiveMode) },
-        { "Dizzy.EXE", typeof(ColorlessDizzySummon) },
-        { "Drake.EXE", typeof(ColorlessDrakeSummon) },
-        { "Isaac.EXE", typeof(ColorlessIsaacSummon) },
-        { "Max.EXE", typeof(ColorlessMaxSummon) },
-        { "Peri.EXE", typeof(ColorlessPeriSummon) },
-        { "Riggs.EXE", typeof(ColorlessRiggsSummon) },
         // CAT Uncommon
         { "Aegis", typeof(AegisCard) },
-        { "Books.EXE", typeof(ColorlessBooksSummon) },
         { "CAT.EXE", typeof(ColorlessCATSummon) },
         { "I Frames", typeof(IFrameCard) },
         { "Jack of All Trades", typeof(JackOfAllTrades) },
