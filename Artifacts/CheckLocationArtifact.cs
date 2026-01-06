@@ -18,6 +18,7 @@ public class CheckLocationArtifact : Artifact, IRegisterable
     public string? locationSlotName;
     public string? locationItemName;
     public string? givenCard;
+    public string? givenArtifact;
     
     public static void Register(IPluginPackage<IModManifest> package, IModHelper helper)
     {
@@ -77,6 +78,16 @@ public class CheckLocationArtifact : Artifact, IRegisterable
                 card = (Card) Archipelago.ItemToCard[givenCard].CreateInstance()
             });
         }
+        
+        if (givenArtifact != null)
+        {
+            var artifact = (Artifact) Archipelago.ItemToArtifact[givenArtifact].CreateInstance();
+            tooltips.AddRange([
+                new TTDivider(),
+                new TTText("<c=artifact>" + artifact.Name() + "</c>"),
+                new TTText(artifact.Description())
+            ]);
+        }
             
         return tooltips;
     }
@@ -91,9 +102,12 @@ public class CheckLocationArtifact : Artifact, IRegisterable
     {
         locationItemName = itemName;
         locationSlotName = slotName;
-        if (IsLocal() && Archipelago.ItemToCard.ContainsKey(locationItemName))
+        if (IsLocal())
         {
-            givenCard = locationItemName;
+            if (Archipelago.ItemToCard.ContainsKey(locationItemName))
+                givenCard = locationItemName;
+            else if (Archipelago.ItemToArtifact.ContainsKey(locationItemName))
+                givenArtifact = locationItemName;
         }
     }
 }

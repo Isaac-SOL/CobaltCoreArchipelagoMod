@@ -46,9 +46,12 @@ public class CheckLocationCard : Card, IRegisterable
     {
         Debug.Assert(Archipelago.Instance.Session != null, "Archipelago.Instance.Session != null");
         var checkAction = new AArchipelagoCheckLocation { locationName = locationName };
-        if (IsLocal() && Archipelago.ItemToCard.ContainsKey(locationItemName!))
+        if (IsLocal())
         {
-            checkAction.givenCard = locationItemName;
+            if (Archipelago.ItemToCard.ContainsKey(locationItemName!))
+                checkAction.givenCard = locationItemName;
+            else if (Archipelago.ItemToArtifact.ContainsKey(locationItemName!))
+                checkAction.givenArtifact = locationItemName;
         }
         
         var list = new List<CardAction> { checkAction };

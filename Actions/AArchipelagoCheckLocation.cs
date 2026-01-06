@@ -13,6 +13,7 @@ public class AArchipelagoCheckLocation : CardAction
 
     public string? locationName;
     public string? givenCard;
+    public string? givenArtifact;
 
     public override void Begin(G g, State s, Combat c)
     {
@@ -47,6 +48,17 @@ public class AArchipelagoCheckLocation : CardAction
             {
                 card = (Card) Archipelago.ItemToCard[givenCard].CreateInstance()
             });
+        }
+
+        if (givenArtifact != null)
+        {
+            var artifact = (Artifact) Archipelago.ItemToArtifact[givenArtifact].CreateInstance();
+            tooltips.AddRange([
+                new TTDivider(),
+                new TTText("<c=artifact>" + artifact.Name() + "</c>"),
+                new TTText(artifact.Description()),
+                new TTDivider()
+            ]);
         }
 
         return tooltips;
