@@ -74,7 +74,7 @@
         },
 
         "CheckLocationArtifact": {
-            "name": "Archipelago Check!",
+            "name": "ARCHIPELAGO CHECK!",
             "descNotFound": "Send an Archipelago item.",
             "descBase": "Send <c=card>{0}</c> to <c=attack>{1}</c>.",
             "descSelf": "Unlock <c=card>{0}</c>."
@@ -82,7 +82,8 @@
 
         "LockedArtifact": {
             "name": "LOCKED ARTIFACT",
-            "desc": "You haven't unlocked this artifact yet."
+            "desc": "You haven't unlocked this artifact yet.",
+            "descNotFound": "No underlying artifact! <c=attack>This should not happen!</c>"
         }
     }
 }

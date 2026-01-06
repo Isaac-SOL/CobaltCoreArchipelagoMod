@@ -1,6 +1,9 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Reflection.Emit;
+using FMOD;
 using HarmonyLib;
+using Debug = System.Diagnostics.Debug;
 
 namespace CobaltCoreArchipelago.StoryPatches;
 
@@ -72,4 +75,39 @@ public class OnHasCardPatch
 public class OnHasArtifactPatch
 {
     static bool Prefix() => false;
+}
+
+// Then we rewrite our own versions so we can actually unlock stuff ourselves
+internal static class UnlockReplacements
+{
+    internal static void UnlockChar(State s, Deck deck)
+    {
+        s.storyVars.unlockedChars.Add(deck);
+    }
+    
+    internal static void UnlockShip(State s, string shipkey)
+    {
+        s.storyVars.unlockedShips.Add(shipkey);
+    }
+    
+    internal static void UnlockOneMemory(State s, Deck deck)
+    {
+        var storyVars = s.storyVars;
+        storyVars.memoryUnlockLevel.TryAdd(deck, 0);
+        storyVars.memoryUnlockLevel[deck]++;
+    }
+
+    internal static void UnlockCodexCard(State s, Type cardType)
+    {
+        var card = cardType.CreateInstance() as Card;
+        Debug.Assert(card != null, nameof(card) + " != null");
+        s.storyVars.cardsOwned.Add(card.Key());
+    }
+
+    internal static void UnlockCodexArtifact(State s, Type artifactType)
+    {
+        var artifact = artifactType.CreateInstance() as Artifact;
+        Debug.Assert(artifact != null, nameof(artifact) + " != null");
+        s.storyVars.artifactsOwned.Add(artifact.Key());
+    }
 }

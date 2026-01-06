@@ -43,7 +43,7 @@ public class LockedArtifact : Artifact, IRegisterable
 
     public override List<Tooltip>? GetExtraTooltips()
     {
-        if (UnderlyingArtifact is null) return null;
+        if (UnderlyingArtifact is null) return [new TTText(ModEntry.Instance.Localizations.Localize(["artifact", "LockedArtifact", "descNotFound"]))];
 
         List<Tooltip> underlyingInfo =
         [

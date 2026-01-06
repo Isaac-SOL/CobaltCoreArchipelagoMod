@@ -39,6 +39,10 @@ public class Archipelago
         { "Tiderunner", "boat" },
     };
 
+    public static Dictionary<string, Deck> ItemToMemory = ItemToDeck
+        .SelectMany(pair => new List<int> { 1, 2, 3 }.Select(i => (pair.Key + " Memory " + i, pair.Value)))
+        .ToDictionary();
+
     public static Dictionary<string, Type> ItemToCard = new()
     {
         // Dizzy Common

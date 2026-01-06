@@ -22,21 +22,26 @@ public static class ItemApplier
         
         if (Archipelago.ItemToStartingShip.TryGetValue(name, out var ship))
         {
-            state.storyVars.UnlockShip(ship);
+            UnlockReplacements.UnlockShip(state, ship);
         }
         else if (Archipelago.ItemToDeck.TryGetValue(name, out var deck))
         {
-            state.storyVars.UnlockChar(deck);
+            UnlockReplacements.UnlockChar(state, deck);
         }
-        else if (Archipelago.ItemToCard.ContainsKey(name))
+        else if (Archipelago.ItemToMemory.TryGetValue(name, out var deckMemory))
         {
-            
+            UnlockReplacements.UnlockOneMemory(state, deckMemory);
         }
-        else if (Archipelago.ItemToArtifact.ContainsKey(name))
+        else if (Archipelago.ItemToCard.TryGetValue(name, out var card))
         {
-            
+            // Also unlock cards in current deck if applicable
+            UnlockReplacements.UnlockCodexCard(state, card);
         }
-        // Also do memories
+        else if (Archipelago.ItemToArtifact.TryGetValue(name, out var artifact))
+        {
+            // Also unlock artifacts in current deck if applicable
+            UnlockReplacements.UnlockCodexArtifact(state, artifact);
+        }
 
         Archipelago.Instance.APSaveData.AddAppliedItem(name);
     }
