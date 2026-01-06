@@ -556,7 +556,7 @@ public class Archipelago
 
         lock (deathLinkLock)
         {
-            if (lastDeathLink is not null && state.storyVars.hasStartedGame)
+            if (lastDeathLink is not null && state.storyVars.hasStartedGame && state.ship.hull > 0)
             {
                 state.ship.hull = 0;
                 PreventDeathLink = true;
