@@ -370,6 +370,8 @@ public class Archipelago
 
     private static ConcurrentBag<string> receivedItemsToProcess = [];
     private static readonly object itemReceivedLock = new();
+    private static DeathLink? lastDeathLink;
+    private static readonly object deathLinkLock = new();
 
     public Archipelago()
     {
@@ -455,6 +457,10 @@ public class Archipelago
         
         Session.Items.ItemReceived += OnItemReceived;
         Session.MessageLog.OnMessageReceived += OnMessageReceived;
+
+        DeathLinkService = Session.CreateDeathLinkService();
+        DeathLinkService.OnDeathLinkReceived += OnDeathLinkReceived;
+        DeathLinkService.EnableDeathLink();
     }
 
     public void Disconnect()
@@ -528,6 +534,14 @@ public class Archipelago
         Logger.LogInformation("Received message: {message}", message);
     }
 
+    private void OnDeathLinkReceived(DeathLink deathLink)
+    {
+        lock (deathLinkLock)
+        {
+            lastDeathLink = deathLink;
+        }
+    }
+
     internal void SafeUpdate(State state)
     {
         lock (itemReceivedLock)
@@ -538,6 +552,17 @@ public class Archipelago
                 Logger.LogInformation("Received {item}", item);
                 ItemApplier.ApplyReceivedItem(item, state);
             }
+        }
+
+        lock (deathLinkLock)
+        {
+            if (lastDeathLink is not null && state.storyVars.hasStartedGame)
+            {
+                state.ship.hull = 0;
+                PreventDeathLink = true;
+            }
+
+            lastDeathLink = null;
         }
     }
 
