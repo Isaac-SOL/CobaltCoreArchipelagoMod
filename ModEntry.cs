@@ -14,6 +14,7 @@ using CobaltCoreArchipelago.External;
 using CobaltCoreArchipelago.Features;
 using Archipelago.MultiClient.Net;
 using Archipelago.MultiClient.Net.Enums;
+using CobaltCoreArchipelago.ConnectionInfoMenu;
 using Microsoft.Xna.Framework;
 
 namespace CobaltCoreArchipelago;
@@ -260,6 +261,9 @@ internal class ModEntry : SimpleMod
         CheckLocationCard.ArtCommon = RegisterSprite(package, "assets/Card/ArchipelagoBack2.png").Sprite;
         CheckLocationCard.ArtUncommon = RegisterSprite(package, "assets/Card/ArchipelagoBack5.png").Sprite;
         CheckLocationCard.ArtRare = RegisterSprite(package, "assets/Card/ArchipelagoBack7.png").Sprite;
+
+        ConnectionInfoInput.TextBoxSpr = RegisterSprite(package, "assets/UI/Textbox.png").Sprite;
+        ConnectionInfoInput.TextBoxHoverSpr = RegisterSprite(package, "assets/UI/Textbox_hover.png").Sprite;
     }
     
     /*

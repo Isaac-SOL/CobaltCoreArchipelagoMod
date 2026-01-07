@@ -5,20 +5,32 @@ using HarmonyLib;
 
 namespace CobaltCoreArchipelago.ConnectionInfoMenu;
 
-[HarmonyPatch(typeof(State), nameof(State.LoadOrNew))]
-public class FileLoadPatch
+[HarmonyPatch(typeof(ProfileSelect), nameof(ProfileSelect.SelectSlot))]
+public class SelectSlotPatch
 {
-    static void Prefix(int slot)
+    static bool Prefix(ref G g, int slotIdx)
     {
-        // TODO Double load to see if the slot is new, can be better?
-        if (State.Load(slot).state is null)
-            APSaveData.Erase(slot);
-        ModEntry.Instance.Archipelago.LoadSaveData(slot);
-        var loginResult = ModEntry.Instance.Archipelago.Reconnect();
-        if (!loginResult.Successful)
+        var saveSlot = State.Load(slotIdx);
+        if (saveSlot.state is null)
+            APSaveData.Erase(slotIdx);
+        ModEntry.Instance.Archipelago.LoadSaveData(slotIdx);
+        g.metaRoute!.subRoute = new ConnectionInfoInput
         {
-            throw new Exception("Could not connect to Archipelago host");
-        }
+            SlotIdx = slotIdx,
+            SaveSlot = saveSlot
+        };
+        return false;
+    }
+    
+    public static void SelectSlotReplacement(G g, int slotIdx)
+    {
+        g.settings.saveSlot = slotIdx;
+        g.settings.Save();
+        PFX.ClearAll();
+        g.state = State.LoadOrNew(g.settings.saveSlot);
+        Cheevos.CheckOnLoad(g.state);
+        g.state.SaveIfRelease();
+        g.metaRoute = new MainMenu();
     }
 }
 
@@ -113,35 +125,5 @@ public class PopulateRunPatch
             difficulty = Archipelago.InstanceSlotData.MinimumDifficulty;
         }
     }
-
-    // static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions, ILGenerator generator)
-    // {
-    //     List<CodeInstruction> storedInstructions = new(instructions);
-    //     var codeMatcher = new CodeMatcher(storedInstructions, generator);
-    //     codeMatcher.MatchEndForward(
-    //             CodeMatch.WithOpcodes([OpCodes.Br_S]),
-    //             CodeMatch.WithOpcodes([OpCodes.Ldloc_S]),
-    //             CodeMatch.WithOpcodes([OpCodes.Callvirt]),
-    //             CodeMatch.WithOpcodes([OpCodes.Stloc_S]),
-    //             CodeMatch.WithOpcodes([OpCodes.Ldarg_0]),
-    //             CodeMatch.WithOpcodes([OpCodes.Ldloc_S]),
-    //             CodeMatch.WithOpcodes([OpCodes.Call])
-    //         ).ThrowIfInvalid("Could not find add starters call in instructions")
-    //         .Advance(-1)
-    //         .RemoveInstruction()
-    //         .InsertAndAdvance(
-    //             CodeInstruction.Call((State state, Deck deck) => ArchipelagoAddStartersForCharacter(state, deck))
-    //         );
-    //     
-    //     return codeMatcher.Instructions();
-    // }
-
-    // static void ArchipelagoAddStartersForCharacter(State state, Deck deck)
-    // {
-    //     foreach (var card in Archipelago.InstanceSlotData.DeckStartingCards[deck])
-    //     {
-    //         state.SendCardToDeck((Card)card.CreateInstance());
-    //     }
-    // }
     
 }

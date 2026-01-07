@@ -1,4 +1,23 @@
 ﻿{
+    "connectionMenu": {
+        "title": "CONNECT TO ARCHIPELAGO",
+        "slot": "SLOT",
+        "newSave": "NEW SAVE",
+        "existingSave": "CONTINUE",
+        "roomId": "ROOM ID:",
+        "host": "HOSTNAME:",
+        "port": "PORT:",
+        "slotName": "SLOT NAME:",
+        "password": "PASSWORD:",
+        "connect": "CONNECT",
+        "invalidPort": "Invalid port number",
+        "connectionIssue": "Failed to connect to Archipelago host.\nMake sure the address, port, slot name and password are correct.",
+        "roomIdConflict": "The room ID has changed since the last time you connected with this save.\nAre you sure you are connecting to the right address/port?",
+        "connectAnyway": "CONNECT\nANYWAY",
+        "cantConnect": "Connection to the host failed.",
+        "retry": "RETRY",
+        "back": "BACK"
+    },
     "deck": {
         "name": "Archipelago",
         "lockedName": "Locked"

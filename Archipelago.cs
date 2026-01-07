@@ -383,7 +383,7 @@ public class Archipelago
         APSaveData = APSaveData.LoadFromSlot(slot);
     }
 
-    public LoginResult Connect()
+    public (LoginResult, ArchipelagoErrorCode) Connect()
     {
         Debug.Assert(APSaveData != null, nameof(APSaveData) + " != null");
         Debug.Assert(Session == null, nameof(Session) + " == null");
@@ -397,8 +397,10 @@ public class Archipelago
         if (!loginResult.Successful)
         {
             Logger.LogError("Failed to connect to Archipelago host");
-            return loginResult;
+            return (loginResult, ArchipelagoErrorCode.ConnectionIssue);
         }
+
+        var code = ArchipelagoErrorCode.Ok;
 
         SlotData = (loginResult as LoginSuccessful)!.SlotData;
         Logger.LogInformation("Successfully connected to Archipelago host");
@@ -411,14 +413,14 @@ public class Archipelago
         if (APSaveData.RoomId is not null && APSaveData.RoomId != Session.RoomState.Seed)
         {
             Logger.LogError("Stored seed is different from Archipelago host seed");
+            code = ArchipelagoErrorCode.RoomIdConflict;
         }
         APSaveData.RoomId = Session.RoomState.Seed;
         
-        ApplyArchipelagoConnection();
-        return loginResult;
+        return (loginResult, code);
     }
 
-    private void ApplyArchipelagoConnection()
+    internal void ApplyArchipelagoConnection()
     {
         Debug.Assert(SlotData != null, nameof(SlotData) + " != null");
         Debug.Assert(Session != null, nameof(Session) + " != null");
@@ -485,7 +487,7 @@ public class Archipelago
         SlotDataHelper = null;
     }
 
-    public LoginResult Reconnect()
+    public (LoginResult, ArchipelagoErrorCode) Reconnect()
     {
         Disconnect();
         return Connect();
@@ -577,6 +579,13 @@ public class Archipelago
         });
         return res.ToArray();
     }
+}
+
+public enum ArchipelagoErrorCode
+{
+    Ok = 0,
+    ConnectionIssue,
+    RoomIdConflict
 }
 
 public enum WinCondition

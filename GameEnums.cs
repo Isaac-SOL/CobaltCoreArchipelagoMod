@@ -9,3 +9,22 @@ namespace CobaltCoreArchipelago;
  */
 [EnumByName(typeof(Spr))]
 internal static partial class StableSpr { }
+
+[EnumByName(typeof(UK))]
+internal static partial class StableUK { }
+
+internal enum ArchipelagoUK
+{
+    connection_host = 208001,
+    connection_port,
+    connection_slot,
+    connection_password,
+    connection_connect,
+    connection_back,
+    connection_finalizeConnection
+}
+
+internal static class ArchipelagoUKExtensions
+{
+    public static UK ToUK(this ArchipelagoUK auk) => (UK)auk;
+}

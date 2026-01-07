@@ -24,13 +24,13 @@ public class APSaveData
     [JsonProperty]
     internal int SaveSlot { get; }
     [JsonProperty]
-    internal string Hostname { get; }
+    internal string Hostname { get; set; }
     [JsonProperty]
-    internal int Port { get; }
+    internal int Port { get; set; }
     [JsonProperty]
-    internal string Slot { get; }
+    internal string Slot { get; set; }
     [JsonProperty]
-    internal string? Password { get; }
+    internal string? Password { get; set; }
     [JsonProperty]
     internal string? RoomId { get; set; }
     [JsonProperty]
@@ -41,7 +41,7 @@ public class APSaveData
     internal static IModStorage ModStorage => ModEntry.Instance.Helper.Storage;
 
     [JsonConstructor]
-    private APSaveData(): this(0, "localhost", 38281, "Time Crystal")
+    private APSaveData(): this(0, "archipelago.gg", 38281, "CAT1")
     {
         
     }
@@ -73,7 +73,7 @@ public class APSaveData
         if (!AllAPSaves.TryGetValue(saveSlot, out APSaveData? value))
         {
             ModEntry.Instance.Logger.LogWarning("Couldn't find save data, creating new one");
-            value = new APSaveData(saveSlot, "localhost", 38281, "Time Crystal");
+            value = new APSaveData(saveSlot, "archipelago.gg", 38281, "CAT1");
             AllAPSaves[saveSlot] = value;
         }
         return value;
