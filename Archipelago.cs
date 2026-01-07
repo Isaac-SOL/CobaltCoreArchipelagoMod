@@ -41,7 +41,7 @@ public class Archipelago
     };
 
     public static Dictionary<string, Deck> ItemToMemory = ItemToDeck
-        .SelectMany(pair => new List<int> { 1, 2, 3 }.Select(i => (pair.Key + " Memory " + i, pair.Value)))
+        .Select(pair => (pair.Key + " Memory", pair.Value))
         .ToDictionary();
 
     public static Dictionary<string, Type> ItemToCard = new()

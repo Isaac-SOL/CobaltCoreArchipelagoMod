@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Logging;
 using Nanoray.PluginManager;
 using Nickel;
+using Nickel.ModSettings;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -19,7 +20,7 @@ internal class ModEntry : SimpleMod
 {
     internal static ModEntry Instance { get; private set; } = null!;
     internal Harmony Harmony;
-    internal IKokoroApi.IV2 KokoroApi;
+    internal IModSettingsApi ModSettings;
     internal ILocalizationProvider<IReadOnlyList<string>> AnyLocalizations { get; }
     internal ILocaleBoundNonNullLocalizationProvider<IReadOnlyList<string>> Localizations { get; }
 
@@ -71,6 +72,7 @@ internal class ModEntry : SimpleMod
     public ModEntry(IPluginPackage<IModManifest> package, IModHelper helper, ILogger logger) : base(package, helper, logger)
     {
         Instance = this;
+        ModSettings = helper.ModRegistry.GetApi<IModSettingsApi>("Nickel.ModSettings")!;
         Harmony = new Harmony("SaltyIsaac.CobaltCoreArchipelago");
         Harmony.PatchAll(Assembly.GetExecutingAssembly());
         Archipelago = new Archipelago();
@@ -78,13 +80,6 @@ internal class ModEntry : SimpleMod
         // Fill out static data
         BaseShips = Mutil.DeepCopy(StarterShip.ships);
         BaseDifficulties = Mutil.DeepCopy(NewRunOptions.difficulties);
-        
-        /*
-         * Some mods provide an API, which can be requested from the ModRegistry.
-         * The following is an example of a required dependency - the code would have unexpected errors if Kokoro was not present.
-         * Dependencies can (and should) be defined within the nickel.json file, to ensure proper load mod load order.
-         */
-        KokoroApi = helper.ModRegistry.GetApi<IKokoroApi>("Shockah.Kokoro")!.V2;
 
         AnyLocalizations = new JsonLocalizationProvider(
             tokenExtractor: new SimpleLocalizationTokenExtractor(),
@@ -138,6 +133,56 @@ internal class ModEntry : SimpleMod
 
         DrawCorePatch.SmolCobaltSpr = RegisterSprite(package, "assets/UI/SmolCobalt.png").Sprite;
         MainMenuRenderPatch.ArchipelagoTitleSpr = RegisterSprite(package, "assets/UI/ArchipelagoLogo.png").Sprite;
+
+        ModSettings.RegisterModSettings(
+            ModSettings.MakeList([
+                ModSettings.MakeProfileSelector(
+                    () => package.Manifest.DisplayName ?? package.Manifest.UniqueName,
+                    // This is an attempt at making a dummy because I have no idea what is going on here
+                    ProfileBasedValue.Create(
+                        () => IModSettingsApi.ProfileMode.Slot,
+                        _ => {},
+                        _ => new List<int>(),
+                        (_, _) => {}
+                    )
+                ),
+                ModSettings.MakePadding(
+                    ModSettings.MakeText(() => "<c=redd>THIS MOD DOES NOT SUPPORT PROFILES!</c>"),
+                    4, 8),
+                ModSettings.MakeCheckbox(
+                        () => "DeathLink",
+                        () => Archipelago.APSaveData!.DeathLinkActive,
+                        (_, _, value) => Archipelago.APSaveData!.DeathLinkActive = value)
+                    .SetTooltips(() => [
+                        new TTText("<c=artifact>DEATHLINK</c>"),
+                        new TTText("If you die, other players die as well. Of course, the reverse is true.")
+                    ]),
+                ModSettings.MakeEnumStepper(
+                        () => "Scouting",
+                        () => Archipelago.APSaveData!.CardScoutMode,
+                        value => Archipelago.APSaveData!.CardScoutMode = value)
+                    .SetValueFormatter(value => value switch
+                    {
+                        CardScoutMode.DontScout => "Don't scout",
+                        CardScoutMode.ScoutOnly => "Scout silently",
+                        CardScoutMode.CreateHint => "Create hint",
+                        _ => "Create hint & message"
+                    })
+                    .SetValueWidth(_ => 170)
+                    .SetTooltips(() => [
+                        new TTText("<c=artifact>AUTOMATIC SCOUTING</c>"),
+                        new TTText("What happens when you see an archipelago card or artifact reward."),
+                        new TTDivider(),
+                        new TTText("<c=card>Don't scout:</c> cards and artifacts will <c=attack>not</c> show which item they will give."),
+                        new TTDivider(),
+                        new TTText("<c=card>Scout silently:</c> cards and artifacts show which item they will give."),
+                        new TTDivider(),
+                        new TTText("<c=card>Create hint:</c> cards and artifacts show which item they will give, and automatically create a hint for it."),
+                        new TTDivider(),
+                        new TTText("<c=card>Create hint & message:</c> cards and artifacts show which item they will give, create a hint for it, and message all players.")
+                    ])
+            ]).SubscribeToOnMenuClose(_ => APSaveData.Save())
+        );
     }
     
     /*

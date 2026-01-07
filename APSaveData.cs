@@ -4,6 +4,7 @@ using System.Linq;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using Nickel;
+using Nickel.ModSettings;
 
 namespace CobaltCoreArchipelago;
 
@@ -19,7 +20,8 @@ public class APSaveData
             return _allApSaveStorage!;
         }
     }
-    [JsonIgnore] private static Dictionary<int, APSaveData>? _allApSaveStorage;
+    [JsonIgnore]
+    private static Dictionary<int, APSaveData>? _allApSaveStorage;
     
     [JsonProperty]
     internal int SaveSlot { get; }
@@ -37,6 +39,10 @@ public class APSaveData
     internal Dictionary<string, int> AppliedInventory { get; }
     [JsonProperty]
     internal HashSet<string> LocationsChecked { get; }
+    [JsonProperty]
+    internal bool DeathLinkActive { get; set; } = true;
+    [JsonProperty]
+    internal CardScoutMode CardScoutMode { get; set; } = CardScoutMode.CreateHintWithMessage;
     
     internal static IModStorage ModStorage => ModEntry.Instance.Helper.Storage;
 
@@ -145,4 +151,12 @@ public class APSaveData
         }
         return false;
     }
+}
+
+internal enum CardScoutMode
+{
+    DontScout = 0,
+    ScoutOnly,
+    CreateHint,
+    CreateHintWithMessage
 }

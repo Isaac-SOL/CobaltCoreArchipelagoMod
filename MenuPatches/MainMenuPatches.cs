@@ -27,11 +27,12 @@ internal class DrawCorePatch
     {
         List<CodeInstruction> storedInstructions = new(instructions);
         var codeMatcher = new CodeMatcher(storedInstructions, generator);
-        // Load ship name from archipelago instead
+        // Draw mini cobalts after the background sprite, but before the core
         codeMatcher.MatchEndForward(
                 CodeMatch.WithOpcodes([OpCodes.Brfalse])
             ).ThrowIfInvalid("Could not find branch in instructions")
             .InsertAfter(
+                // Load all arguments from the base function and call PreCobalt with them
                 new CodeInstruction(OpCodes.Ldarg_0),
                 new CodeInstruction(OpCodes.Ldarg_1),
                 new CodeInstruction(OpCodes.Ldarg_2),
