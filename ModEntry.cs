@@ -11,6 +11,7 @@ using CobaltCoreArchipelago.Artifacts;
 using CobaltCoreArchipelago.Cards;
 using CobaltCoreArchipelago.External;
 using CobaltCoreArchipelago.ConnectionInfoMenu;
+using CobaltCoreArchipelago.MenuPatches;
 
 namespace CobaltCoreArchipelago;
 
@@ -134,6 +135,9 @@ internal class ModEntry : SimpleMod
 
         ConnectionInfoInput.TextBoxSpr = RegisterSprite(package, "assets/UI/Textbox.png").Sprite;
         ConnectionInfoInput.TextBoxHoverSpr = RegisterSprite(package, "assets/UI/Textbox_hover.png").Sprite;
+
+        DrawCorePatch.SmolCobaltSpr = RegisterSprite(package, "assets/UI/SmolCobalt.png").Sprite;
+        MainMenuRenderPatch.ArchipelagoTitleSpr = RegisterSprite(package, "assets/UI/ArchipelagoLogo.png").Sprite;
     }
     
     /*
