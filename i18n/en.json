@@ -22,57 +22,13 @@
         "name": "Archipelago",
         "lockedName": "Locked"
     },
-    "character": {
-        "name": "Professor",
-        "desc": "Your professor. They will teach you how to write your own character, as well as the power of <c=status>POWERDRIVE</c>."
-    },
-    "status": {
-        "knowledge": {
-            "name": "Knowledge",
-            "desc": "Base limit of 3. When reaching the limit, spend the required <c=status>KNOWLEDGE</c> to gain 1 <c=status>POWERDRIVE</c> and 1 <c=status>LESSON</c>. Excess <c=status>KNOWLEDGE</c> is not lost."
-        },
-        "lesson": {
-            "name": "Lesson",
-            "desc": "Increase the limit of <c=status>KNOWLEDGE</c> by {0}."
-        }
-    },
     "action": {
-        "AGainPonder": {
-            "title": "Gain Ponder",
-            "draw": "Add <c=boldPink>{{Count}}</c> <c=card>Ponder</c>s to your <c=white>draw pile</c>.",
-            "discard": "Add <c=boldPink>{{Count}}</c> <c=card>Ponder</c>s to your <c=white>discard pile</c>."
-        },
-        "AOverthink": {
-            "title": "Overthink",
-            "desc": "Discard a <c=card>Ponder</c> in hand, or in the draw pile."
-        },
         "AArchipelagoCheckLocation": {
             "title": "Archipelago Check",
             "desc": "Check an <c=boldPink>Archipelago</c> location and give an item to someone."
         }
     },
     "card": {
-        "LessonPlan": {
-            "name": "Lesson Plan"
-        },
-        "PatternBlock": {
-            "name": "Pattern Block"
-        },
-        
-        "DeepStudy": {
-            "name": "Deep Study"
-        },
-        
-        "ExtractKnowledge": {
-            "name": "Extract Knowledge",
-            "desc": "<c=attack>Attack {0}</c>. If it kills, gain a <c=cardtrait>non-temp</c> <c=card>Ponder</c>.",
-            "descB": "<c=attack>Attack {0}</c>. If it kills, gain a <c=cardtrait>non-temp</c> <c=card>Ponder B</c>."
-        },
-        
-        "Ponder": {
-            "name": "Ponder"
-        },
-        
         "CheckLocationCard": {
             "name": "Archipelago Check!",
             "descNotFound": "Send an Archipelago item.",
@@ -83,22 +39,12 @@
         }
     },
     "artifact": {
-        "BuriedKnowledge": {
-            "name": "BURIED KNOWLEDGE",
-            "desc": "At the start of combat, add 3 <c=card>Ponder</c>s to the discard pile."
-        },
-        "Lexicon": {
-            "name": "LEXICON",
-            "desc": "Whenever you gain a <c=card>Ponder</c> during combat, it is given the A or B upgrade, alternating."
-        },
-
         "CheckLocationArtifact": {
             "name": "ARCHIPELAGO CHECK!",
             "descNotFound": "Send an Archipelago item.",
             "descBase": "Send <c=card>{0}</c> to <c=attack>{1}</c>.",
             "descSelf": "Unlock <c=card>{0}</c>."
         },
-
         "LockedArtifact": {
             "name": "LOCKED ARTIFACT",
             "desc": "You haven't unlocked this artifact yet.",
