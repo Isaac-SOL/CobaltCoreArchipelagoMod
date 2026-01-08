@@ -13,6 +13,8 @@ public class SelectSlotPatch
         var saveSlot = State.Load(slotIdx);
         if (saveSlot.state is null)
             APSaveData.Erase(slotIdx);
+        else if (!APSaveData.AllAPSaves.ContainsKey(slotIdx)) // Prevent loading non-archipelago saves
+            return false;
         ModEntry.Instance.Archipelago.LoadSaveData(slotIdx);
         g.metaRoute!.subRoute = new ConnectionInfoInput
         {
@@ -37,7 +39,7 @@ public class SelectSlotPatch
 [HarmonyPatch(typeof(G), nameof(G.LoadSavegameOnStartup))]
 public class StartupFileLoadPatch
 {
-    static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions,  ILGenerator generator)
+    static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions, ILGenerator generator)
     {
         List<CodeInstruction> storedInstructions = new(instructions);
         var codeMatcher = new CodeMatcher(storedInstructions, generator);

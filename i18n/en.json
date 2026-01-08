@@ -18,6 +18,25 @@
         "retry": "RETRY",
         "back": "BACK"
     },
+    "settings": {
+        "profileWarning": "<c=redd>THIS MOD DOES NOT SUPPORT PROFILES!</c>",
+        "deathlink": {
+            "settingName": "DeathLink",
+            "tooltipName": "<c=artifact>DEATHLINK</c>",
+            "desc": "If you die, other players die as well. Of course, the reverse is also true."
+        },
+        "automaticScouting": {
+            "settingName": "Scouting",
+            "tooltipName": "<c=artifact>AUTOMATIC SCOUTING</c>",
+            "desc": "What happens when you see an archipelago card or artifact reward.",
+            "nameDontScout": "Don't scout",
+            "descDontScout": "<c=card>Don't scout:</c> cards & artifacts will <c=attack>not</c> show which item they will give.",
+            "nameScoutOnly": "Scout silently",
+            "descScoutOnly": "<c=card>Scout silently:</c> cards & artifacts show which item they will give.",
+            "nameCreateHint": "Create hint",
+            "descCreateHint": "<c=card>Create hint:</c> cards & artifacts show which item they will give, create a hint for it, and message all players."
+        }
+    },
     "deck": {
         "name": "Archipelago",
         "lockedName": "Locked"

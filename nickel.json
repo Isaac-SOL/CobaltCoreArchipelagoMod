@@ -1,5 +1,6 @@
 {
   "UniqueName": "SaltyIsaac.CobaltCoreArchipelago",
+  "DisplayName": "Archipelago",
   "Version": "0.1.0",
   "Author": "SaltyIsaac",
   "Description": "Archipelago multiworld randomizer integration for Cobalt Core.",

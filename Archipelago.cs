@@ -462,7 +462,8 @@ public class Archipelago
 
         DeathLinkService = Session.CreateDeathLinkService();
         DeathLinkService.OnDeathLinkReceived += OnDeathLinkReceived;
-        DeathLinkService.EnableDeathLink();
+        if (APSaveData.DeathLinkActive)
+            DeathLinkService.EnableDeathLink();
     }
 
     public void Disconnect()
@@ -571,8 +572,14 @@ public class Archipelago
     internal async Task<(string itemName, string slotName)[]> CheckLocationInfo(params string[] locationNames)
     {
         Debug.Assert(Session != null, nameof(Session) + " != null");
+        Debug.Assert(APSaveData != null, nameof(APSaveData) + " != null");
         var addresses = locationNames.Select(s => Session.Locations.GetLocationIdFromName("Cobalt Core", s)).ToArray();
-        var info = await Session.Locations.ScoutLocationsAsync(HintCreationPolicy.CreateAndAnnounceOnce, addresses);
+        var info = await Session.Locations.ScoutLocationsAsync(
+            APSaveData.CardScoutMode == CardScoutMode.CreateHint
+                ? HintCreationPolicy.CreateAndAnnounceOnce
+                : HintCreationPolicy.None,
+            addresses
+        );
         var res = addresses.Select<long, (string itemName, string slotName)>(a =>
         {
             return info.TryGetValue(a, out var value) ? (value.ItemName, value.Player.Name) : ("[]", "[]");

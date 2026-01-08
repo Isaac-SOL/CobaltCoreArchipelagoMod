@@ -42,7 +42,7 @@ public class APSaveData
     [JsonProperty]
     internal bool DeathLinkActive { get; set; } = true;
     [JsonProperty]
-    internal CardScoutMode CardScoutMode { get; set; } = CardScoutMode.CreateHintWithMessage;
+    internal CardScoutMode CardScoutMode { get; set; } = CardScoutMode.CreateHint;
     
     internal static IModStorage ModStorage => ModEntry.Instance.Helper.Storage;
 
@@ -157,6 +157,5 @@ internal enum CardScoutMode
 {
     DontScout = 0,
     ScoutOnly,
-    CreateHint,
-    CreateHintWithMessage
+    CreateHint
 }

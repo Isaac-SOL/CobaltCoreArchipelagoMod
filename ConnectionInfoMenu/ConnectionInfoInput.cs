@@ -291,7 +291,7 @@ public class ConnectionInfoInput : Route, OnInputPhase, OnMouseDown
         // Validate character input
         var validChar = selectedTextField switch
         {
-            1 => char.IsDigit(args.Character),
+            1 => char.IsDigit(args.Character),  // Port
             _ => char.IsLetterOrDigit(args.Character)
                  || char.IsSymbol(args.Character)
                  || char.IsPunctuation(args.Character)

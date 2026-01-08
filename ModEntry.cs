@@ -133,6 +133,8 @@ internal class ModEntry : SimpleMod
 
         DrawCorePatch.SmolCobaltSpr = RegisterSprite(package, "assets/UI/SmolCobalt.png").Sprite;
         MainMenuRenderPatch.ArchipelagoTitleSpr = RegisterSprite(package, "assets/UI/ArchipelagoLogo.png").Sprite;
+        MkSlotPatch.ArchipelagoSaveSpr = RegisterSprite(package, "assets/UI/ArchipelagoSave.png").Sprite;
+        MkSlotPatch.NotArchipelagoSaveSpr = RegisterSprite(package, "assets/UI/NotArchipelagoSave2.png").Sprite;
 
         ModSettings.RegisterModSettings(
             ModSettings.MakeList([
@@ -147,43 +149,50 @@ internal class ModEntry : SimpleMod
                     )
                 ),
                 ModSettings.MakePadding(
-                    ModSettings.MakeText(() => "<c=redd>THIS MOD DOES NOT SUPPORT PROFILES!</c>"),
+                    ModSettings.MakeText(() => LocalizeSettings("profileWarning")),
                     4, 8),
                 ModSettings.MakeCheckbox(
-                        () => "DeathLink",
+                        () => LocalizeSettings("deathlink", "settingName"),
                         () => Archipelago.APSaveData!.DeathLinkActive,
                         (_, _, value) => Archipelago.APSaveData!.DeathLinkActive = value)
                     .SetTooltips(() => [
-                        new TTText("<c=artifact>DEATHLINK</c>"),
-                        new TTText("If you die, other players die as well. Of course, the reverse is true.")
+                        new TTText(LocalizeSettings("deathlink", "tooltipName")),
+                        new TTText(LocalizeSettings("deathlink", "desc"))
                     ]),
                 ModSettings.MakeEnumStepper(
-                        () => "Scouting",
+                        () => LocalizeSettings("automaticScouting", "settingName"),
                         () => Archipelago.APSaveData!.CardScoutMode,
                         value => Archipelago.APSaveData!.CardScoutMode = value)
                     .SetValueFormatter(value => value switch
                     {
-                        CardScoutMode.DontScout => "Don't scout",
-                        CardScoutMode.ScoutOnly => "Scout silently",
-                        CardScoutMode.CreateHint => "Create hint",
-                        _ => "Create hint & message"
+                        CardScoutMode.DontScout => LocalizeSettings("automaticScouting", "nameDontScout"),
+                        CardScoutMode.ScoutOnly => LocalizeSettings("automaticScouting", "nameScoutOnly"),
+                        _ => LocalizeSettings("automaticScouting", "nameCreateHint")
                     })
-                    .SetValueWidth(_ => 170)
-                    .SetTooltips(() => [
-                        new TTText("<c=artifact>AUTOMATIC SCOUTING</c>"),
-                        new TTText("What happens when you see an archipelago card or artifact reward."),
+                    .SetValueWidth(_ => 100)
+                    .SetTooltips(() => new List<Tooltip>
+                    {
+                        new TTText(LocalizeSettings("automaticScouting", "tooltipName")),
+                        new TTText(LocalizeSettings("automaticScouting", "desc")),
                         new TTDivider(),
-                        new TTText("<c=card>Don't scout:</c> cards and artifacts will <c=attack>not</c> show which item they will give."),
-                        new TTDivider(),
-                        new TTText("<c=card>Scout silently:</c> cards and artifacts show which item they will give."),
-                        new TTDivider(),
-                        new TTText("<c=card>Create hint:</c> cards and artifacts show which item they will give, and automatically create a hint for it."),
-                        new TTDivider(),
-                        new TTText("<c=card>Create hint & message:</c> cards and artifacts show which item they will give, create a hint for it, and message all players.")
-                    ])
-            ]).SubscribeToOnMenuClose(_ => APSaveData.Save())
+                    }.Append(Archipelago.APSaveData!.CardScoutMode switch
+                    {
+                        CardScoutMode.DontScout => new TTText(LocalizeSettings("automaticScouting", "descDontScout")),
+                        CardScoutMode.ScoutOnly => new TTText(LocalizeSettings("automaticScouting", "descScoutOnly")),
+                        _ => new TTText(LocalizeSettings("automaticScouting", "descCreateHint"))
+                    }))
+            ]).SubscribeToOnMenuClose(_ =>
+            {
+                APSaveData.Save();
+                if (Archipelago.APSaveData!.DeathLinkActive)
+                    Archipelago.DeathLinkService!.EnableDeathLink();
+                else
+                    Archipelago.DeathLinkService!.DisableDeathLink();
+            })
         );
     }
+
+    private string LocalizeSettings(params string[] key) => Localizations.Localize(new List<string>{"settings"}.Concat(key).ToArray());
     
     /*
      * assets must also be registered before they may be used.

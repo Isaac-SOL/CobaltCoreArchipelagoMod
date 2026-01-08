@@ -91,7 +91,9 @@ public class CardOfferingPatch
             __result.RemoveAt(s.rngCardOfferings.NextInt() % __result.Count);
         }
         
-        // Scout proposed archipelago cards
+        // Scout proposed archipelago cards if the options allow for it
+        if (Archipelago.Instance.APSaveData.CardScoutMode == CardScoutMode.DontScout) return;
+        
         var checkCards = __result.Where(card => card is CheckLocationCard).Cast<CheckLocationCard>().ToList();
         var locations = checkCards.Select(card => card.locationName).ToArray();
         
@@ -194,7 +196,9 @@ public class ArtifactOfferingPatch
         __result.Add(newArtifact);
         __result.RemoveAt(s.rngCardOfferings.NextInt() % __result.Count);
 
-        // If it was picked, scout its location
+        // If it was picked, scout its location if the options allow for it
+        if (Archipelago.Instance.APSaveData.CardScoutMode == CardScoutMode.DontScout) return;
+        
         if (__result.Contains(newArtifact))
         {
             Archipelago.Instance.CheckLocationInfo(location).ContinueWith(task =>
