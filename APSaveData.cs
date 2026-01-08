@@ -151,6 +151,20 @@ public class APSaveData
         }
         return false;
     }
+
+    internal string? GetNextFixTimelineLocationName(Deck deck)
+    {
+        // Look among locations checked to see which is the next location
+        var name = Archipelago.ItemToDeck.First(kvp => kvp.Value == deck).Key;
+        var baseLocationName = $"Fix {name}'s Timeline";
+        for (var i = 1; i <= 3; i++)
+        {
+            var locationName = $"{baseLocationName} {i}";
+            if (!LocationsChecked.Contains(locationName))
+                return locationName;
+        }
+        return null;
+    }
 }
 
 internal enum CardScoutMode

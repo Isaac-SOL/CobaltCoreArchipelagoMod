@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Reflection.Emit;
+using CobaltCoreArchipelago.MenuPatches;
 using FMOD;
 using HarmonyLib;
 using Debug = System.Diagnostics.Debug;
@@ -62,7 +63,23 @@ public class UnlockShipPatch
 [HarmonyPatch(typeof(StoryVars), nameof(StoryVars.UnlockOneMemory))]
 public class UnlockOneMemoryPatch
 {
-    static bool Prefix() => false;
+    static bool Prefix(StoryVars __instance, Deck deck)
+    {
+        Debug.Assert(Archipelago.Instance.APSaveData != null, "Archipelago.Instance.APSaveData != null");
+        if (Archipelago.InstanceSlotData.ShuffleMemories)
+        {
+            // If memories are shuffled, we send the corresponding location
+            var location = Archipelago.Instance.APSaveData.GetNextFixTimelineLocationName(deck);
+            if (location is not null)
+                Archipelago.Instance.CheckLocation(location);
+        }
+        else
+        {
+            // If memories aren't shuffled, we pass through to our replacement function
+            UnlockReplacements.UnlockOneMemory(__instance, deck);
+        }
+        return false;
+    }
 }
 
 [HarmonyPatch(typeof(State), nameof(State.OnHasCard))]
@@ -98,11 +115,18 @@ internal static class UnlockReplacements
         s.storyVars.unlockedShips.Add(shipkey);
     }
     
-    internal static void UnlockOneMemory(State s, Deck deck)
+    internal static void UnlockOneMemory(StoryVars storyVars, Deck deck)
     {
-        var storyVars = s.storyVars;
         storyVars.memoryUnlockLevel.TryAdd(deck, 0);
         storyVars.memoryUnlockLevel[deck]++;
+        
+        // Immediately check for goal if we don't have to do the future memory
+        // We can't have state in the arguments because of UnlockOneMemoryPatch, so we create a dummy state here
+        var dummyState = new State { persistentStoryVars = storyVars };
+        if (Archipelago.InstanceSlotData.DoFutureMemory || !VaultRenderPatch.CanCompleteGame(Vault.GetVaultMemories(dummyState)))
+            return;
+        Debug.Assert(Archipelago.Instance.Session != null, "Archipelago.Instance.Session != null");
+        Archipelago.Instance.Session.SetGoalAchieved();
     }
 
     internal static void UnlockCodexCard(State s, Type cardType)

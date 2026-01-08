@@ -4,6 +4,7 @@ namespace CobaltCoreArchipelago.GameplayPatches;
 
 public class MainLoopPatches;
 
+// Process received Archipelago items
 [HarmonyPatch(typeof(G), nameof(G.OnAfterFrame))]
 public static class AfterFramePatch
 {

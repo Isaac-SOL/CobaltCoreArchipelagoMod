@@ -30,7 +30,7 @@ public static class ItemApplier
         }
         else if (Archipelago.ItemToMemory.TryGetValue(name, out var deckMemory))
         {
-            UnlockReplacements.UnlockOneMemory(state, deckMemory);
+            UnlockReplacements.UnlockOneMemory(state.storyVars, deckMemory);
         }
         else if (Archipelago.ItemToCard.TryGetValue(name, out var card))
         {

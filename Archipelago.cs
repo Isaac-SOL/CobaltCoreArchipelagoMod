@@ -624,6 +624,7 @@ public struct SlotDataHelper
     public int WinReqTotal { get; set; }
     public int WinReqPerChar { get; set; }
     public bool AddCharacterMemories { get; set; }
+    public bool ShuffleMemories { get; set; }
     public bool DoFutureMemory { get; set; }
     public CardRewardsMode ImmediateCardRewards { get; set; }
     public uint FixedRandSeed { get; set; }
@@ -655,6 +656,7 @@ public struct SlotDataHelper
             res.WinCondition = (WinCondition)Convert.ToInt32(slotData["win_condition"]);
             res.WinReqTotal = Convert.ToInt32(slotData["memories_required_total"]);
             res.WinReqPerChar = Convert.ToInt32(slotData["memories_required_per_character"]);
+            res.ShuffleMemories = Convert.ToBoolean(slotData["shuffle_memories"]);
             res.DoFutureMemory = Convert.ToBoolean(slotData["do_future_memory"]);
             res.AddCharacterMemories = Convert.ToBoolean(slotData["add_character_memories"]);
             res.ImmediateCardRewards = (CardRewardsMode)Convert.ToInt32(slotData["immediate_card_rewards"]);
