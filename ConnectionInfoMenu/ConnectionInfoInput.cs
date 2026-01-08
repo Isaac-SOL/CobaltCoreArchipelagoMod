@@ -23,6 +23,7 @@ public class ConnectionInfoInput : Route, OnInputPhase, OnMouseDown
     private string errorText = "";
     private bool connecting = false;
     private ScreenMode screenMode = ScreenMode.Base;
+    private double blinkStartTime;
 
     private string EditText
     {
@@ -86,7 +87,9 @@ public class ConnectionInfoInput : Route, OnInputPhase, OnMouseDown
             var textToDraw = ConnectionInfo[line];
             if (line == selectedTextField)
             {
-                textToDraw += "<c=boldPink>|</c>";
+                if (blinkStartTime == 0.0) blinkStartTime = g.time;
+                var offsetTime = g.time - blinkStartTime;
+                if (offsetTime - Math.Floor(offsetTime) < 0.5) textToDraw += "<c=boldPink>|</c>";
                 Draw.Text("~", immButton.v.x + 226.0, immButton.v.y + 3.0, font: DB.stapler, color: Colors.boldPink);
             }
             Draw.Text(textToDraw, immButton.v.x + 5.0, immButton.v.y + 8.0,
@@ -148,6 +151,7 @@ public class ConnectionInfoInput : Route, OnInputPhase, OnMouseDown
         else if (Input.GetKeyDown(Keys.Tab))
         {
             selectedTextField = (selectedTextField + 1) % 4;
+            blinkStartTime = g.time;
         }
     }
 
@@ -182,6 +186,8 @@ public class ConnectionInfoInput : Route, OnInputPhase, OnMouseDown
                 FinalizeConnection(g);
                 break;
         }
+
+        blinkStartTime = g.time;
     }
 
     internal void TryToConnect(G g)
@@ -257,10 +263,12 @@ public class ConnectionInfoInput : Route, OnInputPhase, OnMouseDown
         if (validChar)
         {
             EditText += args.Character;
+            blinkStartTime = 0.0;  // Ask render loop to reset it
         }
         else if (args.Character == ControlChars.Back)
         {
             if (EditText.Length > 0) EditText = EditText.Remove(EditText.Length - 1);
+            blinkStartTime = 0.0;  // Ask render loop to reset it
         }
     }
     
