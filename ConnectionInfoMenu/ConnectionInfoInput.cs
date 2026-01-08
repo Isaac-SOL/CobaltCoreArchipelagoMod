@@ -83,11 +83,13 @@ public class ConnectionInfoInput : Route, OnInputPhase, OnMouseDown
                 boxColor: Colors.buttonBoxNormal,
                 onMouseDown: this
             );
+            var textToDraw = ConnectionInfo[line];
             if (line == selectedTextField)
             {
+                textToDraw += "<c=boldPink>|</c>";
                 Draw.Text("~", immButton.v.x + 226.0, immButton.v.y + 3.0, font: DB.stapler, color: Colors.boldPink);
             }
-            Draw.Text(ConnectionInfo[line], immButton.v.x + 5.0, immButton.v.y + 8.0,
+            Draw.Text(textToDraw, immButton.v.x + 5.0, immButton.v.y + 8.0,
                       color: immButton.isHover ? Colors.textChoiceHoverActive : Colors.textChoice);
             line++;
         }
