@@ -21,7 +21,8 @@ internal enum ArchipelagoUK
     connection_password,
     connection_connect,
     connection_back,
-    connection_finalizeConnection
+    connection_finalizeConnection,
+    connection_seePassword
 }
 
 internal static class ArchipelagoUKExtensions

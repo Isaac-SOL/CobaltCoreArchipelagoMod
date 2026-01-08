@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
+using System.Text;
 using daisyowl.text;
 using HarmonyLib;
 using Microsoft.Extensions.Logging;
@@ -24,6 +26,7 @@ public class ConnectionInfoInput : Route, OnInputPhase, OnMouseDown
     private bool connecting = false;
     private ScreenMode screenMode = ScreenMode.Base;
     private double blinkStartTime;
+    private bool seePassword = false;
 
     private string EditText
     {
@@ -75,7 +78,9 @@ public class ConnectionInfoInput : Route, OnInputPhase, OnMouseDown
                  ])
         {
             var offsetY = 24 * (line + 1);
+            // Name of the field
             Draw.Text(sectionName, box.rect.x + 98.0, box.rect.y + offsetY, font: DB.thicket, color: Colors.textBold, align: TAlign.Right);
+            // Clickable field with background
             var immButton = SharedArt.ButtonSprite(
                 g,
                 new Rect(x: 100.0, y: offsetY - 6.0, w: 225.0, h: 21.0),
@@ -84,7 +89,35 @@ public class ConnectionInfoInput : Route, OnInputPhase, OnMouseDown
                 boxColor: Colors.buttonBoxNormal,
                 onMouseDown: this
             );
+            // Get text data from storage
             var textToDraw = ConnectionInfo[line];
+            // Password view button
+            if (uk == ArchipelagoUK.connection_password.ToUK())
+            {
+                Spr baseSpr, downSpr;
+                if (seePassword)
+                {
+                    baseSpr = StableSpr.buttons_eyeball_on;
+                    downSpr = StableSpr.buttons_eyeball_on_down;
+                }
+                else
+                {
+                    baseSpr = StableSpr.buttons_eyeball_off;
+                    downSpr = StableSpr.buttons_eyeball_off_down;
+                    // Hide text if not viewing
+                    textToDraw = new string('*', textToDraw.Length);
+                }
+                // Draw eyeball button
+                SharedArt.ButtonSprite(
+                    g,
+                    new Rect(336.0, offsetY - 4.0, 18.0, 18.0),
+                    ArchipelagoUK.connection_seePassword.ToUK(),
+                    baseSpr, downSpr,
+                    onMouseDown: this
+                );
+            }
+
+            // Add blinking cursor if selected
             if (line == selectedTextField)
             {
                 if (blinkStartTime == 0.0) blinkStartTime = g.time;
@@ -92,6 +125,7 @@ public class ConnectionInfoInput : Route, OnInputPhase, OnMouseDown
                 if (offsetTime - Math.Floor(offsetTime) < 0.5) textToDraw += "<c=boldPink>|</c>";
                 Draw.Text("~", immButton.v.x + 226.0, immButton.v.y + 3.0, font: DB.stapler, color: Colors.boldPink);
             }
+            // Draw editable text
             Draw.Text(textToDraw, immButton.v.x + 5.0, immButton.v.y + 8.0,
                       color: immButton.isHover ? Colors.textChoiceHoverActive : Colors.textChoice);
             line++;
@@ -184,6 +218,9 @@ public class ConnectionInfoInput : Route, OnInputPhase, OnMouseDown
                 break;
             case (UK)ArchipelagoUK.connection_finalizeConnection:
                 FinalizeConnection(g);
+                break;
+            case (UK)ArchipelagoUK.connection_seePassword:
+                seePassword = !seePassword;
                 break;
         }
 
