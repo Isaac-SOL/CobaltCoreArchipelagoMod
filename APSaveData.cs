@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using Microsoft.Extensions.Logging;
@@ -45,6 +46,19 @@ public class APSaveData
     internal CardScoutMode CardScoutMode { get; set; } = CardScoutMode.CreateHint;
     
     internal static IModStorage ModStorage => ModEntry.Instance.Helper.Storage;
+
+    [JsonIgnore]
+    internal IEnumerable<Type> FoundCards => AppliedInventory
+        .Where(kvp => kvp.Value > 0)
+        .Select(kvp => kvp.Key)
+        .Intersect(Archipelago.ItemToCard.Keys)
+        .Select(s => Archipelago.ItemToCard[s]);
+    [JsonIgnore]
+    internal IEnumerable<Type> FoundArtifacts => AppliedInventory
+        .Where(kvp => kvp.Value > 0)
+        .Select(kvp => kvp.Key)
+        .Intersect(Archipelago.ItemToArtifact.Keys)
+        .Select(s => Archipelago.ItemToArtifact[s]);
 
     [JsonConstructor]
     private APSaveData(): this(0, "archipelago.gg", 38281, "CAT1")
@@ -151,6 +165,10 @@ public class APSaveData
         }
         return false;
     }
+
+    internal bool HasItem(string name) => AppliedInventory.TryGetValue(name, out var value) && value > 0;
+    internal bool HasCard(Type type) => Archipelago.CardToItem.TryGetValue(type, out var value) && HasItem(value);
+    internal bool HasArtifact(Type type) => Archipelago.ArtifactToItem.TryGetValue(type, out var value) && HasItem(value);
 
     internal string? GetNextFixTimelineLocationName(Deck deck)
     {

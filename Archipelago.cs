@@ -627,6 +627,7 @@ public struct SlotDataHelper
     public bool ShuffleMemories { get; set; }
     public bool DoFutureMemory { get; set; }
     public CardRewardsMode ImmediateCardRewards { get; set; }
+    public bool GetMoreFoundItems { get; set; }
     public uint FixedRandSeed { get; set; }
 
     public static SlotDataHelper FromSlotData(Dictionary<string, object> slotData)
@@ -660,6 +661,7 @@ public struct SlotDataHelper
             res.DoFutureMemory = Convert.ToBoolean(slotData["do_future_memory"]);
             res.AddCharacterMemories = Convert.ToBoolean(slotData["add_character_memories"]);
             res.ImmediateCardRewards = (CardRewardsMode)Convert.ToInt32(slotData["immediate_card_rewards"]);
+            res.GetMoreFoundItems = true;
             res.FixedRandSeed = Convert.ToUInt32(slotData["fixed_client_seed"]);
         }
         catch (Exception e)

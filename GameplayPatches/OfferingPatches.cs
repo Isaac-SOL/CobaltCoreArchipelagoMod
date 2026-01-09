@@ -35,7 +35,9 @@ public class CardOfferingPatch
         bool isEvent)
     {
         Debug.Assert(Archipelago.Instance.APSaveData != null, "Archipelago.Instance.APSaveData != null");
-        // Make given card unusable if it is an item but not unlocked
+        
+        // PHASE 1: Make each given card unusable if it is an item but not unlocked
+        
         foreach (var card in __result)
         {
             var cardType = card.GetType();
@@ -46,12 +48,41 @@ public class CardOfferingPatch
             card.unplayableOverrideIsPermanent = true;
         }
         
-        if (inCombat || isEvent) return;
-        
-        // Add archipelago check cards
+        // PHASE 2: Add one found card if the option permits it
         
         var availableDecks = s.characters.Select(c => c.deckType).ToList();
         var targetCount = __result.Count;
+        if (Archipelago.InstanceSlotData.GetMoreFoundItems)
+        {
+            var bonusCardAttempts = 0;
+            while (__result.Count < targetCount + 1 && bonusCardAttempts++ < 5)
+            {
+                var deck = limitDeck ?? availableDecks.Random(s.rngCardOfferings);
+                var rarity = rarityOverride ?? CardReward.GetRandomRarity(s.rngCardOfferings, battleType);
+                var pickableCards = DB.releasedCards.Where(c =>
+                {
+                    if (!Archipelago.Instance.APSaveData.HasCard(c.GetType())) return false;
+                    var meta = c.GetMeta();
+                    if (meta.rarity != rarity) return false;
+                    return deck is not null
+                           && deck == meta.deck
+                           && meta is { dontOffer: false, unreleased: false };
+                }).ToList();
+                if (pickableCards.Count == 0) continue;
+                var cardType = pickableCards.Random(s.rngCardOfferings).GetType();
+                if (__result.Any(c => c.GetType() == cardType)) continue;
+                var card = (Card)cardType.CreateInstance();
+                card.drawAnim = 1.0;
+                card.upgrade = CardReward.GetUpgrade(s, s.rngCardOfferings, s.map, card, s.GetDifficulty() >= 1 ? 0.5 : 1.0, overrideUpgradeChances);
+                card.flipAnim = 1.0;
+                __result.Add(card);
+            }
+        }
+        
+        if (inCombat || isEvent) return;
+        
+        // PHASE 3: Add archipelago check cards
+        
         List<Card> archipelagoCards = [];
         var attempts = 0;
         while (archipelagoCards.Count < targetCount && attempts++ < 5)
@@ -147,12 +178,16 @@ public class ArtifactOfferingPatch
         Rand? rngOverride = null)
     {
         Debug.Assert(Archipelago.Instance.APSaveData != null, "Archipelago.Instance.APSaveData != null");
-        // Make given artifact unusable if it is an item but not unlocked
+        
+        // PHASE 1: Make given artifact unusable if it is an item but not unlocked
+        
         var artifactsTemp = new List<Artifact>(__result);
+        var selectedTypes = new List<Type>();  // Save in a list to exclude in next phase
         __result.Clear();
         foreach (var artifact in artifactsTemp)
         {
             var artifactType = artifact.GetType();
+            selectedTypes.Add(artifactType);
             if (Archipelago.ArtifactToItem.TryGetValue(artifactType, out var itemName))
             {
                 if (!Archipelago.Instance.APSaveData.AppliedInventory.TryGetValue(
@@ -169,11 +204,50 @@ public class ArtifactOfferingPatch
             __result.Add(artifact);
         }
         
+        // PHASE 2: Add one found artifact if the option permits it
+        
+        if (Archipelago.InstanceSlotData.GetMoreFoundItems)
+        {
+            var charDecks = new List<Deck?>();
+            foreach (var character in s.characters)
+            {
+                charDecks.Add(character.deckType);
+                if (character.deckType is not null && character.deckType == Deck.colorless)
+                    charDecks.Add(Deck.catartifact);
+            }
+            charDecks.Add(Deck.colorless);
+            limitPools ??= [ArtifactPool.Common];
+            var ownedTypes = s.EnumerateAllArtifacts().Select(art => art.GetType()).ToHashSet();
+            var blocklist = ArtifactReward.GetBlockedArtifacts(s);
+            
+            var bonusArtifactAttempts = 0;
+            while (bonusArtifactAttempts++ < 5)
+            {
+                var pickedArtifact = DB.artifacts.Values.Shuffle(rngOverride ?? s.rngArtifactOfferings).FirstOrDefault(ty =>
+                {
+                    if (!Archipelago.Instance.APSaveData.HasArtifact(ty)) return false;
+                    if (blocklist.Contains(ty)) return false;
+                    if (!DB.artifactMetas.TryGetValue(ty.Name, out var meta)) meta = new ArtifactMeta();
+                    if (limitDeck is not null && limitDeck != meta.owner) return false;
+                    if (!limitPools.Any(p => meta.pools.Contains(p))) return false;
+                    return !selectedTypes.Contains(ty)
+                           && !ownedTypes.Contains(ty)
+                           && charDecks.Contains(meta.owner);
+                });
+                // If we found a valid artifact, add it, remove at random and go to the next phase
+                if (pickedArtifact is null) continue;
+                __result.Add((Artifact)pickedArtifact.CreateInstance());
+                __result.RemoveAt(s.rngCardOfferings.NextInt() % __result.Count);
+                break;
+            }
+        }
+        
         var rng = rngOverride ?? s.rngArtifactOfferings;
         var availableDecks = s.characters.Select(c => c.deckType).ToList();
         var effPools = limitPools ?? [ArtifactPool.Common];
         
-        // Attempt to add a single artifact, cancel if it fails
+        // PHASE 3: Attempt to add a single archipelago check artifact, cancel if it fails
+        
         var deck = limitDeck ?? availableDecks.Random(rng);
         var deckName = Archipelago.ItemToDeck.First(kvp => kvp.Value == deck).Key;
         string rarityName;
