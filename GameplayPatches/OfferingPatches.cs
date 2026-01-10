@@ -98,7 +98,7 @@ public class CardOfferingPatch
             };
             var locationChoices = Locations.AllMissingLocations
                 .Select(address => Locations.GetLocationNameFromId(address))
-                .Where(name => name.StartsWith($"{deckName} {rarityName}")).ToList();
+                .Where(name => name.StartsWith($"{deckName} {rarityName} Card")).ToList();
             if (locationChoices.Count <= 0) continue;
             
             var location = locationChoices.Random(s.rngCardOfferings)!;
@@ -121,6 +121,7 @@ public class CardOfferingPatch
         {
             __result.RemoveAt(s.rngCardOfferings.NextInt() % __result.Count);
         }
+        __result = __result.Shuffle(s.rngCardOfferings).ToList();
         
         // Scout proposed archipelago cards if the options allow for it
         if (Archipelago.Instance.APSaveData.CardScoutMode == CardScoutMode.DontScout) return;
@@ -238,6 +239,7 @@ public class ArtifactOfferingPatch
                 if (pickedArtifact is null) continue;
                 __result.Add((Artifact)pickedArtifact.CreateInstance());
                 __result.RemoveAt(s.rngCardOfferings.NextInt() % __result.Count);
+                __result = __result.Shuffle(s.rngCardOfferings).ToList();
                 break;
             }
         }
@@ -254,12 +256,12 @@ public class ArtifactOfferingPatch
         if (effPools.Contains(ArtifactPool.Boss))
             rarityName = "Boss";
         else if (effPools.Contains(ArtifactPool.Common))
-            rarityName = "Common";
+            rarityName = "";
         else
             rarityName = "N/A";
         var locationChoices = Locations.AllMissingLocations
             .Select(address => Locations.GetLocationNameFromId(address))
-            .Where(name => name.StartsWith($"{deckName} {rarityName}")).ToList();
+            .Where(name => name.StartsWith($"{deckName} {rarityName} Artifact")).ToList();
         if (locationChoices.Count <= 0) return;
         
         var location = locationChoices.Random(s.rngCardOfferings)!;
@@ -269,6 +271,7 @@ public class ArtifactOfferingPatch
         // Add the artifact then remove one at random to keep count
         __result.Add(newArtifact);
         __result.RemoveAt(s.rngCardOfferings.NextInt() % __result.Count);
+        __result = __result.Shuffle(s.rngCardOfferings).ToList();
 
         // If it was picked, scout its location if the options allow for it
         if (Archipelago.Instance.APSaveData.CardScoutMode == CardScoutMode.DontScout) return;
