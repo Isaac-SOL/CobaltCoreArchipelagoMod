@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Reflection.Emit;
 using HarmonyLib;
 
@@ -111,9 +112,10 @@ public class NewGamePatch
 [HarmonyPatch(typeof(State), nameof(State.PopulateRun))]
 public class PopulateRunPatch
 {
-    static void Prefix(State __instance, ref IEnumerable<Deck>? chars, ref bool giveRunStartRewards, ref int difficulty)
+    static void Prefix(State __instance, ref IEnumerable<Deck>? chars, ref int difficulty)
     {
-        // giveRunStartRewards = true;
+        Debug.Assert(Archipelago.Instance.APSaveData != null, "Archipelago.Instance.APSaveData != null");
+        
         if (chars == null)
         {
             // Should only happen in a new game
@@ -122,7 +124,7 @@ public class PopulateRunPatch
             __instance.storyVars.unlockedShips = [Archipelago.InstanceSlotData.StartingShip];
         }
 
-        if (difficulty < Archipelago.InstanceSlotData.MinimumDifficulty)
+        if (!Archipelago.Instance.APSaveData.BypassDifficulty && difficulty < Archipelago.InstanceSlotData.MinimumDifficulty)
         {
             difficulty = Archipelago.InstanceSlotData.MinimumDifficulty;
         }

@@ -169,7 +169,7 @@ internal class ModEntry : SimpleMod
                         CardScoutMode.ScoutOnly => LocalizeSettings("automaticScouting", "nameScoutOnly"),
                         _ => LocalizeSettings("automaticScouting", "nameCreateHint")
                     })
-                    .SetValueWidth(_ => 100)
+                    .SetValueWidth(_ => 105)
                     .SetTooltips(() => new List<Tooltip>
                     {
                         new TTText(LocalizeSettings("automaticScouting", "tooltipName")),
@@ -180,7 +180,15 @@ internal class ModEntry : SimpleMod
                         CardScoutMode.DontScout => new TTText(LocalizeSettings("automaticScouting", "descDontScout")),
                         CardScoutMode.ScoutOnly => new TTText(LocalizeSettings("automaticScouting", "descScoutOnly")),
                         _ => new TTText(LocalizeSettings("automaticScouting", "descCreateHint"))
-                    }))
+                    })),
+                ModSettings.MakeCheckbox(
+                        () => LocalizeSettings("bypassDifficulty", "settingName"),
+                        () => Archipelago.APSaveData!.BypassDifficulty,
+                        (_, _, value) => Archipelago.APSaveData!.BypassDifficulty = value)
+                    .SetTooltips(() => [
+                        new TTText(LocalizeSettings("bypassDifficulty", "tooltipName")),
+                        new TTText(LocalizeSettings("bypassDifficulty", "desc"))
+                    ])
             ]).SubscribeToOnMenuClose(_ =>
             {
                 APSaveData.Save();
@@ -188,6 +196,13 @@ internal class ModEntry : SimpleMod
                     Archipelago.DeathLinkService!.EnableDeathLink();
                 else
                     Archipelago.DeathLinkService!.DisableDeathLink();
+                NewRunOptions.difficulties = Mutil.DeepCopy(BaseDifficulties);
+                if (!Archipelago.APSaveData.BypassDifficulty && Archipelago.SlotDataHelper!.Value.MinimumDifficulty > 0)
+                {
+                    NewRunOptions.difficulties = NewRunOptions.difficulties.Where(difficulty =>
+                                difficulty.level >= Archipelago.SlotDataHelper!.Value.MinimumDifficulty)
+                        .ToList();
+                }
             })
         );
     }

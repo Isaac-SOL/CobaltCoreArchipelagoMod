@@ -35,7 +35,16 @@
             "descScoutOnly": "<c=card>Scout silently:</c> cards & artifacts show which item they will give.",
             "nameCreateHint": "Create hint",
             "descCreateHint": "<c=card>Create hint:</c> cards & artifacts show which item they will give, create a hint for it, and message all players."
+        },
+        "bypassDifficulty": {
+            "settingName": "Bypass Difficulty",
+            "tooltipName": "<c=artifact>BYPASS DIFFICULTY SETTING",
+            "desc": "Check to ignore the minimum difficulty setting in your YAML options, if you changed your mind for example."
         }
+    },
+    "newRunOptions": {
+        "shipUnlock": "You haven't unlocked this ship yet!",
+        "charUnlock": "You haven't unlocked this character yet!"
     },
     "deck": {
         "name": "Archipelago",

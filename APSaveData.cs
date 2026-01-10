@@ -44,6 +44,8 @@ public class APSaveData
     internal bool DeathLinkActive { get; set; } = true;
     [JsonProperty]
     internal CardScoutMode CardScoutMode { get; set; } = CardScoutMode.CreateHint;
+    [JsonProperty]
+    internal bool BypassDifficulty { get; set; } = false;
     
     internal static IModStorage ModStorage => ModEntry.Instance.Helper.Storage;
 

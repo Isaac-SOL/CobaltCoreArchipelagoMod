@@ -448,7 +448,7 @@ public class Archipelago
         }
         // Patch difficulties
         NewRunOptions.difficulties = Mutil.DeepCopy(ModEntry.BaseDifficulties);
-        if (SlotDataHelper.Value.MinimumDifficulty > 0)
+        if (!APSaveData.BypassDifficulty && SlotDataHelper.Value.MinimumDifficulty > 0)
         {
             NewRunOptions.difficulties = NewRunOptions.difficulties.Where(difficulty => difficulty.level >= SlotDataHelper.Value.MinimumDifficulty).ToList();
         }
