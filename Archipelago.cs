@@ -9,6 +9,7 @@ using Archipelago.MultiClient.Net.BounceFeatures.DeathLink;
 using Archipelago.MultiClient.Net.Enums;
 using Archipelago.MultiClient.Net.Helpers;
 using Archipelago.MultiClient.Net.MessageLog.Messages;
+using CobaltCoreArchipelago.GameplayPatches;
 using HarmonyLib;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json.Linq;
@@ -545,8 +546,9 @@ public class Archipelago
         }
     }
 
-    internal void SafeUpdate(State state)
+    internal void SafeUpdate(G g)
     {
+        var state = g.state;
         lock (itemReceivedLock)
         {
             ItemApplier.ApplyDeferredItems(state);
@@ -562,6 +564,15 @@ public class Archipelago
             if (lastDeathLink is not null && state.storyVars.hasStartedGame && state.ship.hull > 0)
             {
                 state.ship.hull = 0;
+                // Snaps us to the base screen to trigger the animation right now.
+                state.routeOverride = null;
+                if (state.route is Combat combat)
+                    combat.routeOverride = null;
+                if (g.metaRoute is not null)
+                    g.CloseRoute(g.metaRoute);
+                // Save a message to replace the void shout
+                GetVoidShoutPatch.DeathLinkMessage = $"{lastDeathLink.Source}\n{lastDeathLink.Cause}";
+                // Ensures that this received DeathLink won't cause us to trigger a new DeathLink ourselves
                 PreventDeathLink = true;
             }
 
