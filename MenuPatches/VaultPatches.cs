@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Reflection.Emit;
+using daisyowl.text;
 using HarmonyLib;
 using Microsoft.Extensions.Logging;
 
@@ -12,13 +13,12 @@ public class VaultPatches;
 [HarmonyPatch(typeof(Vault), nameof(Vault.Render))]
 public class VaultRenderPatch
 {
-    [HarmonyDebug]
     public static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions,
                                                           ILGenerator generator)
     {
         List<CodeInstruction> storedInstructions = new(instructions);
         var codeMatcher = new CodeMatcher(storedInstructions, generator);
-        // Remove the part where vaultMemories are checked, and replace with our own check
+        // Remove the part where vaultMemories are checked for Future Memory unlock, and replace with our own check
         codeMatcher.MatchStartForward(
                 CodeMatch.WithOpcodes([OpCodes.Ldloc_0]),
                 // NOTE: These 2 instructions are seemingly added by Nickel to account for more characters. We are overriding that
@@ -48,10 +48,37 @@ public class VaultRenderPatch
                    > Archipelago.InstanceSlotData.WinReqTotal;
         }
         
-        // WinCondition.PerCharacterMemories
+        // WinCondition.MemoryPerCharacter
         return vaultMemories
             .All(memorySet => memorySet.memoryKeys
                      .Sum(entry => entry.unlocked ? 1 : 0) > Archipelago.InstanceSlotData.WinReqPerChar);
+    }
+
+    public static void Postfix(Vault __instance, G g)
+    {
+        if (__instance.introAnimTime < 2.0) return;
+        var slideIn = Vault.GetSlideIn(__instance.introAnimTime - 2.0);
+        var memories = Vault.GetVaultMemories(g.state);
+        var winCon = Archipelago.InstanceSlotData.WinCondition;
+        string goalString;
+        if (winCon == WinCondition.TotalMemories)
+        {
+            var required = Archipelago.InstanceSlotData.WinReqTotal;
+            var found = memories.Sum(memorySet => memorySet.memoryKeys.Sum(entry => entry.unlocked ? 1 : 0));
+            goalString = $"Memories found:\n{found} / {required}";
+        }
+        else // WinCondition.MemoryPerCharacter
+        {
+            var required = Archipelago.InstanceSlotData.WinReqPerChar;
+            var completed = memories.Sum(memorySet => memorySet.memoryKeys.Sum(entry => entry.unlocked ? 1 : 0) > required ? 1 : 0);
+            var charAmount = memories.Count;
+            goalString = $"Memories required:\n{required} per character\n\n" +
+                         $"Characters completed:\n{completed} / {charAmount}";
+        }
+
+        Draw.Text(goalString,
+                  357.0, (winCon == WinCondition.TotalMemories ? 233.0 : 220.0) + slideIn,
+                  align: TAlign.Center, color: Colors.textBold);
     }
 }
 
