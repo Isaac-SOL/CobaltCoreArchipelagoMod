@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Reflection;
 using System.Reflection.Emit;
 using HarmonyLib;
 
@@ -68,43 +69,28 @@ public class NewGamePatch
     {
         List<CodeInstruction> storedInstructions = new(instructions);
         var codeMatcher = new CodeMatcher(storedInstructions, generator);
-        // Load ship name from archipelago instead
+        // Before storing the state, we pass it to a function to set the Archipelago values
         codeMatcher.MatchStartForward(
-                CodeMatch.LoadsConstant("artemis")
-            ).ThrowIfInvalid("Could not find artemis load call in instructions")
-            .RemoveInstruction()
+                CodeMatch.WithOpcodes([OpCodes.Stloc_0])
+            ).ThrowIfInvalid("Could not find state store instructions")
             .InsertAndAdvance(
-                CodeInstruction.Call(string () => GetArchipelagoStartingShipName())
+                CodeInstruction.Call<State, State>(state => EditStateForNewFile(state))
             );
-        var searchedCodes = new List<OpCode>
-        {
-            OpCodes.Ldc_I4_1, OpCodes.Ldc_I4_2, OpCodes.Ldc_I4_3
-        };
-        // Load character IDs from archipelago instead
-        for (int i = 0; i < searchedCodes.Count; i++)
-        {
-            var i1 = i;
-            codeMatcher.MatchStartForward(
-                    CodeMatch.WithOpcodes([OpCodes.Dup]),
-                    CodeMatch.WithOpcodes([searchedCodes[i]])
-                ).ThrowIfInvalid($"Could not find character {i} load call in instructions")
-                .Advance()
-                .RemoveInstruction()
-                .InsertAndAdvance(
-                    CodeInstruction.CallClosure(int () => GetArchipelagoStartingCharacter(i1)));
-        }
 
         return codeMatcher.Instructions();
     }
 
-    public static string GetArchipelagoStartingShipName()
+    public static State EditStateForNewFile(State state)
     {
-        return Archipelago.InstanceSlotData.StartingShip;
-    }
-
-    public static int GetArchipelagoStartingCharacter(int pos)
-    {
-        return (int)Archipelago.InstanceSlotData.StartingCharacters[pos];
+        state.runConfig.selectedShip = Archipelago.InstanceSlotData.StartingShip;
+        state.runConfig.selectedChars = new HashSet<Deck>(Archipelago.InstanceSlotData.StartingCharacters);
+        // Copied from Cheat.UnlockAllContent
+        state.storyVars.winCount = 500;  // Forces vault button to be visible. 
+        foreach (var kvp in DB.story.all)
+            DB.story.MarkNodeSeen(state, kvp.Key);  // Mark all dialogue as seen
+        foreach (var kvp in DB.enemies)
+            state.storyVars.RecordEnemyDefeated(kvp.Key);  // No idea but just in case
+        return state;
     }
     
 }

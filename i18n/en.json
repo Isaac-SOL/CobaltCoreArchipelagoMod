@@ -21,12 +21,12 @@
     "settings": {
         "profileWarning": "<c=redd>THIS MOD DOES NOT SUPPORT PROFILES!</c>",
         "deathlink": {
-            "settingName": "DeathLink",
+            "settingName": "Deathlink",
             "tooltipName": "<c=artifact>DEATHLINK</c>",
             "desc": "If you die, other players die as well. Of course, the reverse is also true."
         },
         "automaticScouting": {
-            "settingName": "Scouting",
+            "settingName": "Auto-scouting",
             "tooltipName": "<c=artifact>AUTOMATIC SCOUTING</c>",
             "desc": "What happens when you see an archipelago card or artifact reward.",
             "nameDontScout": "Don't scout",
@@ -37,7 +37,7 @@
             "descCreateHint": "<c=card>Create hint:</c> cards & artifacts show which item they will give, create a hint for it, and message all players."
         },
         "bypassDifficulty": {
-            "settingName": "Bypass Difficulty",
+            "settingName": "Bypass difficulty setting",
             "tooltipName": "<c=artifact>BYPASS DIFFICULTY SETTING",
             "desc": "Check to ignore the minimum difficulty setting in your YAML options, if you changed your mind for example."
         }
