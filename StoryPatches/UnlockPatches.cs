@@ -13,19 +13,16 @@ public class UnlockPatches;
 [HarmonyPatch(typeof(StoryVars), nameof(StoryVars.GetUnlockedChars))]
 public class GetUnlockedCharsPatch
 {
-    
-    static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions, ILGenerator generator)
+    // Remove Dizzy, Riggs and Peri from the default unlocked characters.
+    // Nickel does stuff to this function, so we let it run, then we clear the result and replace it with our own
+    [HarmonyPriority(Priority.Low)]
+    static void Postfix(ref HashSet<Deck> __result, StoryVars __instance)
     {
-        // TODO Doesn't work - forced active in a different patch? (on character select screen)
-        List<CodeInstruction> storedInstructions = new(instructions);
-        var codeMatcher = new CodeMatcher(storedInstructions, generator);
-        // Remove HashSet fill with Dizzy, Riggs, Peri
-        codeMatcher.MatchStartForward(
-                CodeMatch.WithOpcodes([OpCodes.Newobj])
-            ).ThrowIfInvalid("Could not find HashSet creation in instructions")
-            .Advance()
-            .RemoveInstructions(12);
-        return codeMatcher.Instructions();
+        __result.Clear();
+        foreach (var unlockedChar in __instance.unlockedChars)
+        {
+            __result.Add(unlockedChar);
+        }
     }
 }
 

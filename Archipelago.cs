@@ -571,7 +571,9 @@ public class Archipelago
                 if (g.metaRoute is not null)
                     g.CloseRoute(g.metaRoute);
                 // Save a message to replace the void shout
-                GetVoidShoutPatch.DeathLinkMessage = $"{lastDeathLink.Source}\n{lastDeathLink.Cause}";
+                GetVoidShoutPatch.DeathLinkMessage = lastDeathLink.Cause is null 
+                    ? $"{lastDeathLink.Source}?"
+                    : $"{lastDeathLink.Source}\n{lastDeathLink.Cause}";
                 // Ensures that this received DeathLink won't cause us to trigger a new DeathLink ourselves
                 PreventDeathLink = true;
             }
