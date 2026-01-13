@@ -416,7 +416,6 @@ public class Archipelago
             Logger.LogError("Stored seed is different from Archipelago host seed");
             code = ArchipelagoErrorCode.RoomIdConflict;
         }
-        APSaveData.RoomId = Session.RoomState.Seed;
         
         return (loginResult, code);
     }
@@ -427,6 +426,7 @@ public class Archipelago
         Debug.Assert(Session != null, nameof(Session) + " != null");
         Debug.Assert(APSaveData != null, nameof(APSaveData) + " != null");
         SlotDataHelper = CobaltCoreArchipelago.SlotDataHelper.FromSlotData(SlotData);
+        APSaveData.RoomId = Session.RoomState.Seed;
         
         // Patch starting decks
         foreach (var deck in ItemToDeck.Values)

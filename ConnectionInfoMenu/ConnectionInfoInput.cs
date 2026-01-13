@@ -246,10 +246,12 @@ public class ConnectionInfoInput : Route, OnInputPhase, OnMouseDown
         if (errorCode == ArchipelagoErrorCode.ConnectionIssue || !loginResult.Successful)
         {
             errorText = Localize(["connectionMenu", "connectionIssue"]);
+            screenMode = ScreenMode.RetryConnection;
         }
         else if (errorCode == ArchipelagoErrorCode.RoomIdConflict)
         {
             errorText = Localize(["connectionMenu", "roomIdConflict"]);
+            screenMode = ScreenMode.RoomIdConflict;
         }
         connecting = false;
         if (errorCode == ArchipelagoErrorCode.Ok)
