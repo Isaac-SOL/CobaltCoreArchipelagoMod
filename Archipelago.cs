@@ -369,7 +369,7 @@ public class Archipelago
     public DeathLinkService? DeathLinkService { get; set; }
     public bool PreventDeathLink { get; set; } = false;
 
-    private static ConcurrentBag<string> receivedItemsToProcess = [];
+    private static ConcurrentBag<(string name, string sender)> receivedItemsToProcess = [];
     private static readonly object itemReceivedLock = new();
     private static DeathLink? lastDeathLink;
     private static readonly object deathLinkLock = new();
@@ -525,9 +525,10 @@ public class Archipelago
             while (helper.PeekItem() != null)
             {
                 var name = helper.PeekItem().ItemName;
+                var sender = helper.PeekItem().Player.Name;
                 // We are currently on the websocket thread.
                 // To prevent concurrency issues we store received items in a thread-safe list to process on the main thread.
-                receivedItemsToProcess.Add(name);
+                receivedItemsToProcess.Add((name, sender));
                 helper.DequeueItem();
             }
         }
@@ -554,7 +555,7 @@ public class Archipelago
             ItemApplier.ApplyDeferredItems(state);
             while (receivedItemsToProcess.TryTake(out var item))
             {
-                Logger.LogInformation("Received {item}", item);
+                Logger.LogInformation("Received {item} from {player}", item.name, item.sender);
                 ItemApplier.ApplyReceivedItem(item, state);
             }
         }

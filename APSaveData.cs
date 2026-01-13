@@ -125,7 +125,7 @@ public class APSaveData
         {
             foreach (var itemInfo in Archipelago.Instance.Session.Items.AllItemsReceived)
             {
-                SyncItemCountWithHost(itemInfo.ItemName);
+                SyncItemCountWithHost(itemInfo.ItemName, itemInfo.Player.Name);
             }
         }
 
@@ -138,14 +138,14 @@ public class APSaveData
         Save();
     }
 
-    internal void SyncItemCountWithHost(string name)
+    internal void SyncItemCountWithHost(string name, string sender)
     {
         Debug.Assert(Archipelago.Instance.Session != null, "Archipelago.Instance.Session != null");
         var localCount = AppliedInventory.GetValueOrDefault(name, 0);
         var hostCount = Archipelago.Instance.Session.Items.AllItemsReceived.Count(i => i.ItemName == name);
         for (int i = localCount; i < hostCount; i++)
         {
-            ItemApplier.ApplyReceivedItem(name);
+            ItemApplier.ApplyReceivedItem((name, sender));
         }
     }
 
