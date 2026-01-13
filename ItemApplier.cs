@@ -21,6 +21,8 @@ public static class ItemApplier
             DeferredUnappliedItems.Add(item);
             return;
         }
+
+        var slotData = Archipelago.InstanceSlotData;
         
         if (Archipelago.ItemToStartingShip.TryGetValue(item.name, out var ship))
         {
@@ -39,10 +41,31 @@ public static class ItemApplier
             if (state.storyVars.hasStartedGame)
             {
                 var newCard = (Card)card.CreateInstance();
+                if (slotData.HasImmediateCardAttribute(CardRewardAttribute.Temporary))
+                    newCard.temporaryOverride = true;
+                if (slotData.HasImmediateCardAttribute(CardRewardAttribute.SingleUse))
+                    newCard.singleUseOverride = true;
+                if (slotData.HasImmediateCardAttribute(CardRewardAttribute.Exhaust))
+                {
+                    newCard.exhaustOverride = true;
+                    newCard.exhaustOverrideIsPermanent = true;
+                }
+                if (slotData.HasImmediateCardAttribute(CardRewardAttribute.Discount))
+                    newCard.discount = -1;
+                if (slotData.HasImmediateCardAttribute(CardRewardAttribute.Recycle))
+                {
+                    newCard.recycleOverride = true;
+                    newCard.recycleOverrideIsPermanent = true;
+                }
+                if (slotData.HasImmediateCardAttribute(CardRewardAttribute.Retain))
+                {
+                    newCard.retainOverride = true;
+                    newCard.recycleOverrideIsPermanent = true;
+                }
                 var newCardMeta = newCard.GetMeta();
                 var local = item.sender == Archipelago.Instance.APSaveData.Slot;
                 var hasDeck = state.characters.Any(character => character.deckType == newCardMeta.deck);
-                if (Archipelago.InstanceSlotData.ImmediateCardRewards switch
+                if (slotData.ImmediateCardRewards switch
                     {
                         CardRewardsMode.IfLocal => local,
                         CardRewardsMode.IfHasDeck => hasDeck,
@@ -76,7 +99,7 @@ public static class ItemApplier
                 var newArtifactMeta = newArtifact.GetMeta();
                 var local = item.sender == Archipelago.Instance.APSaveData.Slot;
                 var hasDeck = state.characters.Any(character => character.deckType == newArtifactMeta.owner);
-                if (Archipelago.InstanceSlotData.ImmediateCardRewards switch
+                if (slotData.ImmediateArtifactRewards switch
                     {
                         CardRewardsMode.IfLocal => local,
                         CardRewardsMode.IfHasDeck => hasDeck,

@@ -148,7 +148,8 @@ public class CardOfferingPatch
             MapLawless => 1.0,
             _ => 0.5
         };
-        roll = Math.Pow(roll, power);
+        if (Archipelago.InstanceSlotData.RarerChecksLater)
+            roll = Math.Pow(roll, power);
         return battleType switch
         {
             BattleType.Elite => Mutil.Roll(roll, (0.35, Rarity.common), (0.45, Rarity.uncommon), (0.2, Rarity.rare)),

@@ -624,6 +624,19 @@ public enum CardRewardsMode
     Always
 }
 
+[Flags]
+public enum CardRewardAttribute
+{
+    None = 0,
+    Temporary = 1,
+    SingleUse = 2,
+    Exhaust = 4,
+    Discount = 8,
+    Recycle = 16,
+    Retain = 32
+}
+
+
 public class SlotDataInvalidException(string message) : Exception(message);
 
 public struct SlotDataHelper
@@ -640,9 +653,18 @@ public struct SlotDataHelper
     public bool AddCharacterMemories { get; set; }
     public bool ShuffleMemories { get; set; }
     public bool DoFutureMemory { get; set; }
-    public CardRewardsMode ImmediateCardRewards { get; set; }
+    public bool ShuffleCards { get; set; }
+    public bool ShuffleArtifacts { get; set; }
+    public int CheckCardDifficulty { get; set; }
+    public bool RarerChecksLater { get; set; }
     public bool GetMoreFoundItems { get; set; }
+    public CardRewardsMode ImmediateCardRewards { get; set; }
+    public CardRewardAttribute ImmediateCardAttribute { get; set; }
+    public CardRewardsMode ImmediateArtifactRewards { get; set; }
     public uint FixedRandSeed { get; set; }
+
+    public bool HasImmediateCardAttribute(CardRewardAttribute attribute)
+        => (ImmediateCardAttribute & attribute) != CardRewardAttribute.None;
 
     public static SlotDataHelper FromSlotData(Dictionary<string, object> slotData)
     {
@@ -673,9 +695,28 @@ public struct SlotDataHelper
             res.WinReqPerChar = Convert.ToInt32(slotData["memories_required_per_character"]);
             res.ShuffleMemories = Convert.ToBoolean(slotData["shuffle_memories"]);
             res.DoFutureMemory = Convert.ToBoolean(slotData["do_future_memory"]);
+            res.ShuffleCards = Convert.ToBoolean(slotData["shuffle_cards"]);
+            res.ShuffleArtifacts = Convert.ToBoolean(slotData["shuffle_artifacts"]);
+            res.CheckCardDifficulty = Convert.ToInt32(slotData["check_card_difficulty"]);
+            res.RarerChecksLater = Convert.ToBoolean(slotData["rarer_checks_later"]);
             res.AddCharacterMemories = Convert.ToBoolean(slotData["add_character_memories"]);
+            res.GetMoreFoundItems = Convert.ToBoolean(slotData["get_more_found_items"]);
             res.ImmediateCardRewards = (CardRewardsMode)Convert.ToInt32(slotData["immediate_card_rewards"]);
-            res.GetMoreFoundItems = true;
+            var attributes = (JArray)slotData["immediate_card_attributes"];
+            foreach (var attribute in attributes)
+            {
+                res.ImmediateCardAttribute |= attribute.ToString() switch
+                {
+                    "Temporary" => CardRewardAttribute.Temporary,
+                    "Single Use" => CardRewardAttribute.SingleUse,
+                    "Exhaust" => CardRewardAttribute.Exhaust,
+                    "Discount" => CardRewardAttribute.Discount,
+                    "Recycle" => CardRewardAttribute.Recycle,
+                    "Retain" => CardRewardAttribute.Retain,
+                    _ => CardRewardAttribute.None
+                };
+            }
+            res.ImmediateArtifactRewards = (CardRewardsMode)Convert.ToInt32(slotData["immediate_artifact_rewards"]);
             res.FixedRandSeed = Convert.ToUInt32(slotData["fixed_client_seed"]);
         }
         catch (Exception e)
