@@ -42,13 +42,21 @@ public class CheckLocationCard : Card, IRegisterable
     public override List<CardAction> GetActions(State s, Combat c)
     {
         Debug.Assert(Archipelago.Instance.Session != null, "Archipelago.Instance.Session != null");
-        var checkAction = new AArchipelagoCheckLocation { locationName = locationName };
-        if (IsLocal())
+        var checkAction = new AArchipelagoCheckLocation
         {
-            if (Archipelago.ItemToCard.ContainsKey(locationItemName!))
-                checkAction.givenCard = locationItemName;
-            else if (Archipelago.ItemToArtifact.ContainsKey(locationItemName!))
-                checkAction.givenArtifact = locationItemName;
+            locationName = locationName
+        };
+        if (locationItemName is not null)
+        {
+            checkAction.itemName = locationItemName;
+            checkAction.receiverName = locationSlotName;
+            if (IsLocal())
+            {
+                if (Archipelago.ItemToCard.ContainsKey(locationItemName))
+                    checkAction.givenCard = locationItemName;
+                else if (Archipelago.ItemToArtifact.ContainsKey(locationItemName))
+                    checkAction.givenArtifact = locationItemName;
+            }
         }
         
         var list = new List<CardAction> { checkAction };
@@ -79,14 +87,15 @@ public class CheckLocationCard : Card, IRegisterable
         
         return list;
     }
-    
+
     private static string Localize(params string[] key) =>
-        ModEntry.Instance.Localizations.Localize(new List<string>{"card", "CheckLocationCard"}.Concat(key).ToArray());
+        ModEntry.Instance.Localizations.Localize(new List<string> { "card", "CheckLocationCard" }
+                                                     .Concat(key).ToArray());
 
     public override CardData GetData(State state)
     {
         string description;
-        if (locationSlotName is null)
+        if (locationSlotName is null || locationItemName is null)
         {
             description = Localize("descNotFound");
         }
@@ -103,8 +112,15 @@ public class CheckLocationCard : Card, IRegisterable
             }
             else
             {
+                // Truncate the text to fit in the card
+                var varTextLength = locationItemName.Length + locationSlotName.Length;
+                var charsToRemove = varTextLength - 28;
+                var effItemName = locationItemName;
+                if (charsToRemove > 0)
+                    effItemName = effItemName.Remove(Math.Max(effItemName.Length - charsToRemove, 0)) + "...";
+
                 description = Localize("descBase");
-                description = string.Format(description, locationItemName, locationSlotName);
+                description = string.Format(description, effItemName, locationSlotName);
             }
         }
 

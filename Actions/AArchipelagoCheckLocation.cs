@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using CobaltCoreArchipelago.Cards;
 using HarmonyLib;
 using Nickel;
@@ -12,6 +13,8 @@ public class AArchipelagoCheckLocation : CardAction
     public static Spr Spr;
 
     public string? locationName;
+    public string? itemName;
+    public string? receiverName;
     public string? givenCard;
     public string? givenArtifact;
 
@@ -28,6 +31,10 @@ public class AArchipelagoCheckLocation : CardAction
             path = Spr
         };
     }
+
+    private static string Localize(params string[] key) =>
+        ModEntry.Instance.Localizations.Localize(new List<string> { "action", "AArchipelagoCheckLocation" }
+                                                     .Concat(key).ToArray());
     
     public override List<Tooltip> GetTooltips(State s)
     {
@@ -36,11 +43,16 @@ public class AArchipelagoCheckLocation : CardAction
             new GlossaryTooltip($"AArchipelagoCheckLocation")
             {
                 Icon = Spr,
-                Title = ModEntry.Instance.Localizations.Localize(["action", "AArchipelagoCheckLocation", "title"]),
+                Title = Localize("title"),
                 TitleColor = Colors.card,
-                Description = ModEntry.Instance.Localizations.Localize(["action", "AArchipelagoCheckLocation", "desc"])
+                Description = Localize("desc"),
             }
         ];
+
+        if (itemName != null)
+            tooltips.Add(new TTText(string.Format(Localize("descItem"), itemName)));
+        if (receiverName != null)
+            tooltips.Add(new TTText(string.Format(Localize("descReceiver"), receiverName)));
         
         if (givenCard != null)
         {

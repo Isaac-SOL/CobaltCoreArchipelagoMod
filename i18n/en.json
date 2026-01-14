@@ -53,7 +53,9 @@
     "action": {
         "AArchipelagoCheckLocation": {
             "title": "Archipelago Check",
-            "desc": "Check an <c=boldPink>Archipelago</c> location and give an item to someone."
+            "desc": "Check an <c=boldPink>Archipelago</c> location and give an item to someone.",
+            "descItem": "<c=card>Item:</c> {0}",
+            "descReceiver": "<c=card>Receiver:</c> {0}"
         }
     },
     "card": {
