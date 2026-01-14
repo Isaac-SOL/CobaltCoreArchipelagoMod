@@ -101,12 +101,6 @@ public class CheckLocationCard : Card, IRegisterable
         }
         else
         {
-            var varTextLength = locationItemName.Length + locationSlotName.Length;
-            var charsToRemove = varTextLength - 28;
-            var effItemName = locationItemName;
-            if (charsToRemove > 0)
-                effItemName = effItemName.Remove(Math.Max(effItemName.Length - charsToRemove, 0)) + "...";
-            
             if (IsLocal())
             {
                 description = Localize(WillAddCardToDeck(state)
@@ -114,7 +108,7 @@ public class CheckLocationCard : Card, IRegisterable
                                            : WillAddArtifact(state)
                                                ? "descSelfAddArtifact"
                                                : "descSelf");
-                description = string.Format(description, effItemName);
+                description = string.Format(description, locationItemName);
             }
             else
             {
