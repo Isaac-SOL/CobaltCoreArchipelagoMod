@@ -41,6 +41,8 @@ public class APSaveData
     [JsonProperty]
     internal HashSet<string> LocationsChecked { get; }
     [JsonProperty]
+    internal int LastCombatCount;
+    [JsonProperty]
     internal bool DeathLinkActive { get; set; } = true;
     [JsonProperty]
     internal CardScoutMode CardScoutMode { get; set; } = CardScoutMode.CreateHint;

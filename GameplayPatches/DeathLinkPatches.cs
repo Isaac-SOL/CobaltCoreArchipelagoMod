@@ -12,8 +12,6 @@ public static class CheckDeathPatch
 {
     internal static bool ThisDeathHandled = false;
     
-    private static int lastCombatCount = 0;
-    
     static void Prefix(G g)
     {
         var state = g.state;
@@ -26,8 +24,10 @@ public static class CheckDeathPatch
 
     internal static void ApplyDeathLinkIfNotPrevented(State state)
     {
+        Debug.Assert(Archipelago.Instance.APSaveData != null, "Archipelago.Instance.APSaveData != null");
         // We call this function exactly once per death, including deaths caused by received DeathLinks.
-        if (lastCombatCount > state.storyVars.combatsThisRun) lastCombatCount = 0;
+        if (Archipelago.Instance.APSaveData.LastCombatCount > state.storyVars.combatsThisRun)
+            Archipelago.Instance.APSaveData.LastCombatCount = 0;
         // If PreventDeathLink was set earlier (in the case of a received DeathLink), we consume it and do nothing.
         if ((!Archipelago.Instance.APSaveData?.DeathLinkActive ?? false) || Archipelago.Instance.PreventDeathLink)
         {
@@ -36,21 +36,21 @@ public static class CheckDeathPatch
         }
         else
         {
-            Debug.Assert(Archipelago.Instance.APSaveData != null, "Archipelago.Instance.APSaveData != null");
             Debug.Assert(Archipelago.Instance.DeathLinkService != null, "Archipelago.Instance.DeathLinkService != null");
             var deathCause = state.route is Combat { otherShip.ai: not null } combat
                 ? $"was killed by {combat.otherShip.ai.GetLocName()}"
                 : "died suddenly";
-            var combats = state.storyVars.combatsThisRun - lastCombatCount;
+            var combats = state.storyVars.combatsThisRun - Archipelago.Instance.APSaveData!.LastCombatCount;
             var loop = state.storyVars.runCount; 
             deathCause +=
                 $" after {combats} {(combats > 1 ? "fights" : "fight")} in Loop {loop}";
             ModEntry.Instance.Logger.LogInformation("Sending a DeathLink with cause: {deathCause}", deathCause);
             Archipelago.Instance.DeathLinkService.SendDeathLink(
-                new DeathLink(Archipelago.Instance.APSaveData.Slot, deathCause)
+                new DeathLink(Archipelago.Instance.APSaveData!.Slot, deathCause)
             );
         }
-        lastCombatCount = state.storyVars.combatsThisRun;
+        Archipelago.Instance.APSaveData!.LastCombatCount = state.storyVars.combatsThisRun;
+        APSaveData.Save();
     }
 }
 
