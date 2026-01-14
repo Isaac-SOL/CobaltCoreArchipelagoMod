@@ -112,6 +112,11 @@ public class CardOfferingPatch
             if (locationChoices.Count <= 0) continue;
             
             var location = locationChoices.Random(s.rngCardOfferings)!;
+            // Make sure we don't give multiple of the same location in one offering. The AP package doesn't like that
+            if (archipelagoCards.Any(prevCard => prevCard is CheckLocationCard prevAPCard
+                                                 && prevAPCard.locationName == location))
+                continue;
+            
             var card = rarity switch
             {
                 Rarity.common => new CheckLocationCard(),
