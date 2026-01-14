@@ -114,6 +114,13 @@ public class PopulateRunPatch
         {
             difficulty = Archipelago.InstanceSlotData.MinimumDifficulty;
         }
+
+        __instance.storyVars.spikeName = new List<StoryVars.SpikeNames>
+        {
+            StoryVars.SpikeNames.spiketwo,
+            StoryVars.SpikeNames.george,
+            StoryVars.SpikeNames.bramblepelt
+        }.Random(__instance.rngShuffle);
     }
     
 }
