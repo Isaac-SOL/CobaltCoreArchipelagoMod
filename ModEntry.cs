@@ -45,13 +45,10 @@ internal class ModEntry : SimpleMod
     private static List<Type> DemoRareCardTypes = [
         typeof(CheckLocationCardRare)
     ];
-    private static List<Type> DemoSpecialCardTypes = [
-    ];
     private static IEnumerable<Type> DemoCardTypes =
         DemoCommonCardTypes
             .Concat(DemoUncommonCardTypes)
-            .Concat(DemoRareCardTypes)
-            .Concat(DemoSpecialCardTypes);
+            .Concat(DemoRareCardTypes);
 
     private static List<Type> DemoCommonArtifacts = [
         typeof(CheckLocationArtifact),
@@ -113,13 +110,6 @@ internal class ModEntry : SimpleMod
             Name = AnyLocalizations.Bind(["deck", "lockedName"]).Localize
         });
 
-        /*
-         * All the IRegisterable types placed into the static lists at the start of the class are initialized here.
-         * This snippet invokes all of them, allowing them to register themselves with the package and helper.
-         */
-        foreach (var type in AllRegisterableTypes)
-            AccessTools.DeclaredMethod(type, nameof(IRegisterable.Register))?.Invoke(null, [package, helper]);
-
         AArchipelagoCheckLocation.Spr = RegisterSprite(package, "assets/ap_action.png").Sprite;
 
         CheckLocationCard.ArtCommon = RegisterSprite(package, "assets/Card/ArchipelagoBack2.png").Sprite;
@@ -135,6 +125,13 @@ internal class ModEntry : SimpleMod
         MainMenuRenderPatch.ArchipelagoTitleSpr = RegisterSprite(package, "assets/UI/ArchipelagoLogo.png").Sprite;
         MkSlotPatch.ArchipelagoSaveSpr = RegisterSprite(package, "assets/UI/ArchipelagoSave.png").Sprite;
         MkSlotPatch.NotArchipelagoSaveSpr = RegisterSprite(package, "assets/UI/NotArchipelagoSave2.png").Sprite;
+
+        /*
+         * All the IRegisterable types placed into the static lists at the start of the class are initialized here.
+         * This snippet invokes all of them, allowing them to register themselves with the package and helper.
+         */
+        foreach (var type in AllRegisterableTypes)
+            AccessTools.DeclaredMethod(type, nameof(IRegisterable.Register))?.Invoke(null, [package, helper]);
 
         ModSettings.RegisterModSettings(
             ModSettings.MakeList([

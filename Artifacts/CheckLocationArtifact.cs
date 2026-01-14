@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Reflection;
 using HarmonyLib;
 using Nanoray.PluginManager;
@@ -47,9 +48,11 @@ public class CheckLocationArtifact : Artifact, IRegisterable
 
     public override void OnReceiveArtifact(State state)
     {
-        // Do the check, then remove the artifact
         Archipelago.Instance.CheckLocation(locationName);
     }
+    
+    private static string Localize(params string[] key) =>
+        ModEntry.Instance.Localizations.Localize(new List<string>{"artifact", "CheckLocationArtifact"}.Concat(key).ToArray());
 
     public override List<Tooltip>? GetExtraTooltips()
     {
@@ -59,14 +62,17 @@ public class CheckLocationArtifact : Artifact, IRegisterable
         string description;
         if (IsLocal())
         {
-            description = ModEntry.Instance.Localizations.Localize(
-                ["card", "CheckLocationCard", "descSelf"]);
+            var state = MG.inst.g.state;  // This is really ugly but my hands were tied
+            description = Localize(WillAddCardToDeck(state)
+                                       ? "descSelfAddCard"
+                                       : WillAddArtifact(state)
+                                           ? "descSelfAddArtifact"
+                                           : "descSelf");
             description = string.Format(description, locationItemName);
         }
         else
         {
-            description = ModEntry.Instance.Localizations.Localize(
-                ["card", "CheckLocationCard", "descBase"]);
+            description = Localize("descBase");
             description = string.Format(description, locationItemName, locationSlotName);
         }
         List<Tooltip> tooltips = [new TTText(description)];
@@ -93,6 +99,40 @@ public class CheckLocationArtifact : Artifact, IRegisterable
     {
         Debug.Assert(Archipelago.Instance.APSaveData != null, "Archipelago.Instance.APSaveData != null");
         return locationSlotName == Archipelago.Instance.APSaveData.Slot;
+    }
+
+    private bool HasDeck(State state) =>
+        (givenCard is not null && DB.cardMetas.TryGetValue(Archipelago.ItemToCard[givenCard].Name, out var cardMeta)
+                               && state.characters.Any(character => character.deckType == cardMeta.deck))
+        || (givenArtifact is not null && DB.artifactMetas.TryGetValue(givenArtifact, out var artifactMeta)
+                                      && state.characters.Any(character => character.deckType == artifactMeta.owner));
+
+    private bool WillAddCardToDeck(State state)
+    {
+        Debug.Assert(Archipelago.Instance.APSaveData != null, "Archipelago.Instance.APSaveData != null");
+        if (givenCard is null) return false;
+        if (!IsLocal()) return false;
+        if (Archipelago.Instance.APSaveData.HasItem(givenCard)) return false;
+        return Archipelago.InstanceSlotData.ImmediateCardRewards switch
+        {
+            CardRewardsMode.Always or CardRewardsMode.IfLocal => true,
+            CardRewardsMode.IfHasDeck or CardRewardsMode.IfLocalAndHasDeck => HasDeck(state),
+            _ => false
+        };
+    }
+
+    private bool WillAddArtifact(State state)
+    {
+        Debug.Assert(Archipelago.Instance.APSaveData != null, "Archipelago.Instance.APSaveData != null");
+        if (givenArtifact is null) return false;
+        if (!IsLocal()) return false;
+        if (Archipelago.Instance.APSaveData.HasItem(givenArtifact)) return false;
+        return Archipelago.InstanceSlotData.ImmediateArtifactRewards switch
+        {
+            CardRewardsMode.Always or CardRewardsMode.IfLocal => true,
+            CardRewardsMode.IfHasDeck or CardRewardsMode.IfLocalAndHasDeck => HasDeck(state),
+            _ => false
+        };
     }
 
     internal void SetTextInfo(string itemName, string slotName)

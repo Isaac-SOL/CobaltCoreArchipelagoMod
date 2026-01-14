@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Reflection;
 using CobaltCoreArchipelago.Actions;
 using Nanoray.PluginManager;
@@ -13,10 +14,6 @@ public class CheckLocationCard : Card, IRegisterable
     public string locationName = "";
     public string? locationSlotName;
     public string? locationItemName;
-
-    private const int Shield = 3;
-    private const int Damage = 2;
-    private const int DamageTimes = 3;
 
     internal static Spr ArtCommon;
     internal static Spr ArtUncommon;
@@ -55,74 +52,83 @@ public class CheckLocationCard : Card, IRegisterable
         }
         
         var list = new List<CardAction> { checkAction };
+        
+        if (Difficulty < 0)
+            list.Add(new ADrawCard
+            {
+                count = GetDraw(s)
+            });
 
         switch (upgrade)
         {
             case Upgrade.A:
                 list.Add(new AStatus
                 {
-                    status = Status.shield,
-                    statusAmount = Shield,
+                    status = IsShieldTemp(s) ? Status.tempShield : Status.shield,
+                    statusAmount = GetShield(s),
                     mode = AStatusMode.Add,
                     targetPlayer = true
                 });
                 break;
             case Upgrade.B:
-                var attack = new AAttack { damage = GetDmg(s, Damage) };
-                for (int i = 0; i < DamageTimes; i++)
+                var attack = new AAttack { damage = GetAttack(s) };
+                for (var i = 0; i < GetAttackTimes(s); i++)
                     list.Add(attack);
                 break;
         }
         
         return list;
     }
+    
+    private static string Localize(params string[] key) =>
+        ModEntry.Instance.Localizations.Localize(new List<string>{"card", "CheckLocationCard"}.Concat(key).ToArray());
 
     public override CardData GetData(State state)
     {
         string description;
         if (locationSlotName is null)
         {
-            description = ModEntry.Instance.Localizations.Localize(
-                ["card", "CheckLocationCard", "descNotFound"]);
+            description = Localize("descNotFound");
         }
         else
         {
             if (IsLocal())
             {
-                description = ModEntry.Instance.Localizations.Localize(
-                    ["card", "CheckLocationCard", "descSelf"]);
+                description = Localize(WillAddCardToDeck(state)
+                                           ? "descSelfAddCard"
+                                           : WillAddArtifact(state)
+                                               ? "descSelfAddArtifact"
+                                               : "descSelf");
                 description = string.Format(description, locationItemName);
             }
             else
             {
-                description = ModEntry.Instance.Localizations.Localize(
-                    ["card", "CheckLocationCard", "descBase"]);
+                description = Localize("descBase");
                 description = string.Format(description, locationItemName, locationSlotName);
             }
+        }
+
+        if (Difficulty < 0)
+        {
+            description += Localize("descDraw");
+            description = string.Format(description, GetDraw(state));
         }
         
         switch (upgrade)
         {
             case Upgrade.A:
-                description += ModEntry.Instance.Localizations.Localize(
-                    ["card", "CheckLocationCard", "descContA"]);
-                description = string.Format(description, Shield);
+                description += Localize(IsShieldTemp(state) ? "descContTempShield" : "descContShield");
+                description = string.Format(description, GetShield(state));
                 break;
             case Upgrade.B:
-                description += ModEntry.Instance.Localizations.Localize(
-                    ["card", "CheckLocationCard", "descContB"]);
-                description = string.Format(description, GetDmg(state, Damage), DamageTimes);
+                description += Localize("descContAttack");
+                description = string.Format(description, GetAttack(state), GetAttackTimes(state));
                 break;
         }
         
         return new CardData
         {
-            cost = upgrade switch
-            {
-                Upgrade.A => 1,
-                Upgrade.B => 2,
-                _ => 3
-            },
+            cost = GetCost(state),
             singleUse = true,
             description = description,
             art = this switch
@@ -134,11 +140,77 @@ public class CheckLocationCard : Card, IRegisterable
             artTint = "CCCCCC"
         };
     }
+
+    private static int Difficulty => Archipelago.InstanceSlotData.CheckCardDifficulty;
+
+    private int GetCost(State _)
+    {
+        return upgrade switch
+        {
+            Upgrade.A => Math.Max(0, Difficulty - 2),
+            Upgrade.B => Math.Max(0, Difficulty - 1),
+            _ => Difficulty
+        };
+    }
+
+    private int GetShield(State _) => Difficulty <= 2 ? 2 : 3;
+
+    private bool IsShieldTemp(State _) => Difficulty <= 3;
+    
+    private int GetAttack(State s) => GetDmg(s, Difficulty switch
+    {
+        <= 1 => 1,
+        2 => 2,
+        _ => 3
+    });
+
+    private int GetAttackTimes(State _) => Difficulty <= 3 ? 2 : 3;
+
+    private int GetDraw(State _) => 1;
     
     private bool IsLocal()
     {
         Debug.Assert(Archipelago.Instance.APSaveData != null, "Archipelago.Instance.APSaveData != null");
         return locationSlotName == Archipelago.Instance.APSaveData.Slot;
+    }
+
+    private bool HasDeck(State state) =>
+        locationItemName is not null
+        && (
+            (DB.cardMetas.TryGetValue(Archipelago.ItemToCard[locationItemName].Name, out var cardMeta)
+             && state.characters.Any(character => character.deckType == cardMeta.deck))
+            || (DB.artifactMetas.TryGetValue(Archipelago.ItemToArtifact[locationItemName].Name, out var artifactMeta)
+                && state.characters.Any(character => character.deckType == artifactMeta.owner))
+        );
+
+    private bool WillAddCardToDeck(State state)
+    {
+        Debug.Assert(Archipelago.Instance.APSaveData != null, "Archipelago.Instance.APSaveData != null");
+        if (locationItemName is null) return false;
+        if (!IsLocal()) return false;
+        if (!Archipelago.ItemToCard.ContainsKey(locationItemName)) return false;
+        if (Archipelago.Instance.APSaveData.HasItem(locationItemName)) return false;
+        return Archipelago.InstanceSlotData.ImmediateCardRewards switch
+        {
+            CardRewardsMode.Always or CardRewardsMode.IfLocal => true,
+            CardRewardsMode.IfHasDeck or CardRewardsMode.IfLocalAndHasDeck => HasDeck(state),
+            _ => false
+        };
+    }
+
+    private bool WillAddArtifact(State state)
+    {
+        Debug.Assert(Archipelago.Instance.APSaveData != null, "Archipelago.Instance.APSaveData != null");
+        if (locationItemName is null) return false;
+        if (!IsLocal()) return false;
+        if (!Archipelago.ItemToArtifact.ContainsKey(locationItemName)) return false;
+        if (Archipelago.Instance.APSaveData.HasItem(locationItemName)) return false;
+        return Archipelago.InstanceSlotData.ImmediateArtifactRewards switch
+        {
+            CardRewardsMode.Always or CardRewardsMode.IfLocal => true,
+            CardRewardsMode.IfHasDeck or CardRewardsMode.IfLocalAndHasDeck => HasDeck(state),
+            _ => false
+        };
     }
 
     internal void SetTextInfo(string itemName, string slotName)

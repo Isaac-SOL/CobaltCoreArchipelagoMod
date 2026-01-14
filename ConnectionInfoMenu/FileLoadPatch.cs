@@ -87,7 +87,7 @@ public class NewGamePatch
         // Copied from Cheat.UnlockAllContent
         state.storyVars.winCount = 500;  // Forces vault button to be visible. 
         foreach (var kvp in DB.story.all)
-            DB.story.MarkNodeSeen(state, kvp.Key);  // Mark all dialogue as seen
+            DB.story.MarkNodeSeen(state, kvp.Key);  // Mark all dialogue as seen TODO this causes mystery nodes to malfunction on first run
         foreach (var kvp in DB.enemies)
             state.storyVars.RecordEnemyDefeated(kvp.Key);  // No idea but just in case
         return state;

@@ -31,10 +31,14 @@ public class CardOfferingPatch
         BattleType battleType,
         Rarity? rarityOverride,
         bool? overrideUpgradeChances,
+        bool makeAllCardsTemporary,
         bool inCombat,
+        int discount,
         bool isEvent)
     {
         Debug.Assert(Archipelago.Instance.APSaveData != null, "Archipelago.Instance.APSaveData != null");
+        
+        if (!Archipelago.InstanceSlotData.ShuffleCards) return;
         
         // PHASE 1: Make each given card unusable if it is an item but not unlocked
         
@@ -75,7 +79,13 @@ public class CardOfferingPatch
                 card.drawAnim = 1.0;
                 card.upgrade = CardReward.GetUpgrade(s, s.rngCardOfferings, s.map, card, s.GetDifficulty() >= 1 ? 0.5 : 1.0, overrideUpgradeChances);
                 card.flipAnim = 1.0;
+                if (makeAllCardsTemporary)
+                    card.temporaryOverride = true;
+                if (discount != 0)
+                    card.discount = discount;
                 __result.Add(card);
+                __result.RemoveAt(s.rngCardOfferings.NextInt() % __result.Count);
+                __result = __result.Shuffle(s.rngCardOfferings).ToList();
             }
         }
         
@@ -181,6 +191,11 @@ public class ArtifactOfferingPatch
     {
         Debug.Assert(Archipelago.Instance.APSaveData != null, "Archipelago.Instance.APSaveData != null");
         
+        if (!Archipelago.InstanceSlotData.ShuffleArtifacts) return;
+
+        var startArtifacts = __result.Aggregate("Start artifacts: ", (current, artifact) => current + $"{artifact.Name()}, ");
+        ModEntry.Instance.Logger.LogInformation("{artifacts}", startArtifacts);
+
         // PHASE 1: Make given artifact unusable if it is an item but not unlocked
         
         var artifactsTemp = new List<Artifact>(__result);
@@ -205,6 +220,9 @@ public class ArtifactOfferingPatch
             }
             __result.Add(artifact);
         }
+
+        var p1Artifacts = __result.Aggregate("Phase 1 artifacts: ", (current, artifact) => current + $"{artifact.Name()}, ");
+        ModEntry.Instance.Logger.LogInformation("{artifacts}", p1Artifacts);
         
         // PHASE 2: Add one found artifact if the option permits it
         
@@ -239,40 +257,46 @@ public class ArtifactOfferingPatch
                 // If we found a valid artifact, add it, remove at random and go to the next phase
                 if (pickedArtifact is null) continue;
                 __result.Add((Artifact)pickedArtifact.CreateInstance());
-                __result.RemoveAt(s.rngCardOfferings.NextInt() % __result.Count);
-                __result = __result.Shuffle(s.rngCardOfferings).ToList();
+                __result.RemoveAt(s.rngArtifactOfferings.NextInt() % __result.Count);
+                __result = __result.Shuffle(s.rngArtifactOfferings).ToList();
                 break;
             }
         }
-        
-        var rng = rngOverride ?? s.rngArtifactOfferings;
-        var availableDecks = s.characters.Select(c => c.deckType).ToList();
-        var effPools = limitPools ?? [ArtifactPool.Common];
+
+        var p2Artifacts = __result.Aggregate("Phase 2 artifacts: ", (current, artifact) => current + $"{artifact.Name()}, ");
+        ModEntry.Instance.Logger.LogInformation("{artifacts}", p2Artifacts);
         
         // PHASE 3: Attempt to add a single archipelago check artifact, cancel if it fails
         
+        var rng = rngOverride ?? s.rngArtifactOfferings;
+        var availableDecks = s.characters.Select(c => c.deckType).ToList();
+        availableDecks.Add(Deck.tooth);  // Just a dummy deck, not present in ItemToDeck
+        var effPools = limitPools ?? [ArtifactPool.Common];
         var deck = limitDeck ?? availableDecks.Random(rng);
-        var deckName = Archipelago.ItemToDeck.First(kvp => kvp.Value == deck).Key;
+        var deckName = Archipelago.ItemToDeck.FirstOrDefault(kvp => kvp.Value == deck, new KeyValuePair<string, Deck>("Basic", Deck.tooth)).Key;
         string rarityName;
         if (effPools.Contains(ArtifactPool.Boss))
-            rarityName = "Boss";
+            rarityName = "Boss ";
         else if (effPools.Contains(ArtifactPool.Common))
             rarityName = "";
         else
-            rarityName = "N/A";
+            rarityName = "N/A ";
         var locationChoices = Locations.AllMissingLocations
             .Select(address => Locations.GetLocationNameFromId(address))
-            .Where(name => name.StartsWith($"{deckName} {rarityName} Artifact")).ToList();
+            .Where(name => name.StartsWith($"{deckName} {rarityName}Artifact")).ToList(); // Note the absence of space before "Artifact"
         if (locationChoices.Count <= 0) return;
         
-        var location = locationChoices.Random(s.rngCardOfferings)!;
-        var newArtifact = rarityName == "Boss" ? new CheckLocationArtifactBoss() : new CheckLocationArtifact();
+        var location = locationChoices.Random(s.rngArtifactOfferings)!;
+        var newArtifact = rarityName == "Boss " ? new CheckLocationArtifactBoss() : new CheckLocationArtifact();
         newArtifact.locationName = location;
         
         // Add the artifact then remove one at random to keep count
         __result.Add(newArtifact);
-        __result.RemoveAt(s.rngCardOfferings.NextInt() % __result.Count);
-        __result = __result.Shuffle(s.rngCardOfferings).ToList();
+        __result.RemoveAt(s.rngArtifactOfferings.NextInt() % __result.Count);
+        __result = __result.Shuffle(s.rngArtifactOfferings).ToList();
+
+        var p3Artifacts = __result.Aggregate("Phase 3 artifacts: ", (current, artifact) => current + $"{artifact.Name()}, ");
+        ModEntry.Instance.Logger.LogInformation("{artifacts}", p3Artifacts);
 
         // If it was picked, scout its location if the options allow for it
         if (Archipelago.Instance.APSaveData.CardScoutMode == CardScoutMode.DontScout) return;

@@ -48,7 +48,7 @@ public class GetUnlockedShipsPatch
 [HarmonyPatch(typeof(StoryVars), nameof(StoryVars.UnlockChar))]
 public class UnlockCharPatch
 {
-    static bool Prefix() => false;
+    static bool Prefix() => false;  // TODO Books was unlocked by herself for some reason ???
 }
 
 [HarmonyPatch(typeof(StoryVars), nameof(StoryVars.UnlockShip))]
@@ -85,7 +85,7 @@ public class OnHasCardPatch
     static bool Prefix(Card card)
     {
         // Allow unlocking cards that aren't archipelago items
-        return !Archipelago.CardToItem.ContainsKey(card.GetType());
+        return !Archipelago.InstanceSlotData.ShuffleCards || !Archipelago.CardToItem.ContainsKey(card.GetType());
     }
 }
 
@@ -95,7 +95,7 @@ public class OnHasArtifactPatch
     static bool Prefix(Artifact r)
     {
         // Allow unlocking artifacts that aren't archipelago items
-        return !Archipelago.ArtifactToItem.ContainsKey(r.GetType());
+        return !Archipelago.InstanceSlotData.ShuffleArtifacts || !Archipelago.ArtifactToItem.ContainsKey(r.GetType());
     }
 }
 
