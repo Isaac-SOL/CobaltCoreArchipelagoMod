@@ -198,9 +198,6 @@ public class ArtifactOfferingPatch
         
         if (!Archipelago.InstanceSlotData.ShuffleArtifacts) return;
 
-        var startArtifacts = __result.Aggregate("Start artifacts: ", (current, artifact) => current + $"{artifact.Name()}, ");
-        ModEntry.Instance.Logger.LogInformation("{artifacts}", startArtifacts);
-
         // PHASE 1: Make given artifact unusable if it is an item but not unlocked
         
         var artifactsTemp = new List<Artifact>(__result);
@@ -225,9 +222,6 @@ public class ArtifactOfferingPatch
             }
             __result.Add(artifact);
         }
-
-        var p1Artifacts = __result.Aggregate("Phase 1 artifacts: ", (current, artifact) => current + $"{artifact.Name()}, ");
-        ModEntry.Instance.Logger.LogInformation("{artifacts}", p1Artifacts);
         
         // PHASE 2: Add one found artifact if the option permits it
         
@@ -267,9 +261,6 @@ public class ArtifactOfferingPatch
                 break;
             }
         }
-
-        var p2Artifacts = __result.Aggregate("Phase 2 artifacts: ", (current, artifact) => current + $"{artifact.Name()}, ");
-        ModEntry.Instance.Logger.LogInformation("{artifacts}", p2Artifacts);
         
         // PHASE 3: Attempt to add a single archipelago check artifact, cancel if it fails
         
@@ -299,9 +290,6 @@ public class ArtifactOfferingPatch
         __result.Add(newArtifact);
         __result.RemoveAt(s.rngArtifactOfferings.NextInt() % __result.Count);
         __result = __result.Shuffle(s.rngArtifactOfferings).ToList();
-
-        var p3Artifacts = __result.Aggregate("Phase 3 artifacts: ", (current, artifact) => current + $"{artifact.Name()}, ");
-        ModEntry.Instance.Logger.LogInformation("{artifacts}", p3Artifacts);
 
         // If it was picked, scout its location if the options allow for it
         if (Archipelago.Instance.APSaveData.CardScoutMode == CardScoutMode.DontScout) return;
