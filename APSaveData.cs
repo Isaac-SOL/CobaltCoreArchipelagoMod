@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using Archipelago.MultiClient.Net.Helpers;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using Nickel;
@@ -115,20 +116,25 @@ public class APSaveData
         Save();
     }
 
+    private static IReceivedItemsHelper APItems => Archipelago.Instance.Session!.Items;
+
     internal void SyncWithHost()
     {
         Debug.Assert(Archipelago.Instance.Session != null, "Archipelago.Instance.Session != null");
-        var localItemCount = AppliedInventory.Sum(kvp => kvp.Value);
-        var hostItemCount = Archipelago.Instance.Session.Items.AllItemsReceived.Count;
+        var hostItems = new Dictionary<string, int>();
 
-        // Apparently this case might be fine so don't check for it
-        // Debug.Assert(localItemCount <= hostItemCount, "localItemCount <= hostItemCount");
-        if (localItemCount < hostItemCount)
+        while (APItems.PeekItem() is { } itemInfo)
         {
-            foreach (var itemInfo in Archipelago.Instance.Session.Items.AllItemsReceived)
+            var itemName = itemInfo.ItemName;
+            if (!hostItems.TryAdd(itemName, 1))
+                hostItems[itemName]++;
+            if (!AppliedInventory.TryGetValue(itemName, out var count) || hostItems[itemName] > count)
             {
-                SyncItemCountWithHost(itemInfo.ItemName, itemInfo.Player.Name);
+                var sender = itemInfo.Player.Name;
+                ModEntry.Instance.Logger.LogInformation("Sync: Received {item} from {player}", itemName, sender);
+                ItemApplier.ApplyReceivedItem((itemName, sender));
             }
+            APItems.DequeueItem();
         }
 
         var hostLocationsChecked = Archipelago.Instance.Session.Locations.AllLocationsChecked;
@@ -140,23 +146,10 @@ public class APSaveData
         Save();
     }
 
-    internal void SyncItemCountWithHost(string name, string sender)
-    {
-        Debug.Assert(Archipelago.Instance.Session != null, "Archipelago.Instance.Session != null");
-        var localCount = AppliedInventory.GetValueOrDefault(name, 0);
-        var hostCount = Archipelago.Instance.Session.Items.AllItemsReceived.Count(i => i.ItemName == name);
-        for (int i = localCount; i < hostCount; i++)
-        {
-            ItemApplier.ApplyReceivedItem((name, sender));
-        }
-    }
-
     internal void AddAppliedItem(string name)
     {
-        if (AppliedInventory.ContainsKey(name))
+        if (!AppliedInventory.TryAdd(name, 1))
             AppliedInventory[name]++;
-        else
-            AppliedInventory[name] = 1;
         Save();
     }
 

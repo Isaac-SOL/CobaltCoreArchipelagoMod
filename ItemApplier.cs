@@ -9,7 +9,7 @@ namespace CobaltCoreArchipelago;
 
 public static class ItemApplier
 {
-    internal static List<(string name, string sender)> DeferredUnappliedItems { get; } = [];
+    private static List<(string name, string sender)> DeferredUnappliedItems { get; set; } = [];
     
     internal static bool CanApplyItems => Archipelago.Instance.Ready;
     
@@ -133,7 +133,7 @@ public static class ItemApplier
         if (!CanApplyItems)
             ModEntry.Instance.Logger.LogWarning("Trying to apply deferred items while unable to apply them");
         var toApply = DeferredUnappliedItems;
-        DeferredUnappliedItems.Clear();
+        DeferredUnappliedItems = [];
         foreach (var item in toApply)
         {
             ApplyReceivedItem(item, state);

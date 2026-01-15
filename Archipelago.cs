@@ -455,8 +455,7 @@ public class Archipelago
         }
 
         Ready = true;
-        APSaveData.SyncWithHost();
-        OnItemReceived((ReceivedItemsHelper) Session.Items);  // We need to do that for initial items I think ?
+        APSaveData.SyncWithHost();  // Consumes items queue
         
         Session.Items.ItemReceived += OnItemReceived;
         Session.MessageLog.OnMessageReceived += OnMessageReceived;
@@ -641,27 +640,27 @@ public class SlotDataInvalidException(string message) : Exception(message);
 
 public struct SlotDataHelper
 {
-    public List<Deck> StartingCharacters { get; set; }
-    public string StartingShip { get; set; }
-    public bool ShuffleShipParts { get; set; }
-    public List<Type> StartingCards { get; set; }
-    public Dictionary<Deck, List<Type>> DeckStartingCards { get; set; }
-    public int MinimumDifficulty { get; set; }
-    public WinCondition WinCondition { get; set; }
-    public int WinReqTotal { get; set; }
-    public int WinReqPerChar { get; set; }
-    public bool AddCharacterMemories { get; set; }
-    public bool ShuffleMemories { get; set; }
-    public bool DoFutureMemory { get; set; }
-    public bool ShuffleCards { get; set; }
-    public bool ShuffleArtifacts { get; set; }
-    public int CheckCardDifficulty { get; set; }
-    public bool RarerChecksLater { get; set; }
-    public bool GetMoreFoundItems { get; set; }
-    public CardRewardsMode ImmediateCardRewards { get; set; }
-    public CardRewardAttribute ImmediateCardAttribute { get; set; }
-    public CardRewardsMode ImmediateArtifactRewards { get; set; }
-    public uint FixedRandSeed { get; set; }
+    public List<Deck> StartingCharacters { get; private set; }
+    public string StartingShip { get; private set; }
+    public bool ShuffleShipParts { get; private set; }
+    public List<Type> StartingCards { get; private set; }
+    public Dictionary<Deck, List<Type>> DeckStartingCards { get; private set; }
+    public int MinimumDifficulty { get; private set; }
+    public WinCondition WinCondition { get; private set; }
+    public int WinReqTotal { get; private set; }
+    public int WinReqPerChar { get; private set; }
+    public bool AddCharacterMemories { get; private set; }
+    public bool ShuffleMemories { get; private set; }
+    public bool DoFutureMemory { get; private set; }
+    public bool ShuffleCards { get; private set; }
+    public bool ShuffleArtifacts { get; private set; }
+    public int CheckCardDifficulty { get; private set; }
+    public bool RarerChecksLater { get; private set; }
+    public bool GetMoreFoundItems { get; private set; }
+    public CardRewardsMode ImmediateCardRewards { get; private set; }
+    public CardRewardAttribute ImmediateCardAttribute { get; private set; }
+    public CardRewardsMode ImmediateArtifactRewards { get; private set; }
+    public uint FixedRandSeed { get; private set; }
 
     public bool HasImmediateCardAttribute(CardRewardAttribute attribute)
         => (ImmediateCardAttribute & attribute) != CardRewardAttribute.None;
