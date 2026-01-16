@@ -3,6 +3,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using Archipelago.MultiClient.Net;
 using Archipelago.MultiClient.Net.BounceFeatures.DeathLink;
@@ -373,6 +374,9 @@ public class Archipelago
     private static readonly object itemReceivedLock = new();
     private static DeathLink? lastDeathLink;
     private static readonly object deathLinkLock = new();
+    public List<string> MessagesReceived { get; } = [];
+    public List<(string message, Color color)[]> MessagePartsReceived { get; } = [];
+    private static readonly object messagesReceivedLock = new();
 
     public Archipelago()
     {
@@ -427,6 +431,7 @@ public class Archipelago
         Debug.Assert(APSaveData != null, nameof(APSaveData) + " != null");
         SlotDataHelper = CobaltCoreArchipelago.SlotDataHelper.FromSlotData(SlotData);
         APSaveData.RoomId = Session.RoomState.Seed;
+        MessagesReceived.Clear();
         
         // Patch starting decks
         foreach (var deck in ItemToDeck.Values)
@@ -538,6 +543,27 @@ public class Archipelago
     private void OnMessageReceived(LogMessage message)
     {
         Logger.LogInformation("Received message: {message}", message);
+        var sb = new StringBuilder();
+        var parts = new List<(string message, Color color)>();
+        foreach (var part in message.Parts)
+        {
+            var colorString = part.Color.R.ToString("X2")
+                              + part.Color.G.ToString("X2")
+                              + part.Color.B.ToString("X2");
+            sb.Append("<c=");
+            sb.Append(colorString);
+            sb.Append('>');
+            sb.Append(part.Text);
+            sb.Append("</c>");
+            var thisColor = new Color(colorString);
+            parts.Add((part.Text, thisColor));
+        }
+
+        lock (messagesReceivedLock)
+        {
+            MessagesReceived.Add(sb.ToString());
+            MessagePartsReceived.Add(parts.ToArray());
+        }
     }
 
     private void OnDeathLinkReceived(DeathLink deathLink)

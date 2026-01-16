@@ -1,7 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection.Emit;
+using System.Text;
 using HarmonyLib;
+using Microsoft.Xna.Framework.Graphics;
 
 namespace CobaltCoreArchipelago.MenuPatches;
 
@@ -52,7 +55,6 @@ internal class DrawCorePatch
     {
         if (!showCobalt) return;
         DisplayMiniCobalts(g, offset, true);
-        Draw.Text("bloablseoirjg", 0.0, 0.0);
     }
 
     static void DisplayMiniCobalts(G g, Vec offset, bool front)
@@ -91,11 +93,52 @@ internal class DrawCorePatch
 [HarmonyPatch(typeof(MainMenu), nameof(MainMenu.Render))]
 public class MainMenuRenderPatch
 {
+    private const int maxMessages = 5;
+    
     internal static Spr ArchipelagoTitleSpr;
     
     static void Postfix(MainMenu __instance)
     {
         if (__instance.subRoute is not null) return;
+        // Logo
         Draw.Sprite(ArchipelagoTitleSpr, 19.0, 90.0);
+        
+        // Draw AP messages
+        // var lastMessages = Archipelago.Instance.MessagesReceived.TakeLast(5).Reverse();
+        // var x = 185.0;
+        // var y = 270.0;
+        // foreach (var message in lastMessages)
+        // {
+        //     var fakeRect = Draw.Text(message, x, y, maxWidth: 250.0, dontDraw: true);
+        //     y -= fakeRect.h + 5.0;
+        //     Draw.Text("<c=boldPink>></c>", x - 5.0, y);
+        //     Draw.Text(message, x, y, maxWidth: 250.0);
+        // }
+        
+        // Draw AP messages
+        // I think in order to do a fade we have no choice but to fade each part separately
+        // This is a lot of work each frame though...
+        var lastMessages = Archipelago.Instance.MessagePartsReceived.TakeLast(maxMessages).Reverse();
+        var x = 185.0;
+        var y = 270.0;
+        int i = 0;
+        foreach (var messageParts in lastMessages)
+        {
+            var alpha = (double)(maxMessages - i) / maxMessages;
+            alpha = Math.Pow(alpha, 0.75);
+            var fadedParts = messageParts.Select(part => (part.message, part.color.fadeAlpha(alpha))).ToArray();
+            var sb = new StringBuilder();
+            foreach (var part in fadedParts)
+            {
+                sb.Append($"<c={part.Item2}>{part.message}</c>");
+            }
+            var message = sb.ToString();
+            var fakeRect = Draw.Text(message, x, y, maxWidth: 250.0, dontDraw: true);
+            y -= fakeRect.h + 5.0;
+            var pinkColor = Colors.boldPink.fadeAlpha(alpha);
+            Draw.Text($"<c={pinkColor}>></c>", x - 5.0, y);
+            Draw.Text(message, x, y, maxWidth: 250.0);
+            i++;
+        }
     }
 }
