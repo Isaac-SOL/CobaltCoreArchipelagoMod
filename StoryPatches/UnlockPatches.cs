@@ -53,7 +53,7 @@ public class UnlockCharPatch
     [HarmonyPriority(Priority.Low)]
     static void Postfix(ref StoryVars __instance)
     {
-        Debug.Assert(Archipelago.Instance.APSaveData != null, "Archipelago.Instance.APSaveData != null");
+        if (Archipelago.Instance.APSaveData is null) return;  // May be called before a slot is loaded ?
         // Rewrite unlockedChars entirely from AP inventory
         __instance.unlockedChars = Archipelago.Instance.APSaveData.AppliedInventory.Keys
             .Where(deckItem => Archipelago.ItemToDeck.ContainsKey(deckItem))
@@ -70,7 +70,7 @@ public class UnlockShipPatch
     [HarmonyPriority(Priority.Low)]
     static void Postfix(ref StoryVars __instance)
     {
-        Debug.Assert(Archipelago.Instance.APSaveData != null, "Archipelago.Instance.APSaveData != null");
+        if (Archipelago.Instance.APSaveData is null) return;  // May be called before a slot is loaded ?
         // Rewrite unlockedShips entirely from AP inventory
         __instance.unlockedShips = Archipelago.Instance.APSaveData.AppliedInventory.Keys
             .Where(deckItem => Archipelago.ItemToStartingShip.ContainsKey(deckItem))

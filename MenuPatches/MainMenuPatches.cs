@@ -52,6 +52,7 @@ internal class DrawCorePatch
     {
         if (!showCobalt) return;
         DisplayMiniCobalts(g, offset, true);
+        Draw.Text("bloablseoirjg", 0.0, 0.0);
     }
 
     static void DisplayMiniCobalts(G g, Vec offset, bool front)
