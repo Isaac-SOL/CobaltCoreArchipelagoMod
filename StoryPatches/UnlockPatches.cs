@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection.Emit;
 using CobaltCoreArchipelago.MenuPatches;
 using FMOD;
@@ -48,13 +49,35 @@ public class GetUnlockedShipsPatch
 [HarmonyPatch(typeof(StoryVars), nameof(StoryVars.UnlockChar))]
 public class UnlockCharPatch
 {
-    static bool Prefix() => false;  // TODO Books was unlocked by herself for some reason ???
+    // Nickel seems to be interfering with this function, so we let it happen and then clear if necessary in postfix
+    [HarmonyPriority(Priority.Low)]
+    static void Postfix(ref StoryVars __instance)
+    {
+        Debug.Assert(Archipelago.Instance.APSaveData != null, "Archipelago.Instance.APSaveData != null");
+        // Rewrite unlockedChars entirely from AP inventory
+        __instance.unlockedChars = Archipelago.Instance.APSaveData.AppliedInventory.Keys
+            .Where(deckItem => Archipelago.ItemToDeck.ContainsKey(deckItem))
+            .Select(deckItem => Archipelago.ItemToDeck[deckItem])
+            .ToHashSet();
+        __instance.unlockedCharsToAnnounce.Clear();
+    }
 }
 
 [HarmonyPatch(typeof(StoryVars), nameof(StoryVars.UnlockShip))]
 public class UnlockShipPatch
 {
-    static bool Prefix() => false;
+    // Nickel seems to be interfering with this function, so we let it happen and then clear if necessary in postfix
+    [HarmonyPriority(Priority.Low)]
+    static void Postfix(ref StoryVars __instance)
+    {
+        Debug.Assert(Archipelago.Instance.APSaveData != null, "Archipelago.Instance.APSaveData != null");
+        // Rewrite unlockedShips entirely from AP inventory
+        __instance.unlockedShips = Archipelago.Instance.APSaveData.AppliedInventory.Keys
+            .Where(deckItem => Archipelago.ItemToStartingShip.ContainsKey(deckItem))
+            .Select(deckItem => Archipelago.ItemToStartingShip[deckItem])
+            .ToHashSet();
+        __instance.unlockedShipsToAnnounce.Clear();
+    }
 }
 
 [HarmonyPatch(typeof(StoryVars), nameof(StoryVars.UnlockOneMemory))]
