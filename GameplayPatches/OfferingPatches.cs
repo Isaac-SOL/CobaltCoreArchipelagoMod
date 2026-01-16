@@ -159,8 +159,11 @@ public class CardOfferingPatch
         {
             for (var i = 0; i < checkCards.Count; i++)
             {
-                var (itemName, slotName) = task.Result[i];
-                checkCards[i].SetTextInfo(itemName, slotName);
+                var info = task.Result[i];
+                if (info is null)
+                    checkCards[i].SetTextInfo("[]", "[]", APColors.Trap);
+                else
+                    checkCards[i].SetTextInfo(info.ItemName, info.Player.Name, info.GetColor());
             }
         });
     }
@@ -309,8 +312,11 @@ public class ArtifactOfferingPatch
         {
             Archipelago.Instance.CheckLocationInfo(location).ContinueWith(task =>
             {
-                var (itemName, slotName) = task.Result[0];
-                newArtifact.SetTextInfo(itemName, slotName);
+                var info = task.Result[0];
+                if (info is null)
+                    newArtifact.SetTextInfo("[]", "[]", APColors.Trap);
+                else
+                    newArtifact.SetTextInfo(info.ItemName, info.Player.Name, info.GetColor());
             });
         }
     }

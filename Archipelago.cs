@@ -10,6 +10,7 @@ using Archipelago.MultiClient.Net.BounceFeatures.DeathLink;
 using Archipelago.MultiClient.Net.Enums;
 using Archipelago.MultiClient.Net.Helpers;
 using Archipelago.MultiClient.Net.MessageLog.Messages;
+using Archipelago.MultiClient.Net.Models;
 using CobaltCoreArchipelago.GameplayPatches;
 using HarmonyLib;
 using Microsoft.Extensions.Logging;
@@ -615,7 +616,7 @@ public class Archipelago
         }
     }
 
-    internal async Task<(string itemName, string slotName)[]> CheckLocationInfo(params string[] locationNames)
+    internal async Task<ScoutedItemInfo?[]> CheckLocationInfo(params string[] locationNames)
     {
         Debug.Assert(Session != null, nameof(Session) + " != null");
         Debug.Assert(APSaveData != null, nameof(APSaveData) + " != null");
@@ -626,12 +627,26 @@ public class Archipelago
                 : HintCreationPolicy.None,
             addresses
         );
-        var res = addresses.Select<long, (string itemName, string slotName)>(a =>
-        {
-            return info.TryGetValue(a, out var value) ? (value.ItemName, value.Player.Name) : ("[]", "[]");
-        });
+        var res = addresses.Select(a => info.GetValueOrDefault(a));
         return res.ToArray();
     }
+}
+
+public static class APColors
+{
+    internal const string OtherPlayer = "FFFF00";
+    internal const string Self = "FF00FF";
+    internal const string Location = "008000";
+    internal const string Filler = "00FFFF";
+    internal const string Useful = "6A5ACD";
+    internal const string Progression = "DDA0DD";
+    internal const string Trap = "FF0000";
+
+    internal static string GetColor(this ItemInfo item) =>
+        (item.Flags & ItemFlags.Advancement) != 0 ? Progression :
+        (item.Flags & ItemFlags.Trap) != 0 ? Trap :
+        (item.Flags & ItemFlags.NeverExclude) != 0 ? Useful :
+        Filler;
 }
 
 public enum ArchipelagoErrorCode

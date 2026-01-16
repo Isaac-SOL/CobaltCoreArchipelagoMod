@@ -67,10 +67,10 @@
         "CheckLocationCard": {
             "name": "Archipelago Check!",
             "descNotFound": "Send an <c=boldPink>Archipelago</c> item.",
-            "descBase": "Send <c=card>{0}</c> to <c=attack>{1}</c>.",
+            "descBase": "Send {0} to {1}.",
             "descSelf": "Unlock <c=card>{0}</c>.",
             "descSelfAddCard": "Unlock <c=card>{0}</c> and add it to your hand.",
-            "descSelfAddArtifact": "Unlock and get <c=card>{0}</c>.",
+            "descSelfAddArtifact": "Unlock and get <c=artifact>{0}</c>.",
             "descContShield": "\n<c=healthBarShield>Shield {0}</c>.",
             "descContTempShield": "\n<c=healthBarTempShield>Shield {0}</c>.",
             "descContAttack": "\n<c=attack>Attack {0} x{1}</c>.",
@@ -90,7 +90,7 @@
             "descBase": "Send <c=card>{0}</c> to <c=attack>{1}</c>.",
             "descSelf": "Unlock <c=card>{0}</c>.",
             "descSelfAddCard": "Unlock <c=card>{0}</c> and add it to your deck.",
-            "descSelfAddArtifact": "Unlock and get <c=card>{0}</c>."
+            "descSelfAddArtifact": "Unlock and get <c=artifact>{0}</c>."
         },
         "LockedArtifact": {
             "name": "LOCKED ARTIFACT",

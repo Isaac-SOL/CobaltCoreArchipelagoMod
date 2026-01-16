@@ -15,9 +15,11 @@ public class CheckLocationArtifact : Artifact, IRegisterable
     [JsonIgnore]
     public static Spr BaseSpr;
     
+    // Note : fields MUST be public if the artifact is copied somewhere or saved
     public string locationName = "";
     public string? locationSlotName;
     public string? locationItemName;
+    public string? locationItemColor;
     public string? givenCard;
     public string? givenArtifact;
     
@@ -73,7 +75,9 @@ public class CheckLocationArtifact : Artifact, IRegisterable
         else
         {
             description = Localize("descBase");
-            description = string.Format(description, locationItemName, locationSlotName);
+            description = string.Format(description,
+                                        $"<c={locationItemColor}>{locationItemName}</c>",
+                                        $"<c={APColors.OtherPlayer}>{locationSlotName}</c>");
         }
         List<Tooltip> tooltips = [new TTText(description)];
         
@@ -135,10 +139,11 @@ public class CheckLocationArtifact : Artifact, IRegisterable
         };
     }
 
-    internal void SetTextInfo(string itemName, string slotName)
+    internal void SetTextInfo(string itemName, string slotName, string itemColor)
     {
         locationItemName = itemName;
         locationSlotName = slotName;
+        locationItemColor = itemColor;
         if (IsLocal())
         {
             if (Archipelago.ItemToCard.ContainsKey(locationItemName))

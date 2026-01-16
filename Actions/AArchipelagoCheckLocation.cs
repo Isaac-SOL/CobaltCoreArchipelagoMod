@@ -14,6 +14,7 @@ public class AArchipelagoCheckLocation : CardAction
 
     public string? locationName;
     public string? itemName;
+    public string? itemColor;
     public string? receiverName;
     public string? givenCard;
     public string? givenArtifact;
@@ -44,15 +45,21 @@ public class AArchipelagoCheckLocation : CardAction
             {
                 Icon = Spr,
                 Title = Localize("title"),
-                TitleColor = Colors.card,
+                TitleColor = Colors.boldPink,
                 Description = Localize("desc"),
             }
         ];
 
         if (itemName != null)
-            tooltips.Add(new TTText(string.Format(Localize("descItem"), itemName)));
+            tooltips.Add(new TTText(string.Format(Localize("descItem"), $"<c={itemColor}>{itemName}</c>")));
         if (receiverName != null)
-            tooltips.Add(new TTText(string.Format(Localize("descReceiver"), receiverName)));
+        {
+            Debug.Assert(Archipelago.Instance.APSaveData != null, "Archipelago.Instance.APSaveData != null");
+            var receiverColor = receiverName == Archipelago.Instance.APSaveData.Slot
+                ? APColors.Self
+                : APColors.OtherPlayer;
+            tooltips.Add(new TTText(string.Format(Localize("descReceiver"), $"<c={receiverColor}>{receiverName}</c>")));
+        }
         
         if (givenCard != null)
         {

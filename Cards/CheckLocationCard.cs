@@ -11,13 +11,15 @@ namespace CobaltCoreArchipelago.Cards;
 
 public class CheckLocationCard : Card, IRegisterable
 {
-    public string locationName = "";
-    public string? locationSlotName;
-    public string? locationItemName;
-
     internal static Spr ArtCommon;
     internal static Spr ArtUncommon;
     internal static Spr ArtRare;
+    
+    // Note : fields MUST be public to be transferred when the card is upgraded or saved for example
+    public string locationName = "";
+    public string? locationSlotName;
+    public string? locationItemName;
+    public string? locationItemColor;
     
     public static void Register(IPluginPackage<IModManifest> package, IModHelper helper)
     {
@@ -50,6 +52,7 @@ public class CheckLocationCard : Card, IRegisterable
         {
             checkAction.itemName = locationItemName;
             checkAction.receiverName = locationSlotName;
+            checkAction.itemColor = locationItemColor;
             if (IsLocal())
             {
                 if (Archipelago.ItemToCard.ContainsKey(locationItemName))
@@ -120,7 +123,9 @@ public class CheckLocationCard : Card, IRegisterable
                     effItemName = effItemName.Remove(Math.Max(effItemName.Length - charsToRemove, 0)) + "...";
 
                 description = Localize("descBase");
-                description = string.Format(description, effItemName, locationSlotName);
+                description = string.Format(description,
+                                            $"<c={locationItemColor}>{effItemName}</c>",
+                                            $"<c={APColors.OtherPlayer}>{locationSlotName}</c>");
             }
         }
 
@@ -229,10 +234,11 @@ public class CheckLocationCard : Card, IRegisterable
         };
     }
 
-    internal void SetTextInfo(string itemName, string slotName)
+    internal void SetTextInfo(string itemName, string slotName, string itemColor)
     {
         locationItemName = itemName;
         locationSlotName = slotName;
+        locationItemColor = itemColor;
     }
 }
 

@@ -45,8 +45,11 @@ public static class CardRewardRenderPatch
         
                     for (var i = 0; i < checkCards.Count; i++)
                     {
-                        var (itemName, slotName) = task.Result[i];
-                        checkCards[i].SetTextInfo(itemName, slotName);
+                        var info = task.Result[i];
+                        if (info is null)
+                            checkCards[i].SetTextInfo("[]", "[]", APColors.Trap);
+                        else
+                            checkCards[i].SetTextInfo(info.ItemName, info.Player.Name, info.GetColor());
                     }
                 });
             }
@@ -90,8 +93,11 @@ public static class ArtifactRewardRenderPatch
                 {
                     for (var i = 0; i < checkArtifacts.Count; i++)
                     {
-                        var (itemName, slotName) = task.Result[i];
-                        checkArtifacts[i].SetTextInfo(itemName, slotName);
+                        var info = task.Result[i];
+                        if (info is null)
+                            checkArtifacts[i].SetTextInfo("[]", "[]", APColors.Trap);
+                        else
+                            checkArtifacts[i].SetTextInfo(info.ItemName, info.Player.Name, info.GetColor());
                     }
                 });
             }
