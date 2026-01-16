@@ -25,6 +25,7 @@ public class APSaveData
     [JsonIgnore]
     private static Dictionary<int, APSaveData>? _allApSaveStorage;
     
+    // General AP info
     [JsonProperty]
     internal int SaveSlot { get; }
     [JsonProperty]
@@ -45,12 +46,16 @@ public class APSaveData
     internal int LastCombatCount { get; set; }
     [JsonProperty]
     internal int DeathLinkCount { get; set; }
+    
+    // Mod settings
     [JsonProperty]
     internal bool DeathLinkActive { get; set; } = true;
     [JsonProperty]
     internal CardScoutMode CardScoutMode { get; set; } = CardScoutMode.CreateHint;
     [JsonProperty]
     internal bool BypassDifficulty { get; set; } = false;
+    [JsonProperty]
+    internal bool MessagesInMenu { get; set; } = true;
     
     internal static IModStorage ModStorage => ModEntry.Instance.Helper.Storage;
 

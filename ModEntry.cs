@@ -190,6 +190,14 @@ internal class ModEntry : SimpleMod
                     .SetTooltips(() => [
                         new TTText(LocalizeSettings("bypassDifficulty", "tooltipName")),
                         new TTText(LocalizeSettings("bypassDifficulty", "desc"))
+                    ]),
+                ModSettings.MakeCheckbox(
+                        () => LocalizeSettings("messagesInMenu", "settingName"),
+                        () => Archipelago.APSaveData!.MessagesInMenu,
+                        (_, _, value) => Archipelago.APSaveData!.MessagesInMenu = value)
+                    .SetTooltips(() => [
+                        new TTText(LocalizeSettings("messagesInMenu", "tooltipName")),
+                        new TTText(LocalizeSettings("messagesInMenu", "desc"))
                     ])
             ]).SubscribeToOnMenuClose(_ =>
             {

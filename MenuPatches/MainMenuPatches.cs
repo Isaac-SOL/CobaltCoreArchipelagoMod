@@ -103,6 +103,8 @@ public class MainMenuRenderPatch
         // Logo
         Draw.Sprite(ArchipelagoTitleSpr, 19.0, 90.0);
         
+        if (Archipelago.Instance.APSaveData is null || !Archipelago.Instance.APSaveData.MessagesInMenu) return;
+        
         // Draw AP messages
         // var lastMessages = Archipelago.Instance.MessagesReceived.TakeLast(5).Reverse();
         // var x = 185.0;

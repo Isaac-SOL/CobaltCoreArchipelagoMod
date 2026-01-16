@@ -38,8 +38,13 @@
         },
         "bypassDifficulty": {
             "settingName": "Bypass difficulty setting",
-            "tooltipName": "<c=artifact>BYPASS DIFFICULTY SETTING",
+            "tooltipName": "<c=artifact>BYPASS DIFFICULTY SETTING</c>",
             "desc": "Check to ignore the minimum difficulty setting in your YAML options, if you changed your mind for example."
+        },
+        "messagesInMenu": {
+            "settingName": "Main menu messages",
+            "tooltipName": "<c=artifact>MAIN MENU MESSAGES</c>",
+            "desc": "Check to see Archipelago server messages on the main menu."
         }
     },
     "newRunOptions": {
