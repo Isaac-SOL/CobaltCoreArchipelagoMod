@@ -21,7 +21,7 @@ internal class DrawCorePatch
         new("4BF24B")
     ];
 
-    private static bool GoFront(double myTime) => Math.Cos(myTime - 0.2) > 0;
+    private static bool GoFront(double myTime) => Math.Cos(myTime - 0.22) > 0;
 
     static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions, ILGenerator generator)
     {

@@ -42,7 +42,9 @@ public class APSaveData
     [JsonProperty]
     internal HashSet<string> LocationsChecked { get; }
     [JsonProperty]
-    internal int LastCombatCount;
+    internal int LastCombatCount { get; set; }
+    [JsonProperty]
+    internal int DeathLinkCount { get; set; }
     [JsonProperty]
     internal bool DeathLinkActive { get; set; } = true;
     [JsonProperty]

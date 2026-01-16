@@ -48,6 +48,7 @@ public static class CheckDeathPatch
             Archipelago.Instance.DeathLinkService.SendDeathLink(
                 new DeathLink(Archipelago.Instance.APSaveData!.Slot, deathCause)
             );
+            Archipelago.Instance.APSaveData!.DeathLinkCount++;
         }
         Archipelago.Instance.APSaveData!.LastCombatCount = state.storyVars.combatsThisRun;
         APSaveData.Save();

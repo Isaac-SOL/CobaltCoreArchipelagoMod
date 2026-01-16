@@ -70,6 +70,12 @@
             "descContTempShield": "\n<c=healthBarTempShield>Shield {0}</c>.",
             "descContAttack": "\n<c=attack>Attack {0} x{1}</c>.",
             "descDraw": "Draw {0}."
+        },
+        "DeathLinkBoros": {
+            "name": "Linkoboros",
+            "descBase": "Attack for <c=attack>{0}</c> dmg.\n+1 for every {2} <c=redd>deathlink</c>.\n<c=action>({1}/{2})</c>",
+            "descA": "Shield for <c=healthBarShield>{0}</c>.\n+1 for every {2} <c=redd>deathlink</c>.\n<c=action>({1}/{2})</c>",
+            "descB": "<c=status>Overdrive {0}</c>.\n+1 for every {2} <c=redd>deathlink</c>.\n<c=action>({1}/{2})</c>"
         }
     },
     "artifact": {

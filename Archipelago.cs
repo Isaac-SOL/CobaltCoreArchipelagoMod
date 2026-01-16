@@ -431,7 +431,7 @@ public class Archipelago
         // Patch starting decks
         foreach (var deck in ItemToDeck.Values)
         {
-            StarterDeck.starterSets[deck].cards = new List<Card>();
+            StarterDeck.starterSets[deck].cards = [];
             foreach (var card in SlotDataHelper.Value.DeckStartingCards[deck])
             {
                 StarterDeck.starterSets[deck].cards.Add((Card)card.CreateInstance());
@@ -453,6 +453,8 @@ public class Archipelago
         {
             NewRunOptions.difficulties = NewRunOptions.difficulties.Where(difficulty => difficulty.level >= SlotDataHelper.Value.MinimumDifficulty).ToList();
         }
+        // Patch memories
+        Vault.charsWithLore = Mutil.DeepCopy(ModEntry.BaseCharsWithLore);
 
         Ready = true;
         APSaveData.SyncWithHost();  // Consumes items queue
@@ -548,6 +550,8 @@ public class Archipelago
 
     internal void SafeUpdate(G g)
     {
+        Debug.Assert(APSaveData != null, nameof(APSaveData) + " != null");
+        
         var state = g.state;
         lock (itemReceivedLock)
         {
@@ -576,6 +580,9 @@ public class Archipelago
                     : $"{lastDeathLink.Source}\n{lastDeathLink.Cause}";
                 // Ensures that this received DeathLink won't cause us to trigger a new DeathLink ourselves
                 PreventDeathLink = true;
+                // Add to the count and save
+                APSaveData.DeathLinkCount++;
+                APSaveData.Save();
             }
 
             lastDeathLink = null;

@@ -106,24 +106,35 @@ public class CardOfferingPatch
                 Rarity.uncommon => "Uncommon",
                 _ => "Rare"
             };
-            var locationChoices = Locations.AllMissingLocations
-                .Select(address => Locations.GetLocationNameFromId(address))
-                .Where(name => name.StartsWith($"{deckName} {rarityName} Card")).ToList();
-            if (locationChoices.Count <= 0) continue;
-            
-            var location = locationChoices.Random(s.rngCardOfferings)!;
-            // Make sure we don't give multiple of the same location in one offering. The AP package doesn't like that
-            if (archipelagoCards.Any(prevCard => prevCard is CheckLocationCard prevAPCard
-                                                 && prevAPCard.locationName == location))
-                continue;
-            
-            var card = rarity switch
+
+            Card card;
+            if (rarity == Rarity.rare && s.rngCardOfferings.NextInt() % 100 > 92)
             {
-                Rarity.common => new CheckLocationCard(),
-                Rarity.uncommon => new CheckLocationCardUncommon(),
-                _ => new CheckLocationCardRare()
-            };
-            card.locationName = location;
+                // Sometimes replace rare cards with a DeathLinkBoros
+                card = new DeathLinkBoros();
+            }
+            else
+            {
+                // But most of the time we add an actual check card with a set location
+                var locationChoices = Locations.AllMissingLocations
+                    .Select(address => Locations.GetLocationNameFromId(address))
+                    .Where(name => name.StartsWith($"{deckName} {rarityName} Card")).ToList();
+                if (locationChoices.Count <= 0) continue;
+            
+                var location = locationChoices.Random(s.rngCardOfferings)!;
+                // Make sure we don't give multiple of the same location in one offering. The AP package doesn't like that
+                if (archipelagoCards.Any(prevCard => prevCard is CheckLocationCard prevAPCard
+                                                     && prevAPCard.locationName == location))
+                    continue;
+            
+                card = rarity switch
+                {
+                    Rarity.common => new CheckLocationCard(),
+                    Rarity.uncommon => new CheckLocationCardUncommon(),
+                    _ => new CheckLocationCardRare()
+                };
+                (card as CheckLocationCard)!.locationName = location;
+            }
             card.drawAnim = 1.0;
             card.upgrade = CardReward.GetUpgrade(s, s.rngCardOfferings, s.map, card, s.GetDifficulty() >= 1 ? 0.5 : 1.0, overrideUpgradeChances);
             card.flipAnim = 1.0;

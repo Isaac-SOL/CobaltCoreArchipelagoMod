@@ -27,6 +27,7 @@ internal class ModEntry : SimpleMod
     internal Archipelago Archipelago;
     internal static Dictionary<string, StarterShip> BaseShips { get; set; } = new();
     internal static List<NewRunOptions.DifficultyLevel> BaseDifficulties { get; set; } = [];
+    internal static List<Deck> BaseCharsWithLore { get; set; } = [];
 
     internal IDeckEntry ArchipelagoDeck;
     internal IDeckEntry LockedDeck;
@@ -43,7 +44,8 @@ internal class ModEntry : SimpleMod
         typeof(CheckLocationCardUncommon)
     ];
     private static List<Type> DemoRareCardTypes = [
-        typeof(CheckLocationCardRare)
+        typeof(CheckLocationCardRare),
+        typeof(DeathLinkBoros)
     ];
     private static IEnumerable<Type> DemoCardTypes =
         DemoCommonCardTypes
@@ -77,6 +79,7 @@ internal class ModEntry : SimpleMod
         // Fill out static data
         BaseShips = Mutil.DeepCopy(StarterShip.ships);
         BaseDifficulties = Mutil.DeepCopy(NewRunOptions.difficulties);
+        BaseCharsWithLore = Mutil.DeepCopy(Vault.charsWithLore);
 
         AnyLocalizations = new JsonLocalizationProvider(
             tokenExtractor: new SimpleLocalizationTokenExtractor(),
@@ -125,6 +128,8 @@ internal class ModEntry : SimpleMod
         MainMenuRenderPatch.ArchipelagoTitleSpr = RegisterSprite(package, "assets/UI/ArchipelagoLogo.png").Sprite;
         MkSlotPatch.ArchipelagoSaveSpr = RegisterSprite(package, "assets/UI/ArchipelagoSave.png").Sprite;
         MkSlotPatch.NotArchipelagoSaveSpr = RegisterSprite(package, "assets/UI/NotArchipelagoSave2.png").Sprite;
+        
+        BGRunWin.charFullBodySprites.Add(Deck.colorless, RegisterSprite(package, "assets/cat_end.png").Sprite);
 
         /*
          * All the IRegisterable types placed into the static lists at the start of the class are initialized here.
