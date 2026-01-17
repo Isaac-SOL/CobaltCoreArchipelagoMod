@@ -45,13 +45,13 @@ public class VaultRenderPatch
             return vaultMemories
                        .Sum(memorySet => memorySet.memoryKeys
                                 .Sum(entry => entry.unlocked ? 1 : 0))
-                   > Archipelago.InstanceSlotData.WinReqTotal;
+                   >= Archipelago.InstanceSlotData.WinReqTotal;
         }
         
         // WinCondition.MemoryPerCharacter
         return vaultMemories
             .All(memorySet => memorySet.memoryKeys
-                     .Sum(entry => entry.unlocked ? 1 : 0) > Archipelago.InstanceSlotData.WinReqPerChar);
+                     .Sum(entry => entry.unlocked ? 1 : 0) >= Archipelago.InstanceSlotData.WinReqPerChar);
     }
 
     public static void Postfix(Vault __instance, G g)
@@ -70,7 +70,7 @@ public class VaultRenderPatch
         else // WinCondition.MemoryPerCharacter
         {
             var required = Archipelago.InstanceSlotData.WinReqPerChar;
-            var completed = memories.Sum(memorySet => memorySet.memoryKeys.Sum(entry => entry.unlocked ? 1 : 0) > required ? 1 : 0);
+            var completed = memories.Sum(memorySet => memorySet.memoryKeys.Sum(entry => entry.unlocked ? 1 : 0) >= required ? 1 : 0);
             var charAmount = memories.Count;
             goalString = $"Memories required:\n{required} per character\n\n" +
                          $"Characters completed:\n{completed} / {charAmount}";
