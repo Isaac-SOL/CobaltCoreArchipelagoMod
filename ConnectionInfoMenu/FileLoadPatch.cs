@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
 using HarmonyLib;
+using Microsoft.Extensions.Logging;
 
 namespace CobaltCoreArchipelago.ConnectionInfoMenu;
 
@@ -80,14 +82,23 @@ public class NewGamePatch
         return codeMatcher.Instructions();
     }
 
+    private static readonly string[] dontMarkSeenKeys =
+    [
+        // Actual character memory cutscenes
+        "Dizzy_Memory", "Riggs_Memory", "Peri_Memory", "Goat_Memory", "Eunice_Memory", "Hacker_Memory",
+        // Dialogue branches to pick a character at the end of a run
+        "RunWinWho"
+    ];
+
     public static State EditStateForNewFile(State state)
     {
         state.runConfig.selectedShip = Archipelago.InstanceSlotData.StartingShip;
         state.runConfig.selectedChars = new HashSet<Deck>(Archipelago.InstanceSlotData.StartingCharacters);
-        // Copied from Cheat.UnlockAllContent
-        state.storyVars.winCount = 500;  // Forces vault button to be visible. 
-        foreach (var kvp in DB.story.all)
-            DB.story.MarkNodeSeen(state, kvp.Key);  // Mark all dialogue as seen TODO this causes mystery nodes to malfunction on first run
+        // Based on Cheat.UnlockAllContent
+        state.storyVars.winCount = 500;  // Forces vault button to be visible.
+        // We view all story nodes but exclude some
+        foreach (var node in DB.story.all.Where(kvp => !dontMarkSeenKeys.Any(s => kvp.Key.StartsWith(s))))
+            DB.story.MarkNodeSeen(state, node.Key);
         foreach (var kvp in DB.enemies)
             state.storyVars.RecordEnemyDefeated(kvp.Key);  // No idea but just in case
         return state;
