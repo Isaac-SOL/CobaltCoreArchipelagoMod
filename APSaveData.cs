@@ -178,10 +178,9 @@ public class APSaveData
     {
         // Look among locations checked to see which is the next location
         var name = Archipelago.ItemToDeck.First(kvp => kvp.Value == deck).Key;
-        var baseLocationName = $"Fix {name}'s Timeline";
         for (var i = 1; i <= 3; i++)
         {
-            var locationName = $"{baseLocationName} {i}";
+            var locationName = $"Fix {name}'s Timeline {i}";
             if (!LocationsChecked.Contains(locationName))
                 return locationName;
         }
