@@ -96,7 +96,10 @@ public class UnlockOneMemoryPatch
         else
         {
             // If memories aren't shuffled, we pass through to our replacement function
-            UnlockReplacements.UnlockOneMemory(__instance, deck);
+            // and use the saved data directly from Cobalt Core
+            var s = MG.inst.g.state; // This is our only way to access state here
+            var count = __instance.memoryUnlockLevel.TryGetValue(deck, out var currCount) ? currCount + 1 : 1;
+            UnlockReplacements.SetMemoryCount(s, deck, count);
         }
         return false;
     }
@@ -136,16 +139,13 @@ internal static class UnlockReplacements
     }
     
     // Called either by the normal UnlockOneMemory if memories aren't shuffled, otherwise by ApplyItems if they are
-    internal static void UnlockOneMemory(StoryVars storyVars, Deck deck)
+    internal static void SetMemoryCount(State s, Deck deck, int count)
     {
-        storyVars.memoryUnlockLevel.TryAdd(deck, 0);
-        storyVars.memoryUnlockLevel[deck]++;
+        s.storyVars.memoryUnlockLevel[deck] = count;
         
         // Immediately check for goal if we don't have to do the future memory
-        // We can't have state in the arguments because of UnlockOneMemoryPatch, so we create a dummy state here
-        var dummyState = new State { persistentStoryVars = storyVars };
         if (!Archipelago.InstanceSlotData.DoFutureMemory &&
-            VaultRenderPatch.CanCompleteGame(Vault.GetVaultMemories(dummyState)))
+            VaultRenderPatch.CanCompleteGame(Vault.GetVaultMemories(s)))
         {
             Debug.Assert(Archipelago.Instance.Session != null, "Archipelago.Instance.Session != null");
             Archipelago.Instance.Session.SetGoalAchieved();
