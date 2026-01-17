@@ -97,5 +97,54 @@
             "desc": "You haven't unlocked this artifact yet.",
             "descNotFound": "No underlying artifact! <c=attack>This should not happen!</c>"
         }
+    },
+    "story": {
+        "memory": {
+            "BooksEndTalk1": {
+                "Books1": "I'm Books!",
+                "Void1": "Cool"
+            },
+            "BooksEndTalk2": {
+                "Books1": "I'm also Books!",
+                "Void1": "Huh ok"
+            },
+            "BooksEndTalk3": {
+                "Books1": "I'm Books once again!",
+                "Void1": "This is getting ridiculous"
+            },
+            
+            "CATEndTalk1": {
+                "CAT1": "I'm CAT!",
+                "Void1": "Cool"
+            },
+            "CATEndTalk2": {
+                "CAT1": "I'm also CAT!",
+                "Void1": "Huh ok"
+            },
+            "CATEndTalk3": {
+                "CAT1": "I'm CAT once again!",
+                "Void1": "This is getting ridiculous"
+            },
+            
+            "BooksMemory1": {
+                "Books1": "I'm Books!"
+            },
+            "BooksMemory2": {
+                "Books1": "I'm also Books!"
+            },
+            "BooksMemory3": {
+                "Books1": "I'm Books once again!"
+            },
+            
+            "CATMemory1": {
+                "CAT1": "I'm CAT!"
+            },
+            "CATMemory2": {
+                "CAT1": "I'm also CAT!"
+            },
+            "CATMemory3": {
+                "CAT1": "I'm CAT once again!"
+            }
+        }
     }
 }

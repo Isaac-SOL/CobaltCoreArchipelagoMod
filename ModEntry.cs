@@ -13,6 +13,7 @@ using CobaltCoreArchipelago.Cards;
 using CobaltCoreArchipelago.External;
 using CobaltCoreArchipelago.ConnectionInfoMenu;
 using CobaltCoreArchipelago.MenuPatches;
+using CobaltCoreArchipelago.StoryPatches;
 
 namespace CobaltCoreArchipelago;
 
@@ -137,6 +138,9 @@ internal class ModEntry : SimpleMod
          */
         foreach (var type in AllRegisterableTypes)
             AccessTools.DeclaredMethod(type, nameof(IRegisterable.Register))?.Invoke(null, [package, helper]);
+        
+        // Add story memories immediately (we won't see them if charsWithLore is not patched anyway)
+        AdditionalStoryNodes.Register(AdditionalStoryNodes.memoryNodes);
 
         ModSettings.RegisterModSettings(
             ModSettings.MakeList([

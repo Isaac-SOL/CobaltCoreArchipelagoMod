@@ -461,6 +461,11 @@ public class Archipelago
         }
         // Patch memories
         Vault.charsWithLore = Mutil.DeepCopy(ModEntry.BaseCharsWithLore);
+        if (SlotDataHelper.Value.AddCharacterMemories)
+        {
+            Vault.charsWithLore.Add(Deck.shard);
+            Vault.charsWithLore.Add(Deck.colorless);
+        }
 
         Ready = true;
         APSaveData.SyncWithHost();  // Consumes items queue
