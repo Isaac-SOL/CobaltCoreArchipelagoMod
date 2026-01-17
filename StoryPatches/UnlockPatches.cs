@@ -135,6 +135,7 @@ internal static class UnlockReplacements
         s.storyVars.unlockedShips.Add(shipkey);
     }
     
+    // Called either by the normal UnlockOneMemory if memories aren't shuffled, otherwise by ApplyItems if they are
     internal static void UnlockOneMemory(StoryVars storyVars, Deck deck)
     {
         storyVars.memoryUnlockLevel.TryAdd(deck, 0);
@@ -143,10 +144,12 @@ internal static class UnlockReplacements
         // Immediately check for goal if we don't have to do the future memory
         // We can't have state in the arguments because of UnlockOneMemoryPatch, so we create a dummy state here
         var dummyState = new State { persistentStoryVars = storyVars };
-        if (Archipelago.InstanceSlotData.DoFutureMemory || !VaultRenderPatch.CanCompleteGame(Vault.GetVaultMemories(dummyState)))
-            return;
-        Debug.Assert(Archipelago.Instance.Session != null, "Archipelago.Instance.Session != null");
-        Archipelago.Instance.Session.SetGoalAchieved();
+        if (!Archipelago.InstanceSlotData.DoFutureMemory &&
+            VaultRenderPatch.CanCompleteGame(Vault.GetVaultMemories(dummyState)))
+        {
+            Debug.Assert(Archipelago.Instance.Session != null, "Archipelago.Instance.Session != null");
+            Archipelago.Instance.Session.SetGoalAchieved();
+        }
     }
 
     internal static void UnlockCodexCard(State s, Type cardType)
