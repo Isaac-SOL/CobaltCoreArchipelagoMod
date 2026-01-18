@@ -138,8 +138,8 @@ public class MainMenuRenderPatch
             var fakeRect = Draw.Text(message, x, y, maxWidth: 250.0, dontDraw: true);
             y -= fakeRect.h + 5.0;
             var pinkColor = Colors.boldPink.fadeAlpha(alpha);
-            Draw.Text($"<c={pinkColor}>></c>", x - 5.0, y);
-            Draw.Text(message, x, y, maxWidth: 250.0);
+            Draw.Text($"<c={pinkColor}>></c>", x - 5.0, y, outline: Colors.black);
+            Draw.Text(message, x, y, maxWidth: 250.0, outline: Colors.black);
             i++;
         }
     }
