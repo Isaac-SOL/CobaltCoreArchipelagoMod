@@ -5,6 +5,7 @@ using System.Reflection.Emit;
 using CobaltCoreArchipelago.MenuPatches;
 using FMOD;
 using HarmonyLib;
+using Microsoft.Extensions.Logging;
 using Debug = System.Diagnostics.Debug;
 
 namespace CobaltCoreArchipelago.StoryPatches;
@@ -51,15 +52,16 @@ public class UnlockCharPatch
 {
     // Nickel seems to be interfering with this function, so we let it happen and then clear if necessary in postfix
     [HarmonyPriority(Priority.Low)]
-    static void Postfix(ref StoryVars __instance)
+    static void Postfix(ref StoryVars __instance, Deck deck)
     {
         if (Archipelago.Instance.APSaveData is null) return;  // May be called before a slot is loaded ?
         // Rewrite unlockedChars entirely from AP inventory
-        __instance.unlockedChars = Archipelago.Instance.APSaveData.AppliedInventory.Keys
-            .Where(deckItem => Archipelago.ItemToDeck.ContainsKey(deckItem))
-            .Select(deckItem => Archipelago.ItemToDeck[deckItem])
+        __instance.unlockedChars = Archipelago.Instance.APSaveData.AppliedInventory
+            .Where(kvp => kvp.Value > 0 && Archipelago.ItemToDeck.ContainsKey(kvp.Key))
+            .Select(kvp => Archipelago.ItemToDeck[kvp.Key])
             .ToHashSet();
         __instance.unlockedCharsToAnnounce.Clear();
+        ModEntry.Instance.Logger.LogWarning("Called UnlockCharPatch on {deck}", deck);
     }
 }
 
@@ -68,15 +70,16 @@ public class UnlockShipPatch
 {
     // Nickel seems to be interfering with this function, so we let it happen and then clear if necessary in postfix
     [HarmonyPriority(Priority.Low)]
-    static void Postfix(ref StoryVars __instance)
+    static void Postfix(ref StoryVars __instance, string shipkey)
     {
         if (Archipelago.Instance.APSaveData is null) return;  // May be called before a slot is loaded ?
         // Rewrite unlockedShips entirely from AP inventory
-        __instance.unlockedShips = Archipelago.Instance.APSaveData.AppliedInventory.Keys
-            .Where(deckItem => Archipelago.ItemToStartingShip.ContainsKey(deckItem))
-            .Select(deckItem => Archipelago.ItemToStartingShip[deckItem])
+        __instance.unlockedShips = Archipelago.Instance.APSaveData.AppliedInventory
+            .Where(kvp => kvp.Value > 0 && Archipelago.ItemToStartingShip.ContainsKey(kvp.Key))
+            .Select(kvp => Archipelago.ItemToStartingShip[kvp.Key])
             .ToHashSet();
         __instance.unlockedShipsToAnnounce.Clear();
+        ModEntry.Instance.Logger.LogWarning("Called UnlockShipPatch on {ship}", shipkey);
     }
 }
 
@@ -101,6 +104,7 @@ public class UnlockOneMemoryPatch
             var count = __instance.memoryUnlockLevel.TryGetValue(deck, out var currCount) ? currCount + 1 : 1;
             UnlockReplacements.SetMemoryCount(s, deck, count);
         }
+        ModEntry.Instance.Logger.LogWarning("Called UnlockOneMemoryPatch on {memory}", deck);
         return false;
     }
 }
