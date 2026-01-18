@@ -85,7 +85,8 @@ public class NewGamePatch
     private static readonly string[] dontMarkSeenKeys =
     [
         // Actual character memory cutscenes
-        "Dizzy_Memory", "Riggs_Memory", "Peri_Memory", "Goat_Memory", "Eunice_Memory", "Hacker_Memory",
+        "Dizzy_Memory", "Riggs_Memory", "Peri_Memory", "Goat_Memory",
+        "Eunice_Memory", "Hacker_Memory", "Shard_Memory", "CAT_Memory",
         // Dialogue branches to pick a character at the end of a run
         "RunWinWho"
     ];
