@@ -78,7 +78,7 @@ public class VaultRenderPatch
 
         Draw.Text(goalString,
                   357.0, (winCon == WinCondition.TotalMemories ? 233.0 : 220.0) + slideIn,
-                  align: TAlign.Center, color: Colors.textBold);
+                  align: TAlign.Center, color: Colors.buttonBoxNormal, outline: Colors.black);
     }
 }
 
