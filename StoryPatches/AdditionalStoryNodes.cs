@@ -23,6 +23,7 @@ internal class CustomSay : Say
 internal class AdditionalStoryNodes
 {
     internal static string AmCat => "comp";
+    internal static string AmCatDeck => Deck.colorless.Key();
     internal static string AmBooks => Deck.shard.Key();
     internal static string AmVoid => "void";
 
@@ -134,9 +135,9 @@ internal class AdditionalStoryNodes
             {
                 type = NodeType.@event,
                 introDelay = false,
-                allPresent = [ AmCat ],
+                allPresent = [ AmCatDeck ],
                 bg = "BGRunWin",
-                lookup = [ $"runWin_{AmCat}" ],
+                lookup = [ $"runWin_{AmCatDeck}" ],
                 lines =
                 [
                     new Wait
@@ -163,9 +164,9 @@ internal class AdditionalStoryNodes
             {
                 type = NodeType.@event,
                 introDelay = false,
-                allPresent = [ AmCat ],
+                allPresent = [ AmCatDeck ],
                 bg = "BGRunWin",
-                lookup = [ $"runWin_{AmCat}" ],
+                lookup = [ $"runWin_{AmCatDeck}" ],
                 requiredScenes = [ "RunWinWho_CAT_1" ],
                 lines =
                 [
@@ -193,9 +194,9 @@ internal class AdditionalStoryNodes
             {
                 type = NodeType.@event,
                 introDelay = false,
-                allPresent = [ AmCat ],
+                allPresent = [ AmCatDeck ],
                 bg = "BGRunWin",
-                lookup = [ $"runWin_{AmCat}" ],
+                lookup = [ $"runWin_{AmCatDeck}" ],
                 requiredScenes = [ "RunWinWho_CAT_2" ],
                 lines =
                 [
@@ -226,7 +227,7 @@ internal class AdditionalStoryNodes
                 type = NodeType.@event,
                 introDelay = false,
                 bg = "BGRunWin",
-                lookup = [ "vault", $"vault_{Deck.shard.Key()}" ],
+                lookup = [ "vault", $"vault_{AmBooks}" ],
                 lines =
                 [
                     new TitleCard(),
@@ -249,7 +250,7 @@ internal class AdditionalStoryNodes
                 type = NodeType.@event,
                 introDelay = false,
                 bg = "BGRunWin",
-                lookup = [ "vault", $"vault_{Deck.shard.Key()}" ],
+                lookup = [ "vault", $"vault_{AmBooks}" ],
                 lines =
                 [
                     new TitleCard(),
@@ -272,7 +273,7 @@ internal class AdditionalStoryNodes
                 type = NodeType.@event,
                 introDelay = false,
                 bg = "BGRunWin",
-                lookup = [ "vault", $"vault_{Deck.shard.Key()}" ],
+                lookup = [ "vault", $"vault_{AmBooks}" ],
                 lines =
                 [
                     new TitleCard(),
@@ -297,7 +298,7 @@ internal class AdditionalStoryNodes
                 type = NodeType.@event,
                 introDelay = false,
                 bg = "BGRunWin",
-                lookup = [ "vault", $"vault_{Deck.colorless.Key()}" ],
+                lookup = [ "vault", $"vault_{AmCatDeck}" ],
                 lines =
                 [
                     new TitleCard(),
@@ -320,7 +321,7 @@ internal class AdditionalStoryNodes
                 type = NodeType.@event,
                 introDelay = false,
                 bg = "BGRunWin",
-                lookup = [ "vault", $"vault_{Deck.colorless.Key()}" ],
+                lookup = [ "vault", $"vault_{AmCatDeck}" ],
                 lines =
                 [
                     new TitleCard(),
@@ -343,7 +344,7 @@ internal class AdditionalStoryNodes
                 type = NodeType.@event,
                 introDelay = false,
                 bg = "BGRunWin",
-                lookup = [ "vault", $"vault_{Deck.colorless.Key()}" ],
+                lookup = [ "vault", $"vault_{AmCatDeck}" ],
                 lines =
                 [
                     new TitleCard(),

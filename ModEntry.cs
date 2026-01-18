@@ -75,6 +75,7 @@ internal class ModEntry : SimpleMod
         ModSettings = helper.ModRegistry.GetApi<IModSettingsApi>("Nickel.ModSettings")!;
         Harmony = new Harmony("SaltyIsaac.CobaltCoreArchipelago");
         Harmony.PatchAll(Assembly.GetExecutingAssembly());
+        RunWinWhoPatch.ApplyPatch(Harmony);
         Archipelago = new Archipelago();
         
         // Fill out static data
