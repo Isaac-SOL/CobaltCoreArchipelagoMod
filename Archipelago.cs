@@ -433,6 +433,7 @@ public class Archipelago
         SlotDataHelper = CobaltCoreArchipelago.SlotDataHelper.FromSlotData(SlotData);
         APSaveData.RoomId = Session.RoomState.Seed;
         MessagesReceived.Clear();
+        MessagePartsReceived.Clear();
         
         // Patch starting decks
         foreach (var deck in ItemToDeck.Values)
