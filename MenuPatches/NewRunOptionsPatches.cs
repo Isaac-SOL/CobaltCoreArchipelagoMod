@@ -1,4 +1,5 @@
-﻿using HarmonyLib;
+﻿using CobaltCoreArchipelago.StoryPatches;
+using HarmonyLib;
 
 namespace CobaltCoreArchipelago.MenuPatches;
 
@@ -32,5 +33,16 @@ public class CharacterRenderPatch
     public static void Prefix(ref bool hideFace)
     {
         hideFace = false;
+    }
+}
+
+// Ensure we don't have unlocked characters we shouldn't have everytime we open the NewRunOptions screen
+[HarmonyPatch(typeof(NewRunOptions), nameof(NewRunOptions.OnEnter))]
+public class NewRunOptionsEnterPatch
+{
+    public static void Postfix(State s)
+    {
+        UnlockCharPatch.RewriteUnlockedCharsFromAP(s.storyVars);
+        UnlockShipPatch.RewriteUnlockedShipsFromAP(s.storyVars);
     }
 }

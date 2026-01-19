@@ -56,12 +56,18 @@ public class UnlockCharPatch
     {
         if (Archipelago.Instance.APSaveData is null) return;  // May be called before a slot is loaded ?
         // Rewrite unlockedChars entirely from AP inventory
-        __instance.unlockedChars = Archipelago.Instance.APSaveData.AppliedInventory
+        RewriteUnlockedCharsFromAP(__instance);
+        ModEntry.Instance.Logger.LogWarning("Called UnlockCharPatch on {deck}", deck);
+    }
+
+    internal static void RewriteUnlockedCharsFromAP(StoryVars storyVars)
+    {
+        Debug.Assert(Archipelago.Instance.APSaveData != null, "Archipelago.Instance.APSaveData != null");
+        storyVars.unlockedChars = Archipelago.Instance.APSaveData.AppliedInventory
             .Where(kvp => kvp.Value > 0 && Archipelago.ItemToDeck.ContainsKey(kvp.Key))
             .Select(kvp => Archipelago.ItemToDeck[kvp.Key])
             .ToHashSet();
-        __instance.unlockedCharsToAnnounce.Clear();
-        ModEntry.Instance.Logger.LogWarning("Called UnlockCharPatch on {deck}", deck);
+        storyVars.unlockedCharsToAnnounce.Clear();
     }
 }
 
@@ -74,12 +80,18 @@ public class UnlockShipPatch
     {
         if (Archipelago.Instance.APSaveData is null) return;  // May be called before a slot is loaded ?
         // Rewrite unlockedShips entirely from AP inventory
-        __instance.unlockedShips = Archipelago.Instance.APSaveData.AppliedInventory
+        RewriteUnlockedShipsFromAP(__instance);
+        ModEntry.Instance.Logger.LogWarning("Called UnlockShipPatch on {ship}", shipkey);
+    }
+
+    internal static void RewriteUnlockedShipsFromAP(StoryVars storyVars)
+    {
+        Debug.Assert(Archipelago.Instance.APSaveData != null, "Archipelago.Instance.APSaveData != null");
+        storyVars.unlockedShips = Archipelago.Instance.APSaveData.AppliedInventory
             .Where(kvp => kvp.Value > 0 && Archipelago.ItemToStartingShip.ContainsKey(kvp.Key))
             .Select(kvp => Archipelago.ItemToStartingShip[kvp.Key])
             .ToHashSet();
-        __instance.unlockedShipsToAnnounce.Clear();
-        ModEntry.Instance.Logger.LogWarning("Called UnlockShipPatch on {ship}", shipkey);
+        storyVars.unlockedShipsToAnnounce.Clear();
     }
 }
 
