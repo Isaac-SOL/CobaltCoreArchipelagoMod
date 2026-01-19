@@ -123,11 +123,11 @@ one game in a multiworld.
 - Make sure the mod has been installed ([Install section](#installing-the-cobalt-core-mod)).
 - Run the game using the Nickel Launcher. Cobalt Core mods only work when the 
 game is run this way.
-- If the mod is correctly installed, the game will always start on the profile
+- If the mod is correctly installed, the game will always start on the save
 selection screen. If it does not, there was an issue during installation.
-- You cannot run already-existing profiles with the Archipelago mod. These will
+- You cannot run already-existing saves with the Archipelago mod. These will
 be marked with a crossed AP icon and will not be clickable.
-Click on an empty profile (delete one if necessary), and you will be prompted
+Click on an empty save (delete one if necessary), and you will be prompted
 for your connection info: hostname, port number, slot name and password.
 - Use the hostname and port number for the previous section. Your slot name will be
 CAT1 by default, but you can change it in the options.yaml file. If you didn't set
