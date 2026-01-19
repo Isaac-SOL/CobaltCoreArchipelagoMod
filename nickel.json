@@ -1,16 +1,10 @@
 {
   "UniqueName": "SaltyIsaac.CobaltCoreArchipelago",
   "DisplayName": "Archipelago",
-  "Version": "0.1.0",
+  "Version": "1.0.0",
   "Author": "SaltyIsaac",
   "Description": "Archipelago multiworld randomizer integration for Cobalt Core.",
   "RequiredApiVersion": "1.5.7",
   "EntryPointAssembly": "CobaltCoreArchipelago.dll",
-  "LoadPhase": "AfterDbInit",
-  "Dependencies": [
-    {
-      "UniqueName": "Shockah.Kokoro",
-      "Version": "1.12.1"
-    }
-  ]
+  "LoadPhase": "AfterDbInit"
 }
