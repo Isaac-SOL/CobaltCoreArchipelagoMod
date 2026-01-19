@@ -102,6 +102,7 @@ public class NewGamePatch
             DB.story.MarkNodeSeen(state, node.Key);
         foreach (var kvp in DB.enemies)
             state.storyVars.RecordEnemyDefeated(kvp.Key);  // No idea but just in case
+        state.storyVars.ResetAfterRun(); // After having seen everything we reset to not affect the first loop
         return state;
     }
     

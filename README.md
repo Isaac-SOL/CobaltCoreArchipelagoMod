@@ -156,8 +156,6 @@ the game immediately.
 - When you finish a run, the void entity will give you the option to fix Book's
 or CAT's timelines even if the `additional_character_memories` setting is `false`.
 I'm not sure what happens if you do that, and you probably shouldn't try it.
-- On your first loop, events (question marks on the map) will not do anything.
-You may want to die immediately to enter your second loop and avoid this issue.
 
 ## Credits
 
