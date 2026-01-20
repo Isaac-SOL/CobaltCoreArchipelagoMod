@@ -60,15 +60,23 @@ public class APSaveData
     internal static IModStorage ModStorage => ModEntry.Instance.Helper.Storage;
 
     [JsonIgnore]
-    internal IEnumerable<Type> FoundCards => AppliedInventory
+    internal IEnumerable<string> AppliedInventoryPositive => AppliedInventory
         .Where(kvp => kvp.Value > 0)
-        .Select(kvp => kvp.Key)
+        .Select(kvp => kvp.Key);
+    [JsonIgnore]
+    internal IEnumerable<string> FoundShips => AppliedInventoryPositive
+        .Intersect(Archipelago.ItemToStartingShip.Keys)
+        .Select(s => Archipelago.ItemToStartingShip[s]);
+    [JsonIgnore]
+    internal IEnumerable<Deck> FoundChars => AppliedInventoryPositive
+        .Intersect(Archipelago.ItemToDeck.Keys)
+        .Select(s => Archipelago.ItemToDeck[s]);
+    [JsonIgnore]
+    internal IEnumerable<Type> FoundCards => AppliedInventoryPositive
         .Intersect(Archipelago.ItemToCard.Keys)
         .Select(s => Archipelago.ItemToCard[s]);
     [JsonIgnore]
-    internal IEnumerable<Type> FoundArtifacts => AppliedInventory
-        .Where(kvp => kvp.Value > 0)
-        .Select(kvp => kvp.Key)
+    internal IEnumerable<Type> FoundArtifacts => AppliedInventoryPositive
         .Intersect(Archipelago.ItemToArtifact.Keys)
         .Select(s => Archipelago.ItemToArtifact[s]);
 
@@ -171,8 +179,12 @@ public class APSaveData
     }
 
     internal bool HasItem(string name) => AppliedInventory.TryGetValue(name, out var value) && value > 0;
-    internal bool HasCard(Type type) => Archipelago.CardToItem.TryGetValue(type, out var value) && HasItem(value);
-    internal bool HasArtifact(Type type) => Archipelago.ArtifactToItem.TryGetValue(type, out var value) && HasItem(value);
+    internal bool HasCard(Type type) => Archipelago.CardToItem.TryGetValue(type, out var value)
+                                        && HasItem(value);
+    internal bool HasArtifact(Type type) => Archipelago.ArtifactToItem.TryGetValue(type, out var value)
+                                            && HasItem(value);
+    internal bool HasChar(Deck deck) => HasItem(Archipelago.ItemToDeck.FirstOrNull(kvp => kvp.Value == deck)?.Key ?? "");
+    internal bool HasShip(string shipkey) => HasItem(Archipelago.ItemToStartingShip.FirstOrNull(kvp => kvp.Value == shipkey)?.Key ?? "");
 
     internal string? GetNextFixTimelineLocationName(Deck deck)
     {

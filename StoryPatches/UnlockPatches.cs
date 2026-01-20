@@ -63,11 +63,10 @@ public class UnlockCharPatch
     internal static void RewriteUnlockedCharsFromAP(StoryVars storyVars)
     {
         Debug.Assert(Archipelago.Instance.APSaveData != null, "Archipelago.Instance.APSaveData != null");
-        storyVars.unlockedChars = Archipelago.Instance.APSaveData.AppliedInventory
-            .Where(kvp => kvp.Value > 0 && Archipelago.ItemToDeck.ContainsKey(kvp.Key))
-            .Select(kvp => Archipelago.ItemToDeck[kvp.Key])
-            .ToHashSet();
-        storyVars.unlockedCharsToAnnounce.Clear();
+        storyVars.unlockedChars = Archipelago.Instance.APSaveData.FoundChars.ToHashSet();
+        storyVars.unlockedCharsToAnnounce = storyVars.unlockedCharsToAnnounce
+            .Where(deck => Archipelago.Instance.APSaveData.HasChar(deck))
+            .ToList();
     }
 }
 
@@ -87,11 +86,10 @@ public class UnlockShipPatch
     internal static void RewriteUnlockedShipsFromAP(StoryVars storyVars)
     {
         Debug.Assert(Archipelago.Instance.APSaveData != null, "Archipelago.Instance.APSaveData != null");
-        storyVars.unlockedShips = Archipelago.Instance.APSaveData.AppliedInventory
-            .Where(kvp => kvp.Value > 0 && Archipelago.ItemToStartingShip.ContainsKey(kvp.Key))
-            .Select(kvp => Archipelago.ItemToStartingShip[kvp.Key])
-            .ToHashSet();
-        storyVars.unlockedShipsToAnnounce.Clear();
+        storyVars.unlockedShips = Archipelago.Instance.APSaveData.FoundShips.ToHashSet();
+        storyVars.unlockedShipsToAnnounce = storyVars.unlockedShipsToAnnounce
+            .Where(shipkey => Archipelago.Instance.APSaveData.HasShip(shipkey))
+            .ToList();
     }
 }
 
@@ -146,12 +144,14 @@ internal static class UnlockReplacements
 {
     internal static void UnlockChar(State s, Deck deck)
     {
-        s.storyVars.unlockedChars.Add(deck);
+        if (s.storyVars.unlockedChars.Add(deck))
+            s.storyVars.unlockedCharsToAnnounce.Add(deck);
     }
     
     internal static void UnlockShip(State s, string shipkey)
     {
-        s.storyVars.unlockedShips.Add(shipkey);
+        if (s.storyVars.unlockedShips.Add(shipkey))
+            s.storyVars.unlockedShipsToAnnounce.Add(shipkey);
     }
     
     // Called either by the normal UnlockOneMemory if memories aren't shuffled, otherwise by ApplyItems if they are

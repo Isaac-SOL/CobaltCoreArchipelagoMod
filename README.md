@@ -144,6 +144,9 @@ found on each character
 by pressing a button.
 - Actual dialogue for the additional Books and CAT memories. (If you're interested
 in writing those, hit me up!)
+- Additional dialogue between characters when getting new items from other players,
+or unlocking items for other players. Lots of dialogue if possible!
+(Also interested in writers for these!)
 - Potentially additional cards or artifacts which give the game more interactivity
 with the multiworld.
 

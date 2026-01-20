@@ -46,8 +46,7 @@ public class CardOfferingPatch
         {
             var cardType = card.GetType();
             if (!Archipelago.CardToItem.TryGetValue(cardType, out var itemName)) continue;
-            if (Archipelago.Instance.APSaveData.AppliedInventory.TryGetValue(
-                    itemName, out var itemCount) && itemCount != 0) continue;
+            if (Archipelago.Instance.APSaveData.HasItem(itemName)) continue;
             card.unplayableOverride = true;
             card.unplayableOverrideIsPermanent = true;
         }
@@ -212,7 +211,7 @@ public class ArtifactOfferingPatch
         
         if (!Archipelago.InstanceSlotData.ShuffleArtifacts) return;
 
-        // PHASE 1: Make given artifact unusable if it is an item but not unlocked
+        // PHASE 1: Make each given artifact unusable if it is an item but not unlocked
         
         var artifactsTemp = new List<Artifact>(__result);
         var selectedTypes = new List<Type>();  // Save in a list to exclude in next phase
@@ -221,18 +220,15 @@ public class ArtifactOfferingPatch
         {
             var artifactType = artifact.GetType();
             selectedTypes.Add(artifactType);
-            if (Archipelago.ArtifactToItem.TryGetValue(artifactType, out var itemName))
+            if (Archipelago.ArtifactToItem.TryGetValue(artifactType, out var itemName)
+                && !Archipelago.Instance.APSaveData.HasItem(itemName))
             {
-                if (!Archipelago.Instance.APSaveData.AppliedInventory.TryGetValue(
-                        itemName, out var itemCount) || itemCount == 0)
-                {
-                    var lockedArtifact = artifact.GetMeta().pools.Contains(ArtifactPool.Boss)
-                        ? new LockedArtifactBoss()
-                        : new LockedArtifact();
-                    lockedArtifact.SetUnderlyingArtifact(artifact);
-                    __result.Add(lockedArtifact);
-                    continue;
-                }
+                var lockedArtifact = artifact.GetMeta().pools.Contains(ArtifactPool.Boss)
+                    ? new LockedArtifactBoss()
+                    : new LockedArtifact();
+                lockedArtifact.SetUnderlyingArtifact(artifact);
+                __result.Add(lockedArtifact);
+                continue;
             }
             __result.Add(artifact);
         }
