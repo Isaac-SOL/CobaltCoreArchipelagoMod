@@ -165,6 +165,8 @@ considering I had no idea what I was doing
 - Ixrec for making the great Nine Sols AP mod whose code helped
 me figure out how an AP integration is supposed to work considering I *also* had no
 idea what I was doing on that front either
+- Landmaster who first started a Cobalt Core Archipelago project which was never
+finished but can be found [here](https://github.com/Landmaster/CobaltCoreArchipelago)
 - All the people in the CC modding community who answered my many questions
 - All the Archipelago contributors for making this frankly absurd project
 - Everyone at Rocket Rat Games for making a very cool and cute game that is not only
