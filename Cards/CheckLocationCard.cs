@@ -97,13 +97,25 @@ public class CheckLocationCard : Card, IRegisterable
 
     public override CardData GetData(State state)
     {
-        string description;
-        if (locationSlotName is null || locationItemName is null)
+        Debug.Assert(Archipelago.Instance.APSaveData != null, "Archipelago.Instance.APSaveData != null");
+        string? description = null;
+        if (Archipelago.Instance.APSaveData.LocationsChecked.Contains(locationName))
         {
+            // Location was already checked
+            // Check that there are no other effects
+            if (Difficulty >= 0 && upgrade == Upgrade.None)
+            {
+                description = Localize("descNothing");
+            } // Otherwise description stays null
+        }
+        else if (locationSlotName is null || locationItemName is null)
+        {
+            // Location was not scouted
             description = Localize("descNotFound");
         }
         else
         {
+            // Location was scouted and not already checked
             if (IsLocal())
             {
                 description = Localize(WillAddCardToDeck(state)

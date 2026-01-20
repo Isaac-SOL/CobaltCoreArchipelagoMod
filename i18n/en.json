@@ -57,15 +57,15 @@
     },
     "action": {
         "AArchipelagoCheckLocation": {
-            "title": "AP Check",
-            "desc": "Check an <c=boldPink>Archipelago</c> location and give an item to someone.",
+            "title": "AP Item",
+            "desc": "Send an <c=boldPink>Archipelago</c> item to someone in the multiworld.",
             "descItem": "<c=card>Item:</c> {0}",
             "descReceiver": "<c=card>Receiver:</c> {0}"
         }
     },
     "card": {
         "CheckLocationCard": {
-            "name": "Archipelago Check!",
+            "name": "Archipelago Item!",
             "descNotFound": "Send an <c=boldPink>Archipelago</c> item.",
             "descBase": "Send {0} to {1}.",
             "descSelf": "Unlock <c=card>{0}</c>.",
@@ -74,7 +74,8 @@
             "descContShield": "\n<c=healthBarShield>Shield {0}</c>.",
             "descContTempShield": "\n<c=healthBarTempShield>Shield {0}</c>.",
             "descContAttack": "\n<c=attack>Attack {0} x{1}</c>.",
-            "descDraw": "Draw {0}."
+            "descDraw": "Draw {0}.",
+            "descNothing": "You already found this item!"
         },
         "DeathLinkBoros": {
             "name": "Linkoboros",
@@ -85,7 +86,7 @@
     },
     "artifact": {
         "CheckLocationArtifact": {
-            "name": "ARCHIPELAGO CHECK!",
+            "name": "ARCHIPELAGO ITEM!",
             "descNotFound": "Send an <c=boldPink>Archipelago</c> item.",
             "descBase": "Send <c=card>{0}</c> to <c=attack>{1}</c>.",
             "descSelf": "Unlock <c=card>{0}</c>.",
