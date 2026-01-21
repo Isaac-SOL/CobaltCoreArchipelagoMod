@@ -150,6 +150,15 @@ or unlocking items for other players. Lots of dialogue if possible!
 - Potentially additional cards or artifacts which give the game more interactivity
 with the multiworld.
 
+### Will other mods be supported?
+
+I don't know for sure yet. If there are compatibility issues with "utility"
+or "quality of life" type mods, I will try my best to fix them. However, the AP
+protocol cannot support added characters or cards as a generic thing, as far as
+I am aware. They would have to each be added individually. If someone can work
+out a solution for this we can discuss it, but if it proves to be too big of
+an undertaking I will probably not do it myself.
+
 ## Known issues
 
 - Using Nickel's import function to import a save from the vanilla game will
