@@ -144,7 +144,7 @@ found on each character
 by pressing a button.
 - Actual dialogue for the additional Books and CAT memories. (If you're interested
 in writing those, hit me up!)
-- Additional dialogue between characters when getting new items from other players,
+- Additional in-combat dialogue between characters when getting new items from other players,
 or unlocking items for other players. Lots of dialogue if possible!
 (Also interested in writers for these!)
 - Potentially additional cards or artifacts which give the game more interactivity
@@ -156,9 +156,6 @@ with the multiworld.
 immediately throw you onto the main menu without connecting to a host. This is not
 supported and will probably crash quickly, but it's fine as long as you close
 the game immediately.
-- When you finish a run, the void entity will give you the option to fix Book's
-or CAT's timelines even if the `additional_character_memories` setting is `false`.
-I'm not sure what happens if you do that, and you probably shouldn't try it.
 
 ## Credits
 
