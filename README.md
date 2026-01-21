@@ -78,18 +78,15 @@ On that page, scroll down to the "Assets" section for the release you want,
 click on the appropriate installer for your system to start downloading it
 (for most Windows users, that will be the file called `Setup.Archipelago.X.Y.Z.exe`),
 then run it.
-- Go to the Releases page of this repository and look at the latest release.
+- Go to the [Releases page of this repository](https://github.com/Isaac-SOL/CobaltCoreArchipelagoMod/releases)
+and look at the latest release.
 There should be three files: A .zip, an .apworld and a .yaml.
 Download all three.
-
-### Installing the Cobalt Core mod
-
-- Extract the .zip file in the `ModLibrary` folder inside your `Nickel` folder.
 
 ### Archipelago tools setup
 
 - Go to your Archipelago installation folder. Typically, that will be `C:\ProgramData\Archipelago`.
-- Put the `Cobalt Core.yaml` file in `Archipelago\Players`.
+- Put the `Cobalt.Core.yaml` file in `Archipelago\Players`.
 You may leave the `.yaml` unchanged to play on default settings, or use your
 favorite text editor to read and change the settings in it.
 - Double-click on the `cobalt_core.apworld` file. Archipelago should display a
@@ -100,7 +97,7 @@ there's now an `cobalt_core.apworld` file in `Archipelago\custom_worlds\`.
 
 Let's create a randomized "multiworld" with only a single Cobalt Core world in it.
 
-- Make sure `Cobalt Core.yaml` is the only file in `Archipelago\Players`
+- Make sure `Cobalt.Core.yaml` is the only file in `Archipelago\Players`
 (subfolders here are fine).
 - Double-click on `Archipelago\ArchipelagoGenerate.exe`. You should see a
 console window appear and then disappear after a few seconds.
@@ -120,7 +117,8 @@ one game in a multiworld.
 
 ### Running the Cobalt Core mod
 
-- Make sure the mod has been installed ([Install section](#installing-the-cobalt-core-mod)).
+- Extract the .zip file you downloaded at the end of the [Prerequisites section](#prerequisites-and-dependencies)
+in the `ModLibrary` folder inside your `Nickel` folder.
 - Run the game using the Nickel Launcher. Cobalt Core mods only work when the 
 game is run this way.
 - If the mod is correctly installed, the game will always start on the save
