@@ -102,11 +102,7 @@ public class CheckLocationCard : Card, IRegisterable
         if (Archipelago.Instance.APSaveData.LocationsChecked.Contains(locationName))
         {
             // Location was already checked
-            // Check that there are no other effects
-            if (Difficulty >= 0 && upgrade == Upgrade.None)
-            {
-                description = Localize("descNothing");
-            } // Otherwise description stays null
+            description = Localize("descNothing");
         }
         else if (locationSlotName is null || locationItemName is null)
         {
