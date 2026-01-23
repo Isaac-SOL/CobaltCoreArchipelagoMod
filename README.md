@@ -12,8 +12,6 @@ The mod may work with other versions, but has not been tested on them.
 
 ## Current Status (January 2026)
 
-### NOTE: The text below is only a placeholder, the mod isn't actually released yet!
-
 Just released! I have tested it on my own with some friends but there may still be
 some bugs I couldn't find yet. If you encounter any issues while playing,
 please ping me on Discord (`saltyisaac`) in the Cobalt Core channel on the
