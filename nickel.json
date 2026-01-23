@@ -1,10 +1,15 @@
 {
   "UniqueName": "SaltyIsaac.CobaltCoreArchipelago",
   "DisplayName": "Archipelago",
-  "Version": "1.0.0",
+  "Version": "{{ModVersion}}",
   "Author": "SaltyIsaac",
   "Description": "Archipelago multiworld randomizer integration for Cobalt Core.",
   "RequiredApiVersion": "1.5.7",
   "EntryPointAssembly": "CobaltCoreArchipelago.dll",
-  "LoadPhase": "AfterDbInit"
+  "LoadPhase": "AfterDbInit",
+  "UpdateChecks": {
+    "GitHub": {
+      "Repository": "Isaac-SOL/CobaltCoreArchipelagoMod"
+    }
+  }
 }
