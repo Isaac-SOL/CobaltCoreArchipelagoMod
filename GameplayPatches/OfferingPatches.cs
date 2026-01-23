@@ -143,15 +143,16 @@ public class CardOfferingPatch
         // Concatenate both picks and cull at random to keep normal offering count
         __result.AddRange(archipelagoCards);
         while (__result.Count > targetCount)
-        {
             __result.RemoveAt(s.rngCardOfferings.NextInt() % __result.Count);
-        }
         __result = __result.Shuffle(s.rngCardOfferings).ToList();
         
         // Scout proposed archipelago cards if the options allow for it
         if (Archipelago.Instance.APSaveData.CardScoutMode == CardScoutMode.DontScout) return;
         
-        var checkCards = __result.Where(card => card is CheckLocationCard).Cast<CheckLocationCard>().ToList();
+        var checkCards = __result
+            .Where(card => card is CheckLocationCard)
+            .Cast<CheckLocationCard>()
+            .ToList();
         var locations = checkCards.Select(card => card.locationName).ToArray();
         
         Archipelago.Instance.CheckLocationInfo(locations).ContinueWith(task =>
@@ -211,7 +212,7 @@ public class ArtifactOfferingPatch
         
         if (!Archipelago.InstanceSlotData.ShuffleArtifacts) return;
 
-        // PHASE 1: Make each given artifact unusable if it is an item but not unlocked
+        // PHASE 1: Remove each artifact if it is an item but not unlocked
         
         var artifactsTemp = new List<Artifact>(__result);
         var selectedTypes = new List<Type>();  // Save in a list to exclude in next phase
@@ -220,17 +221,10 @@ public class ArtifactOfferingPatch
         {
             var artifactType = artifact.GetType();
             selectedTypes.Add(artifactType);
-            if (Archipelago.ArtifactToItem.TryGetValue(artifactType, out var itemName)
-                && !Archipelago.Instance.APSaveData.HasItem(itemName))
-            {
-                var lockedArtifact = artifact.GetMeta().pools.Contains(ArtifactPool.Boss)
-                    ? new LockedArtifactBoss()
-                    : new LockedArtifact();
-                lockedArtifact.SetUnderlyingArtifact(artifact);
-                __result.Add(lockedArtifact);
-                continue;
-            }
-            __result.Add(artifact);
+            // Ensure that the artifact is not an item OR we have it in our inventory
+            if (!Archipelago.ArtifactToItem.TryGetValue(artifactType, out var itemName)
+                || Archipelago.Instance.APSaveData.HasItem(itemName))
+                __result.Add(artifact);
         }
         
         // PHASE 2: Add one found artifact if the option permits it
@@ -263,58 +257,72 @@ public class ArtifactOfferingPatch
                            && !ownedTypes.Contains(ty)
                            && charDecks.Contains(meta.owner);
                 });
-                // If we found a valid artifact, add it, remove at random and go to the next phase
-                if (pickedArtifact is null) continue;
-                __result.Add((Artifact)pickedArtifact.CreateInstance());
-                __result.RemoveAt(s.rngArtifactOfferings.NextInt() % __result.Count);
-                __result = __result.Shuffle(s.rngArtifactOfferings).ToList();
-                break;
+                // If we found a valid artifact, add it and immediately go to the next phase
+                if (pickedArtifact is not null)
+                {
+                    __result.Add((Artifact)pickedArtifact.CreateInstance());
+                    break;
+                }
             }
         }
         
-        // PHASE 3: Attempt to add a single archipelago check artifact, cancel if it fails
-        
+        // PHASE 3: Add archipelago check artifacts
+
         var rng = rngOverride ?? s.rngArtifactOfferings;
         var availableDecks = s.characters.Select(c => c.deckType).ToList();
         availableDecks.Add(Deck.tooth);  // Just a dummy deck, not present in ItemToDeck
         var effPools = limitPools ?? [ArtifactPool.Common];
-        var deck = limitDeck ?? availableDecks.Random(rng);
-        var deckName = Archipelago.ItemToDeck.FirstOrDefault(kvp => kvp.Value == deck, new KeyValuePair<string, Deck>("Basic", Deck.tooth)).Key;
-        string rarityName;
-        if (effPools.Contains(ArtifactPool.Boss))
-            rarityName = "Boss ";
-        else if (effPools.Contains(ArtifactPool.Common))
-            rarityName = "";
-        else
-            rarityName = "N/A ";
-        var locationChoices = Locations.AllMissingLocations
-            .Select(address => Locations.GetLocationNameFromId(address))
-            .Where(name => name.StartsWith($"{deckName} {rarityName}Artifact")).ToList(); // Note the absence of space before "Artifact"
-        if (locationChoices.Count <= 0) return;
+        var rarityName = effPools.Contains(ArtifactPool.Boss) ?   "Boss "
+                       : effPools.Contains(ArtifactPool.Common) ? ""
+                       :                                          "N/A ";
+        var archipelagoArtifacts = new List<CheckLocationArtifact>();
+        var apArtifactsAttempts = 0;
+        while (apArtifactsAttempts++ < 10 && archipelagoArtifacts.Count < count)
+        {
+            var deck = limitDeck ?? availableDecks.Random(rng);
+            var deckName = Archipelago.ItemToDeck.FirstOrDefault(kvp => kvp.Value == deck, new KeyValuePair<string, Deck>("Basic", Deck.tooth)).Key;
+            var locationChoices = Locations.AllMissingLocations
+                .Select(address => Locations.GetLocationNameFromId(address))
+                .Where(name => name.StartsWith($"{deckName} {rarityName}Artifact")).ToList(); // Note the absence of space before "Artifact"
+            if (locationChoices.Count <= 0) continue;
+            
+            var location = locationChoices.Random(s.rngArtifactOfferings)!;
+            // Make sure we don't give multiple of the same location in one offering. The AP package doesn't like that
+            if (archipelagoArtifacts.Any(prevArtifact => prevArtifact.locationName == location))
+                continue;
+                
+            var newArtifact = rarityName == "Boss " ? new CheckLocationArtifactBoss() : new CheckLocationArtifact();
+            newArtifact.locationName = location;
+            
+            archipelagoArtifacts.Add(newArtifact);
+        }
         
-        var location = locationChoices.Random(s.rngArtifactOfferings)!;
-        var newArtifact = rarityName == "Boss " ? new CheckLocationArtifactBoss() : new CheckLocationArtifact();
-        newArtifact.locationName = location;
+        // Concatenate both picks and cull at random to keep normal offering count
+        __result.AddRange(archipelagoArtifacts);
+        while (__result.Count > count)
+            __result.RemoveAt(s.rngCardOfferings.NextInt() % __result.Count);
+        __result = __result.Shuffle(s.rngCardOfferings).ToList();
         
-        // Add the artifact then remove one at random to keep count
-        __result.Add(newArtifact);
-        __result.RemoveAt(s.rngArtifactOfferings.NextInt() % __result.Count);
-        __result = __result.Shuffle(s.rngArtifactOfferings).ToList();
-
-        // If it was picked, scout its location if the options allow for it
+        // Scout proposed archipelago artifacts if the options allow for it
         if (Archipelago.Instance.APSaveData.CardScoutMode == CardScoutMode.DontScout) return;
         
-        if (__result.Contains(newArtifact))
+        var checkArtifacts = __result
+            .Where(artifact => artifact is CheckLocationArtifact)
+            .Cast<CheckLocationArtifact>()
+            .ToList();
+        var locations = checkArtifacts.Select(card => card.locationName).ToArray();
+        
+        Archipelago.Instance.CheckLocationInfo(locations).ContinueWith(task =>
         {
-            Archipelago.Instance.CheckLocationInfo(location).ContinueWith(task =>
+            for (var i = 0; i < checkArtifacts.Count; i++)
             {
-                var info = task.Result[0];
+                var info = task.Result[i];
                 if (info is null)
-                    newArtifact.SetTextInfo("[]", "[]", APColors.Trap);
+                    checkArtifacts[i].SetTextInfo("[]", "[]", APColors.Trap);
                 else
-                    newArtifact.SetTextInfo(info.ItemName, info.Player.Name, info.GetColor());
-            });
-        }
+                    checkArtifacts[i].SetTextInfo(info.ItemName, info.Player.Name, info.GetColor());
+            }
+        });
     }
 }
 
