@@ -5,6 +5,7 @@ using System.Linq;
 using Archipelago.MultiClient.Net.Helpers;
 using CobaltCoreArchipelago.Artifacts;
 using CobaltCoreArchipelago.Cards;
+using CobaltCoreArchipelago.Features;
 using HarmonyLib;
 using Microsoft.Extensions.Logging;
 
@@ -92,7 +93,8 @@ public class CardOfferingPatch
         
         // PHASE 3: Add archipelago check cards
         
-        List<Card> archipelagoCards = [];
+        var archipelagoCards = new List<Card>();
+        var pickedLocations = new List<string>();
         var attempts = 0;
         while (archipelagoCards.Count < targetCount && attempts++ < 5)
         {
@@ -117,15 +119,11 @@ public class CardOfferingPatch
                 // But most of the time we add an actual check card with a set location
                 var locationChoices = Locations.AllMissingLocations
                     .Select(address => Locations.GetLocationNameFromId(address))
-                    .Where(name => name.StartsWith($"{deckName} {rarityName} Card")).ToList();
+                    .Where(name => name.StartsWith($"{deckName} {rarityName} Card") && !pickedLocations.Contains(name))
+                    .ToList();
                 if (locationChoices.Count <= 0) continue;
-            
-                var location = locationChoices.Random(s.rngCardOfferings)!;
-                // Make sure we don't give multiple of the same location in one offering. The AP package doesn't like that
-                if (archipelagoCards.Any(prevCard => prevCard is CheckLocationCard prevAPCard
-                                                     && prevAPCard.locationName == location))
-                    continue;
-            
+
+                var location = NotSoRandomManager.RandomLocation(locationChoices, s.rngCardOfferings);
                 card = rarity switch
                 {
                     Rarity.common => new CheckLocationCard(),
@@ -133,6 +131,7 @@ public class CardOfferingPatch
                     _ => new CheckLocationCardRare()
                 };
                 (card as CheckLocationCard)!.locationName = location;
+                pickedLocations.Add(location);
             }
             card.drawAnim = 1.0;
             card.upgrade = CardReward.GetUpgrade(s, s.rngCardOfferings, s.map, card, s.GetDifficulty() >= 1 ? 0.5 : 1.0, overrideUpgradeChances);
@@ -154,6 +153,8 @@ public class CardOfferingPatch
             .Cast<CheckLocationCard>()
             .ToList();
         var locations = checkCards.Select(card => card.locationName).ToArray();
+        NotSoRandomManager.AddSeenLocations(locations);
+        APSaveData.Save();
         
         Archipelago.Instance.CheckLocationInfo(locations).ContinueWith(task =>
         {
@@ -276,6 +277,7 @@ public class ArtifactOfferingPatch
                        : effPools.Contains(ArtifactPool.Common) ? ""
                        :                                          "N/A ";
         var archipelagoArtifacts = new List<CheckLocationArtifact>();
+        var pickedLocations = new List<string>();
         var apArtifactsAttempts = 0;
         while (apArtifactsAttempts++ < 10 && archipelagoArtifacts.Count < count)
         {
@@ -283,18 +285,16 @@ public class ArtifactOfferingPatch
             var deckName = Archipelago.ItemToDeck.FirstOrDefault(kvp => kvp.Value == deck, new KeyValuePair<string, Deck>("Basic", Deck.tooth)).Key;
             var locationChoices = Locations.AllMissingLocations
                 .Select(address => Locations.GetLocationNameFromId(address))
-                .Where(name => name.StartsWith($"{deckName} {rarityName}Artifact")).ToList(); // Note the absence of space before "Artifact"
+                .Where(name => name.StartsWith($"{deckName} {rarityName}Artifact") && !pickedLocations.Contains(name))
+                .ToList(); // Note the absence of space before "Artifact"
             if (locationChoices.Count <= 0) continue;
-            
-            var location = locationChoices.Random(s.rngArtifactOfferings)!;
-            // Make sure we don't give multiple of the same location in one offering. The AP package doesn't like that
-            if (archipelagoArtifacts.Any(prevArtifact => prevArtifact.locationName == location))
-                continue;
-                
+
+            var location = NotSoRandomManager.RandomLocation(locationChoices, rng);
             var newArtifact = rarityName == "Boss " ? new CheckLocationArtifactBoss() : new CheckLocationArtifact();
             newArtifact.locationName = location;
             
             archipelagoArtifacts.Add(newArtifact);
+            pickedLocations.Add(location);
         }
         
         // Concatenate both picks and cull at random to keep normal offering count
@@ -303,14 +303,17 @@ public class ArtifactOfferingPatch
             __result.RemoveAt(s.rngCardOfferings.NextInt() % __result.Count);
         __result = __result.Shuffle(s.rngCardOfferings).ToList();
         
-        // Scout proposed archipelago artifacts if the options allow for it
-        if (Archipelago.Instance.APSaveData.CardScoutMode == CardScoutMode.DontScout) return;
-        
+        // Add seen locations to the NotSoRandomManager so that they won't be seen for a while
         var checkArtifacts = __result
             .Where(artifact => artifact is CheckLocationArtifact)
             .Cast<CheckLocationArtifact>()
             .ToList();
         var locations = checkArtifacts.Select(card => card.locationName).ToArray();
+        NotSoRandomManager.AddSeenLocations(locations);
+        APSaveData.Save();
+        
+        // Scout proposed archipelago artifacts if the options allow for it
+        if (Archipelago.Instance.APSaveData.CardScoutMode == CardScoutMode.DontScout) return;
         
         Archipelago.Instance.CheckLocationInfo(locations).ContinueWith(task =>
         {

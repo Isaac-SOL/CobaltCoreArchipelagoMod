@@ -46,6 +46,8 @@ public class APSaveData
     internal int LastCombatCount { get; set; }
     [JsonProperty]
     internal int DeathLinkCount { get; set; }
+    [JsonProperty]
+    internal List<string> RecentlySeenLocations { get; set; }
     
     // Mod settings
     [JsonProperty]
@@ -95,6 +97,7 @@ public class APSaveData
         Password = password;
         AppliedInventory = new Dictionary<string, int>();
         LocationsChecked = [];
+        RecentlySeenLocations = [];
     }
 
     internal static void LoadAllSaves()
