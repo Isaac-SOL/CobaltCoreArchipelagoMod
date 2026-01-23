@@ -56,13 +56,12 @@ In order to unlock ships, characters, cards, artifacts, or items for other
 games, you will find new cards and artifacts which unlock an item when played.
 Which items you find will depend on which characters you have in your run.
 
-Deathlink can be toggled in the mod settings in-game.
-
 The goal is to accumulate a certain amount of memories (1 for each character by
 default), which unlocks the Future Memory sequence. Finishing this sequence
 completes the game.
 
-There are more details in the YAML options file as well as in the in-game mod settings.
+There are more details in the YAML options file as well as in the in-game
+mod settings (such as Deathlink).
 
 ## Installation
 
@@ -128,7 +127,7 @@ be marked with a crossed AP icon and will not be clickable.
 Click on an empty save (delete one if necessary), and you will be prompted
 for your connection info: hostname, port number, slot name and password.
 - Use the hostname and port number for the previous section. Your slot name will be
-CAT1 by default, but you can change it in the options.yaml file. If you didn't set
+CAT1 by default, but you can change it in `Cobalt.Core.yaml`. If you didn't set
 a password you can leave it empty.
 - Press "Connect", and, if everything went right, you should be in the main menu.
 You are now connected and ready to start playing with other people!
