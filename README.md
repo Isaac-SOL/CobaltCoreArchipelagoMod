@@ -51,7 +51,7 @@ be unplayable until they are unlocked by you or another player.
 
 Usual character and ship unlock conditions are removed.
 In order to unlock ships, characters, cards, artifacts, or items for other
-games, you will find new cards and artifacts which unlock an item when played.
+games, you will find special cards and artifacts which unlock an item when played.
 Which items you find will depend on which characters you have in your run.
 
 The goal is to accumulate a certain amount of memories (1 for each character by
@@ -112,7 +112,7 @@ as long as each `.yaml` file has a unique player/slot name. It also doesn't
 matter who plays which game; it's common for one human player to play more than
 one game in a multiworld.
 
-### Running the Cobalt Core mod
+### Installing and running the Cobalt Core mod
 
 - Extract the .zip file you downloaded at the end of the [Prerequisites section](#prerequisites-and-dependencies)
 in the `ModLibrary` folder inside your `Nickel` folder.
@@ -124,7 +124,7 @@ selection screen. If it does not, there was an issue during installation.
 be marked with a crossed AP icon and will not be clickable.
 Click on an empty save (delete one if necessary), and you will be prompted
 for your connection info: hostname, port number, slot name and password.
-- Use the hostname and port number for the previous section. Your slot name will be
+- Use the hostname and port number from the previous section. Your slot name will be
 CAT1 by default, but you can change it in `Cobalt.Core.yaml`. If you didn't set
 a password you can leave it empty.
 - Press "Connect", and, if everything went right, you should be in the main menu.
