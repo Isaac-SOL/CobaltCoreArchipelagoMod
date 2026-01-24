@@ -160,6 +160,9 @@ an undertaking I will probably not do it myself.
 immediately throw you onto the main menu without connecting to a host. This is not
 supported and will probably crash quickly, but it's fine as long as you close
 the game immediately.
+- Sometimes, after finishing a run, you may see a notifications for new
+unlocked characters or ships that aren't actually unlocked yet. This does not
+affect gameplay, the unlocks work correctly, it's the notifications that are bugged.
 
 ## Credits
 
