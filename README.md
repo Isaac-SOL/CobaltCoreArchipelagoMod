@@ -1,5 +1,7 @@
 # Cobalt Core Archipelago
 
+![Logo](assets/CCAP_full.png)
+
 A Cobalt Core mod for [the Archipelago multi-game randomizer system](https://archipelago.gg/).
 
 - Version: 1.0.0
