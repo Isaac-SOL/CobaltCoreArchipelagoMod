@@ -14,6 +14,7 @@ using CobaltCoreArchipelago.External;
 using CobaltCoreArchipelago.ConnectionInfoMenu;
 using CobaltCoreArchipelago.MenuPatches;
 using CobaltCoreArchipelago.StoryPatches;
+using TheJazMaster.CombatQoL;
 
 namespace CobaltCoreArchipelago;
 
@@ -22,6 +23,7 @@ internal class ModEntry : SimpleMod
     internal static ModEntry Instance { get; private set; } = null!;
     internal Harmony Harmony;
     internal IModSettingsApi ModSettings;
+    internal ICombatQolApi? CombatQol;
     internal ILocalizationProvider<IReadOnlyList<string>> AnyLocalizations { get; }
     internal ILocaleBoundNonNullLocalizationProvider<IReadOnlyList<string>> Localizations { get; }
 
@@ -73,6 +75,7 @@ internal class ModEntry : SimpleMod
     {
         Instance = this;
         ModSettings = helper.ModRegistry.GetApi<IModSettingsApi>("Nickel.ModSettings")!;
+        CombatQol = helper.ModRegistry.GetApi<ICombatQolApi>("TheJazMaster.CombatQoL");
         Harmony = new Harmony("SaltyIsaac.CobaltCoreArchipelago");
         Harmony.PatchAll(Assembly.GetExecutingAssembly());
         RunWinWhoPatch.ApplyPatch(Harmony);

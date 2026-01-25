@@ -130,6 +130,19 @@ a password you can leave it empty.
 - Press "Connect", and, if everything went right, you should be in the main menu.
 You are now connected and ready to start playing with other people!
 
+## Mods that are supported / known to work with AP
+
+- [CombatQoL](https://www.nexusmods.com/cobaltcore/mods/49)
+
+### Will other mods be supported?
+
+I don't know for sure yet. If there are compatibility issues with "utility"
+or "quality of life" type mods, I will try my best to fix them. However, the AP
+protocol cannot support added characters or cards as a generic thing, as far as
+I am aware. They would have to each be added individually. If someone can work
+out a solution for this we can discuss it, but if it proves to be too big of
+an undertaking I will probably not do it myself.
+
 ## Planned features (no promises!)
 
 - In-game tracker: A way to know how many cards and artifacts are left to be
@@ -144,15 +157,6 @@ or unlocking items for other players. Lots of dialogue if possible!
 (Also interested in writers for these!)
 - Potentially additional cards or artifacts which give the game more interactivity
 with the multiworld.
-
-### Will other mods be supported?
-
-I don't know for sure yet. If there are compatibility issues with "utility"
-or "quality of life" type mods, I will try my best to fix them. However, the AP
-protocol cannot support added characters or cards as a generic thing, as far as
-I am aware. They would have to each be added individually. If someone can work
-out a solution for this we can discuss it, but if it proves to be too big of
-an undertaking I will probably not do it myself.
 
 ## Known issues
 

@@ -5,6 +5,7 @@ using System.Linq;
 using CobaltCoreArchipelago.Cards;
 using HarmonyLib;
 using Nickel;
+using TheJazMaster.CombatQoL;
 
 namespace CobaltCoreArchipelago.Actions;
 
@@ -22,7 +23,10 @@ public class AArchipelagoCheckLocation : CardAction
     public override void Begin(G g, State s, Combat c)
     {
         Debug.Assert(locationName != null, nameof(locationName) + " != null");
-        Archipelago.Instance.CheckLocation(locationName);
+        // Can't undo an AP card with CombatQoL
+        var combatQoL = ModEntry.Instance.CombatQol;
+        combatQoL?.InvalidateUndos(c, ICombatQolApi.InvalidationReason.NONE);
+        if (!combatQoL?.IsSimulating() ?? true) Archipelago.Instance.CheckLocation(locationName);
     }
     
     public override Icon? GetIcon(State s)
