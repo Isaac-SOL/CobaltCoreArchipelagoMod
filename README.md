@@ -142,8 +142,7 @@ You are now connected and ready to start playing with other people!
 - Combat QoL ([NexusMods](https://www.nexusmods.com/cobaltcore/mods/49)):
 Support is implemented but has not been tested thoroughly yet
 - More Difficulty Options ([NexusMods](https://www.nexusmods.com/cobaltcore/mods/15), [GitHub](https://github.com/TheJazMaster/MoreDifficulties/releases/latest)):
-Higher difficulties work, you just can't set them as the minimum. Alternative
-starter decks do not work at the moment.
+Higher difficulties work, you just can't set them as the minimum.
 - Extra Boot Options ([NexusMods](https://www.nexusmods.com/cobaltcore/mods/80), [GitHub](https://github.com/Vin-117/CobaltCoreExtraBootOptions/releases))
 
 ### Will other mods be supported?
@@ -182,7 +181,7 @@ affect gameplay, the unlocks work correctly, it's the notifications that are bug
 
 ## Credits
 
-- Shockah for making Nickel
+- Shockah for making Nickel and helping me with various issues
 - rft50 for making the DemoMod that eased me into modding Cobalt Core
 considering I had no idea what I was doing
 - Ixrec for making the great Nine Sols AP mod whose code helped

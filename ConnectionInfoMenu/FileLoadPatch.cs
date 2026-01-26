@@ -61,12 +61,6 @@ public class StartupFileLoadPatch
 [HarmonyPatch(typeof(State), nameof(State.NewGame))]
 public class NewGamePatch
 {
-    // ReSharper disable once RedundantAssignment
-    static void Prefix(ref bool skipTutorial)
-    {
-        skipTutorial = true;
-    }
-
     static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions, ILGenerator generator)
     {
         List<CodeInstruction> storedInstructions = new(instructions);
@@ -75,8 +69,10 @@ public class NewGamePatch
         codeMatcher.MatchStartForward(
                 CodeMatch.WithOpcodes([OpCodes.Stloc_0])
             ).ThrowIfInvalid("Could not find state store instructions")
+            .RemoveInstructions(20) // Remove call to PopulateRun and skipTutorial set
             .InsertAndAdvance(
-                CodeInstruction.Call<State, State>(state => EditStateForNewFile(state))
+                CodeInstruction.Call<State, State>(state => EditStateForNewFile(state)),
+                CodeInstruction.StoreLocal(0)
             );
 
         return codeMatcher.Instructions();
@@ -93,16 +89,23 @@ public class NewGamePatch
 
     public static State EditStateForNewFile(State state)
     {
+        state.storyVars.skipTutorial = true;
+        var startingChars = Archipelago.InstanceSlotData.StartingCharacters;
+        state.storyVars.unlockedChars = new HashSet<Deck>(startingChars);
+        state.storyVars.unlockedShips = [Archipelago.InstanceSlotData.StartingShip];
+        state.runConfig.selectedChars = new HashSet<Deck>(startingChars);
         state.runConfig.selectedShip = Archipelago.InstanceSlotData.StartingShip;
-        state.runConfig.selectedChars = new HashSet<Deck>(Archipelago.InstanceSlotData.StartingCharacters);
         // Based on Cheat.UnlockAllContent
         state.storyVars.winCount = 500;  // Forces vault button to be visible.
-        // We view all story nodes but exclude some
         foreach (var node in DB.story.all.Where(kvp => !dontMarkSeenKeys.Any(s => kvp.Key.StartsWith(s))))
-            DB.story.MarkNodeSeen(state, node.Key);
+            DB.story.MarkNodeSeen(state, node.Key);  // We view all story nodes but exclude some
         foreach (var kvp in DB.enemies)
             state.storyVars.RecordEnemyDefeated(kvp.Key);  // No idea but just in case
-        state.storyVars.ResetAfterRun(); // After having seen everything we reset to not affect the first loop
+        // Start a loop and end it immediately
+        state.PopulateRun(StarterShip.ships["artemis"], chars: startingChars);
+        state.ship.hull = 0;
+        state.storyVars.ResetAfterRun();
+        state.ChangeRoute(() => new NewRunOptions());
         return state;
     }
     
@@ -111,17 +114,9 @@ public class NewGamePatch
 [HarmonyPatch(typeof(State), nameof(State.PopulateRun))]
 public class PopulateRunPatch
 {
-    static void Prefix(State __instance, ref IEnumerable<Deck>? chars, ref int difficulty)
+    static void Prefix(State __instance, ref int difficulty)
     {
         Debug.Assert(Archipelago.Instance.APSaveData != null, "Archipelago.Instance.APSaveData != null");
-        
-        if (chars == null)
-        {
-            // Should only happen in a new game
-            chars = Archipelago.InstanceSlotData.StartingCharacters;
-            __instance.storyVars.unlockedChars = new HashSet<Deck>(chars);
-            __instance.storyVars.unlockedShips = [Archipelago.InstanceSlotData.StartingShip];
-        }
 
         if (!Archipelago.Instance.APSaveData.BypassDifficulty && difficulty < Archipelago.InstanceSlotData.MinimumDifficulty)
         {
