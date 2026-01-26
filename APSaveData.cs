@@ -184,8 +184,12 @@ public class APSaveData
     internal bool HasItem(string name) => AppliedInventory.TryGetValue(name, out var value) && value > 0;
     internal bool HasCard(Type type) => Archipelago.CardToItem.TryGetValue(type, out var value)
                                         && HasItem(value);
+    internal bool HasCardOrNotAP(Type type) => !Archipelago.CardToItem.TryGetValue(type, out var value)
+                                               || HasItem(value);
     internal bool HasArtifact(Type type) => Archipelago.ArtifactToItem.TryGetValue(type, out var value)
                                             && HasItem(value);
+    internal bool HasArtifactOrNotAP(Type type) => !Archipelago.ArtifactToItem.TryGetValue(type, out var value)
+                                                   || HasItem(value);
     internal bool HasChar(Deck deck) => HasItem(Archipelago.ItemToDeck.FirstOrNull(kvp => kvp.Value == deck)?.Key ?? "");
     internal bool HasShip(string shipkey) => HasItem(Archipelago.ItemToStartingShip.FirstOrNull(kvp => kvp.Value == shipkey)?.Key ?? "");
 

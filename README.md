@@ -134,15 +134,14 @@ You are now connected and ready to start playing with other people!
 
 ## Mods that are supported / known to work with AP
 
-- Kokoro ([NexusMods](https://www.nexusmods.com/cobaltcore/mods/4))
 - Rerolls ([NexusMods](https://www.nexusmods.com/cobaltcore/mods/2))
-- Codex Helper ([NexusMods](https://www.nexusmods.com/cobaltcore/mods/20), [GitHub](https://github.com/Shockah/Cobalt-Core-Mods/blob/master/CodexHelper/docs/README.md))
 - Better Run Summaries ([NexusMods](https://www.nexusmods.com/cobaltcore/mods/19))
 - UI Suite ([NexusMods](https://www.nexusmods.com/cobaltcore/mods/45))
 - Combat QoL ([NexusMods](https://www.nexusmods.com/cobaltcore/mods/49)):
 Support is implemented but has not been tested thoroughly yet
 - More Difficulty Options ([NexusMods](https://www.nexusmods.com/cobaltcore/mods/15), [GitHub](https://github.com/TheJazMaster/MoreDifficulties/releases/latest)):
 Higher difficulties work, you just can't set them as the minimum.
+Be careful, alternate starting cards aren't unlocked at the start!
 - Extra Boot Options ([NexusMods](https://www.nexusmods.com/cobaltcore/mods/80), [GitHub](https://github.com/Vin-117/CobaltCoreExtraBootOptions/releases))
 
 ### Will other mods be supported?
