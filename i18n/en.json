@@ -19,7 +19,7 @@
         "back": "BACK"
     },
     "settings": {
-        "profileWarning": "<c=redd>THIS MOD DOES NOT SUPPORT PROFILES!</c>",
+        "profileWarning": "<c=redd>THIS MOD DOES NOT SUPPORT PROFILES!\nSETTINGS ARE SAVED PER-SLOT.</c>",
         "deathlink": {
             "settingName": "Deathlink",
             "tooltipName": "<c=artifact>DEATHLINK</c>",
