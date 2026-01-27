@@ -105,6 +105,8 @@ public class UnlockOneMemoryPatch
             var location = Archipelago.Instance.APSaveData.GetNextFixTimelineLocationName(deck);
             if (location is not null)
                 Archipelago.Instance.CheckLocation(location);
+            else
+                ModEntry.Instance.Logger.LogError("Could not find location to check on memory unlock with deck {deck}", deck);
         }
         else
         {
