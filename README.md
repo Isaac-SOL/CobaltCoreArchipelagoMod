@@ -12,6 +12,8 @@ A Cobalt Core mod for [the Archipelago multi-game randomizer system](https://arc
 
 The mod may work with other versions, but has not been tested on them.
 
+[Associated APWorld repository](https://github.com/Isaac-SOL/Archipelago-CobaltCore)
+
 ## Current Status (January 2026)
 
 Just released! I have tested it on my own with some friends but there may still be
