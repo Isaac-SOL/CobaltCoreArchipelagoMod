@@ -12,7 +12,7 @@ A Cobalt Core mod for [the Archipelago multi-game randomizer system](https://arc
 
 The mod may work with other versions, but has not been tested on them.
 
-[Associated APWorld repository](https://github.com/Isaac-SOL/Archipelago-CobaltCore)
+[Associated APWorld repository](https://github.com/Isaac-SOL/Archipelago-CobaltCore/tree/cobalt-core/worlds/cobalt_core)
 
 ## Current Status (January 2026)
 
