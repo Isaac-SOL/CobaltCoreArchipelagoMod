@@ -126,8 +126,7 @@ public class PopulateRunPatch
         __instance.storyVars.spikeName = new List<StoryVars.SpikeNames>
         {
             StoryVars.SpikeNames.spiketwo,
-            StoryVars.SpikeNames.george,
-            StoryVars.SpikeNames.bramblepelt
+            StoryVars.SpikeNames.george
         }.Random(__instance.rngShuffle);
     }
     
