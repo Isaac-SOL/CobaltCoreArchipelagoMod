@@ -36,15 +36,15 @@ public static class ItemApplier
         {
             if (Archipelago.InstanceSlotData.ShuffleMemories)
             {
-                ModEntry.Instance.Logger.LogError("Received {memory}, but memories aren't shuffled. Bug?", item.name);
-            }
-            else
-            {
                 // Memories are shuffled: we get the values from the AP inventory and ignore the Cobalt Core value
                 var count = Archipelago.Instance.APSaveData.AppliedInventory.TryGetValue(item.name, out var currCount)
                     ? currCount + 1
                     : 1;
                 UnlockReplacements.SetMemoryCount(state, deckMemory, count);
+            }
+            else
+            {
+                ModEntry.Instance.Logger.LogError("Received {memory}, but memories aren't shuffled. Bug?", item.name);
             }
         }
         else if (Archipelago.ItemToCard.TryGetValue(item.name, out var card))
