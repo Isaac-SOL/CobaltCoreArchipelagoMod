@@ -109,7 +109,8 @@ public class CardOfferingPatch
             };
 
             Card card;
-            if (rarity == Rarity.rare && s.rngCardOfferings.NextInt() % 100 > 92)
+            if (Archipelago.Instance.APSaveData.DeathLinkActive
+                && rarity == Rarity.rare && s.rngCardOfferings.NextInt() % 100 > 95)
             {
                 // Sometimes replace rare cards with a DeathLinkBoros
                 card = new DeathLinkBoros();
