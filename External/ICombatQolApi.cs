@@ -14,6 +14,7 @@ public interface ICombatQolApi {
         DYING_ENEMY = 1<<5,
         DYING_PLAYER = 1<<6,
         TURN_END = 1<<7,
+        CUSTOM_REASON = 1<<8
     }
 	enum RngTypes {
 		ACTION, SHUFFLE, AI, CARD_OFFERINGS, CARD_OFFERINGS_MIDCOMBAT, ARTIFACT_OFFERINGS
@@ -28,6 +29,8 @@ public interface ICombatQolApi {
 	void ClearKnownCards(Combat c, CardDestination destination);
 
 	void InvalidateUndos(Combat c, InvalidationReason reason);
+	
+	void InvalidateUndos(Combat c, InvalidationReason reason, string? message);
 
 	void MarkCardAsOkayToBeGone(Combat c, Card card);
 

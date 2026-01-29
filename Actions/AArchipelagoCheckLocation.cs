@@ -25,7 +25,7 @@ public class AArchipelagoCheckLocation : CardAction
         Debug.Assert(locationName != null, nameof(locationName) + " != null");
         // Can't undo an AP card with CombatQoL
         var combatQoL = ModEntry.Instance.CombatQol;
-        combatQoL?.InvalidateUndos(c, ICombatQolApi.InvalidationReason.NONE);
+        combatQoL?.InvalidateUndos(c, ICombatQolApi.InvalidationReason.CUSTOM_REASON, "sending an Archipelago item");
         if (!combatQoL?.IsSimulating() ?? true) Archipelago.Instance.CheckLocation(locationName);
     }
     
