@@ -131,6 +131,7 @@ internal class ModEntry : SimpleMod
 
         ConnectionInfoInput.TextBoxSpr = RegisterSprite(package, "assets/UI/Textbox.png").Sprite;
         ConnectionInfoInput.TextBoxHoverSpr = RegisterSprite(package, "assets/UI/Textbox_hover.png").Sprite;
+        ConnectionInfoInput.LeftArrowSpr = RegisterSprite(package, "assets/UI/LeftArrow.png").Sprite;
 
         MainMenuPatch.TextBoxSpr = RegisterSprite(package, "assets/UI/Textbox_mainMenu.png").Sprite;
         MainMenuPatch.TextBoxHoverSpr = RegisterSprite(package, "assets/UI/Textbox_mainMenu_hover.png").Sprite;

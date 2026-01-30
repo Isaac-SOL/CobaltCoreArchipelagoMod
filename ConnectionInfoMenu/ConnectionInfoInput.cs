@@ -14,7 +14,7 @@ namespace CobaltCoreArchipelago.ConnectionInfoMenu;
 
 public class ConnectionInfoInput : Route, OnInputPhase, OnMouseDown
 {
-    internal static Spr TextBoxSpr, TextBoxHoverSpr;
+    internal static Spr TextBoxSpr, TextBoxHoverSpr, LeftArrowSpr;
 
     internal int SlotIdx { get; set; }
     internal State.SaveSlot? SaveSlot { get; set; }
@@ -123,7 +123,7 @@ public class ConnectionInfoInput : Route, OnInputPhase, OnMouseDown
                 if (blinkStartTime == 0.0) blinkStartTime = g.time;
                 var offsetTime = g.time - blinkStartTime;
                 if (offsetTime - Math.Floor(offsetTime) < 0.5) textToDraw += "<c=boldPink>|</c>";
-                Draw.Text("~", immButton.v.x + 226.0, immButton.v.y + 3.0, font: DB.stapler, color: Colors.boldPink);
+                Draw.Sprite(LeftArrowSpr, immButton.v.x + 226.0, immButton.v.y + 4.0, color: Colors.boldPink);
             }
             // Draw editable text
             Draw.Text(textToDraw, immButton.v.x + 5.0, immButton.v.y + 8.0,
