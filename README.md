@@ -139,7 +139,7 @@ You are now connected and ready to start playing with other people!
 - Rerolls ([NexusMods](https://www.nexusmods.com/cobaltcore/mods/2))
 - Better Run Summaries ([NexusMods](https://www.nexusmods.com/cobaltcore/mods/19))
 - UI Suite ([NexusMods](https://www.nexusmods.com/cobaltcore/mods/45))
-- Combat QoL >= 1.6.0 ([NexusMods](https://www.nexusmods.com/cobaltcore/mods/49))
+- Combat QoL >= 1.6.1 ([NexusMods](https://www.nexusmods.com/cobaltcore/mods/49))
 - More Difficulty Options ([NexusMods](https://www.nexusmods.com/cobaltcore/mods/15), [GitHub](https://github.com/TheJazMaster/MoreDifficulties/releases/latest)):
 Higher difficulties work, you just can't set them as the minimum.
 Be careful, alternate starting cards aren't unlocked at the start!

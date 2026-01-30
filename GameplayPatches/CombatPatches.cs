@@ -1,29 +1,33 @@
 ﻿using System.Diagnostics;
+using CobaltCoreArchipelago.Cards;
 using HarmonyLib;
 
 namespace CobaltCoreArchipelago.GameplayPatches;
 
 public class CombatPatches;
 
-// Check that cards are locked or unlocked each time they are drawn
-// This is *a tad* overkill, but shouldn't have much of a performance impact,
-// and ensures that the cards are always consistent with the AP inventory
 [HarmonyPatch(typeof(Combat), nameof(Combat.SendCardToHand))]
 public static class SendCardToHandPatch
 {
     public static void Postfix(Card card)
     {
         Debug.Assert(Archipelago.Instance.APSaveData != null, "Archipelago.Instance.APSaveData != null");
-        if (!Archipelago.CardToItem.ContainsKey(card.GetType())) return;
-        if (Archipelago.Instance.APSaveData.HasCard(card.GetType()))
+        
+        // Recheck non-scouted AP locations just in case
+        if (Archipelago.Instance.APSaveData.CardScoutMode == CardScoutMode.DontScout
+            || card is not CheckLocationCard apCard) return;
+        
+        if (apCard.locationItemName is null or "[]")
         {
-            card.unplayableOverride = false;
-            card.unplayableOverrideIsPermanent = false;
-        }
-        else
-        {
-            card.unplayableOverride = true;
-            card.unplayableOverrideIsPermanent = true;
+            // TODO: this WILL break if we draw multiple non-scouted AP cards in quick succession
+            Archipelago.Instance.ScoutLocationInfo(apCard.locationName).ContinueWith(task =>
+            {
+                var info = task.Result[0];
+                if (info is null)
+                    apCard.SetTextInfo("[]", "[]", APColors.Trap);
+                else
+                    apCard.SetTextInfo(info.ItemName, info.Player.Name, info.GetColor());
+            });
         }
     }
 }

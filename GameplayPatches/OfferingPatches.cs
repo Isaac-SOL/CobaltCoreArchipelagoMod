@@ -43,14 +43,7 @@ public class CardOfferingPatch
         
         // PHASE 1: Make each given card unusable if it is an item but not unlocked
         
-        foreach (var card in __result)
-        {
-            var cardType = card.GetType();
-            if (!Archipelago.CardToItem.TryGetValue(cardType, out var itemName)) continue;
-            if (Archipelago.Instance.APSaveData.HasItem(itemName)) continue;
-            card.unplayableOverride = true;
-            card.unplayableOverrideIsPermanent = true;
-        }
+        // REMOVED: This is now handled with OnGetDynamicInnateCardTraitOverrides in ModEntry
         
         // PHASE 2: Add one found card if the option permits it
         
@@ -157,7 +150,7 @@ public class CardOfferingPatch
         NotSoRandomManager.AddSeenLocations(locations);
         APSaveData.Save();
         
-        Archipelago.Instance.CheckLocationInfo(locations).ContinueWith(task =>
+        Archipelago.Instance.ScoutLocationInfo(locations).ContinueWith(task =>
         {
             for (var i = 0; i < checkCards.Count; i++)
             {
@@ -316,7 +309,7 @@ public class ArtifactOfferingPatch
         // Scout proposed archipelago artifacts if the options allow for it
         if (Archipelago.Instance.APSaveData.CardScoutMode == CardScoutMode.DontScout) return;
         
-        Archipelago.Instance.CheckLocationInfo(locations).ContinueWith(task =>
+        Archipelago.Instance.ScoutLocationInfo(locations).ContinueWith(task =>
         {
             for (var i = 0; i < checkArtifacts.Count; i++)
             {

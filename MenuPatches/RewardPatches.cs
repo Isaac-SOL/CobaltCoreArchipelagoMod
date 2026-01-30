@@ -40,7 +40,7 @@ public static class CardRewardRenderPatch
 
             if (locations.Length > 0)
             {
-                Archipelago.Instance.CheckLocationInfo(locations).ContinueWith(task =>
+                Archipelago.Instance.ScoutLocationInfo(locations).ContinueWith(task =>
                 {
         
                     for (var i = 0; i < checkCards.Count; i++)
@@ -89,7 +89,7 @@ public static class ArtifactRewardRenderPatch
 
             if (locations.Length > 0)
             {
-                Archipelago.Instance.CheckLocationInfo(locations).ContinueWith(task =>
+                Archipelago.Instance.ScoutLocationInfo(locations).ContinueWith(task =>
                 {
                     for (var i = 0; i < checkArtifacts.Count; i++)
                     {

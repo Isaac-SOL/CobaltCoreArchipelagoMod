@@ -622,7 +622,7 @@ public class Archipelago
         }
     }
 
-    internal async Task<ScoutedItemInfo?[]> CheckLocationInfo(params string[] locationNames)
+    internal async Task<ScoutedItemInfo?[]> ScoutLocationInfo(params string[] locationNames)
     {
         Debug.Assert(Session != null, nameof(Session) + " != null");
         Debug.Assert(APSaveData != null, nameof(APSaveData) + " != null");

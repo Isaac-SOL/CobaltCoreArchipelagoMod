@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using CobaltCoreArchipelago.Actions;
 using CobaltCoreArchipelago.StoryPatches;
 using HarmonyLib;
 using Microsoft.Extensions.Logging;
@@ -23,6 +24,11 @@ public static class ItemApplier
         }
 
         var slotData = Archipelago.InstanceSlotData;
+        var combat = state.route as Combat;
+        
+        // If we have CombatQoL installed, any state update can be undone in combat unless we explicitly prevent it
+        // We add a guard both *before* and *after* just in case the player undoes at the wrong time
+        combat?.Queue(new AInvalidateUndos());
         
         if (Archipelago.ItemToStartingShip.TryGetValue(item.name, out var ship))
         {
@@ -85,7 +91,7 @@ public static class ItemApplier
                         _ => false
                     })
                 {
-                    if (state.route is Combat combat && !combat.EitherShipIsDead(state))
+                    if (combat is not null && !combat.EitherShipIsDead(state))
                     {
                         combat.Queue(new AAddCard
                         {
@@ -121,7 +127,7 @@ public static class ItemApplier
                         _ => false
                     } && hasShip)
                 {
-                    if (state.route is Combat combat && !combat.EitherShipIsDead(state))
+                    if (combat is not null && !combat.EitherShipIsDead(state))
                     {
                         combat.Queue(new AAddArtifact
                         {
@@ -137,7 +143,9 @@ public static class ItemApplier
             // Also unlock artifacts in current deck if applicable
             UnlockReplacements.UnlockCodexArtifact(state, artifact);
         }
-
+        
+        // If we have CombatQoL installed, any state update can be undone in combat unless we explicitly prevent it
+        combat?.Queue(new AInvalidateUndos());
         Archipelago.Instance.APSaveData.AddAppliedItem(item.name);
     }
 

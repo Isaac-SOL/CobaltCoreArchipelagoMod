@@ -60,7 +60,11 @@
             "title": "AP Item",
             "desc": "Send an <c=boldPink>Archipelago</c> item to someone in the multiworld.",
             "descItem": "<c=card>Item:</c> {0}",
-            "descReceiver": "<c=card>Receiver:</c> {0}"
+            "descReceiver": "<c=card>Receiver:</c> {0}",
+            "cannotUndoReason": "sending an Archipelago item"
+        },
+        "AInvalidateUndos": {
+            "cannotUndoReason": "receiving an item from Archipelago"
         }
     },
     "card": {

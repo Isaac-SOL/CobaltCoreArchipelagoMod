@@ -5,6 +5,7 @@ using Nickel;
 using Nickel.ModSettings;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using CobaltCoreArchipelago.Actions;
@@ -70,6 +71,8 @@ internal class ModEntry : SimpleMod
     private static IEnumerable<Type> AllRegisterableTypes =
         DemoCardTypes
             .Concat(DemoArtifactTypes);
+
+    internal static IModCards ModCards => Instance.Helper.Content.Cards;
 
     public ModEntry(IPluginPackage<IModManifest> package, IModHelper helper, ILogger logger) : base(package, helper, logger)
     {
@@ -223,6 +226,19 @@ internal class ModEntry : SimpleMod
                 }
             })
         );
+
+        // Set non-unlocked cards as unplayable
+        Helper.Content.Cards.OnGetDynamicInnateCardTraitOverrides += (_, args) =>
+        {
+            Debug.Assert(Archipelago.Instance.APSaveData != null, "Archipelago.Instance.APSaveData != null");
+            if (Archipelago.CardToItem.TryGetValue(args.Card.GetType(), out var cardItem)
+                && !Archipelago.Instance.APSaveData.HasItem(cardItem)
+                // All cards are unlocked during the finale (for now at least)
+                && MG.inst.g.state.route is not Combat { otherShip.ai: FinaleFrienemy })
+            {
+                args.SetOverride(ModCards.UnplayableCardTrait, true);
+            }
+        };
     }
 
     private string LocalizeSettings(params string[] key) => Localizations.Localize(new List<string>{"settings"}.Concat(key).ToArray());
