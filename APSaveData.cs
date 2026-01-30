@@ -51,9 +51,11 @@ public class APSaveData
     
     // Mod settings
     [JsonProperty]
-    internal bool DeathLinkActive { get; set; } = true;
+    internal DeathLinkMode DeathLinkMode { get; set; } = DeathLinkMode.Off;
     [JsonProperty]
-    internal CardScoutMode CardScoutMode { get; set; } = CardScoutMode.CreateHint;
+    internal int DeathLinkHullDamage { get; set; } = 4;
+    [JsonProperty]
+    internal CardScoutMode CardScoutMode { get; set; } = CardScoutMode.ScoutOnly;
     [JsonProperty]
     internal bool BypassDifficulty { get; set; } = false;
     [JsonProperty]
@@ -212,4 +214,12 @@ internal enum CardScoutMode
     DontScout = 0,
     ScoutOnly,
     CreateHint
+}
+
+internal enum DeathLinkMode
+{
+    Off = 0,
+    Missing,
+    HullDamage,
+    Death
 }

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using Nanoray.PluginManager;
@@ -8,8 +9,6 @@ namespace CobaltCoreArchipelago.Cards;
 
 public class DeathLinkBoros : Card, IRegisterable
 {
-    private const int stepBase = 3, stepA = 3, stepB = 6;
-    
     public static void Register(IPluginPackage<IModManifest> package, IModHelper helper)
     {
         helper.Content.Cards.RegisterCard(new CardConfiguration
@@ -25,16 +24,37 @@ public class DeathLinkBoros : Card, IRegisterable
         });
     }
 
-    private (int step, int value, int remainder) GeatDeathLinkInfo()
+    private int GetHullDamageFactor() => Archipelago.Instance.APSaveData!.DeathLinkHullDamage switch
+    {
+        1 => 5,
+        2 => 4,
+        3 or 4 => 3,
+        5 or 6 or 7 or 8 => 2,
+        _ => 1
+    };
+
+    private int GetDeathLinkStep() => (upgrade, Archipelago.Instance.APSaveData!.DeathLinkMode) switch
+    {
+        (Upgrade.A,    DeathLinkMode.Missing) => 8,
+        (Upgrade.B,    DeathLinkMode.Missing) => 16,
+        (Upgrade.None, DeathLinkMode.Missing) => 8,
+
+        (Upgrade.A,    DeathLinkMode.HullDamage) => GetHullDamageFactor(),
+        (Upgrade.B,    DeathLinkMode.HullDamage) => GetHullDamageFactor() * 2,
+        (Upgrade.None, DeathLinkMode.HullDamage) => GetHullDamageFactor(),
+
+        (Upgrade.A,    DeathLinkMode.Death) => 1,
+        (Upgrade.B,    DeathLinkMode.Death) => 2,
+        (Upgrade.None, DeathLinkMode.Death) => 1,
+
+        _ => 10
+    };
+
+    private (int step, int value, int remainder) GetDeathLinkInfo()
     {
         Debug.Assert(Archipelago.Instance.APSaveData != null, "Archipelago.Instance.APSaveData != null");
         var deathLinks = Archipelago.Instance.APSaveData.DeathLinkCount;
-        var step = upgrade switch
-        {
-            Upgrade.A => stepA,
-            Upgrade.B => stepB,
-            _ => stepBase
-        };
+        var step = GetDeathLinkStep();
         var value = deathLinks / step;
         var remainder = deathLinks % step;
         return (step, value, remainder);
@@ -42,7 +62,7 @@ public class DeathLinkBoros : Card, IRegisterable
 
     public override List<CardAction> GetActions(State s, Combat c)
     {
-        var (_, value, _) = GeatDeathLinkInfo();
+        var (_, value, _) = GetDeathLinkInfo();
         return upgrade switch
         {
             Upgrade.A =>
@@ -50,6 +70,13 @@ public class DeathLinkBoros : Card, IRegisterable
                 new AStatus
                 {
                     status = Status.shield,
+                    targetPlayer = true,
+                    mode = AStatusMode.Add,
+                    statusAmount = value
+                },
+                new AStatus
+                {
+                    status = Status.tempShield,
                     targetPlayer = true,
                     mode = AStatusMode.Add,
                     statusAmount = value
@@ -81,13 +108,16 @@ public class DeathLinkBoros : Card, IRegisterable
 
     public override CardData GetData(State state)
     {
-        var (step, value, remainder) = GeatDeathLinkInfo();
+        var (step, value, remainder) = GetDeathLinkInfo();
         var description = string.Format(upgrade switch
         {
             Upgrade.A => Localize("descA"),
             Upgrade.B => Localize("descB"),
             _ => Localize("descBase")
-        }, value, remainder, step);
+        }, value);
+        description += step == 1
+            ? Localize("descRampOne")
+            : string.Format(Localize("descRamp"), remainder, step);
         return new CardData
         {
             cost = 2,

@@ -25,6 +25,12 @@ public class CardOfferingPatch
         }
     }
 
+    private static int DeathLinkBorosRarity() => Archipelago.Instance.APSaveData!.DeathLinkMode switch
+    {
+        DeathLinkMode.Off => 200,
+        _ => 95
+    };
+
     static void Postfix(
         ref List<Card> __result,
         State s,
@@ -102,8 +108,7 @@ public class CardOfferingPatch
             };
 
             Card card;
-            if (Archipelago.Instance.APSaveData.DeathLinkActive
-                && rarity == Rarity.rare && s.rngCardOfferings.NextInt() % 100 > 95)
+            if (rarity == Rarity.rare && s.rngCardOfferings.NextInt() % 100 > DeathLinkBorosRarity())
             {
                 // Sometimes replace rare cards with a DeathLinkBoros
                 card = new DeathLinkBoros();

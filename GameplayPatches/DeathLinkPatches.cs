@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
 using Archipelago.MultiClient.Net.BounceFeatures.DeathLink;
+using CobaltCoreArchipelago.Features;
 using HarmonyLib;
 using Microsoft.Extensions.Logging;
 
@@ -29,10 +30,10 @@ public static class CheckDeathPatch
         if (Archipelago.Instance.APSaveData.LastCombatCount > state.storyVars.combatsThisRun)
             Archipelago.Instance.APSaveData.LastCombatCount = 0;
         // If PreventDeathLink was set earlier (in the case of a received DeathLink), we consume it and do nothing.
-        if ((!Archipelago.Instance.APSaveData?.DeathLinkActive ?? false) || Archipelago.Instance.PreventDeathLink)
+        if ((Archipelago.Instance.APSaveData?.DeathLinkMode ?? DeathLinkMode.Off) == DeathLinkMode.Off || DeathLinkManager.PreventDeathLink)
         {
             ModEntry.Instance.Logger.LogInformation("Tried sending a DeathLink, but it was prevented");
-            Archipelago.Instance.PreventDeathLink = false;
+            DeathLinkManager.PreventDeathLink = false;
         }
         else
         {

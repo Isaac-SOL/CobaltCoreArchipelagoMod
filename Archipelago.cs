@@ -11,6 +11,7 @@ using Archipelago.MultiClient.Net.Enums;
 using Archipelago.MultiClient.Net.Helpers;
 using Archipelago.MultiClient.Net.MessageLog.Messages;
 using Archipelago.MultiClient.Net.Models;
+using CobaltCoreArchipelago.Features;
 using CobaltCoreArchipelago.GameplayPatches;
 using HarmonyLib;
 using Microsoft.Extensions.Logging;
@@ -369,7 +370,6 @@ public class Archipelago
     public ILogger Logger => ModEntry.Instance.Logger;
     public bool Ready { get; private set; } = false;
     public DeathLinkService? DeathLinkService { get; set; }
-    public bool PreventDeathLink { get; set; } = false;
 
     private static ConcurrentBag<(string name, string sender)> receivedItemsToProcess = [];
     private static readonly object itemReceivedLock = new();
@@ -476,7 +476,7 @@ public class Archipelago
 
         DeathLinkService = Session.CreateDeathLinkService();
         DeathLinkService.OnDeathLinkReceived += OnDeathLinkReceived;
-        if (APSaveData.DeathLinkActive)
+        if (APSaveData.DeathLinkMode != DeathLinkMode.Off)
             DeathLinkService.EnableDeathLink();
     }
 
@@ -600,22 +600,7 @@ public class Archipelago
         {
             if (lastDeathLink is not null && state.storyVars.hasStartedGame && state.ship.hull > 0)
             {
-                state.ship.hull = 0;
-                // Snaps us to the base screen to trigger the animation right now.
-                state.routeOverride = null;
-                if (state.route is Combat combat)
-                    combat.routeOverride = null;
-                if (g.metaRoute is not null)
-                    g.CloseRoute(g.metaRoute);
-                // Save a message to replace the void shout
-                GetVoidShoutPatch.DeathLinkMessage = lastDeathLink.Cause is null 
-                    ? $"{lastDeathLink.Source}?"
-                    : $"{lastDeathLink.Source}\n{lastDeathLink.Cause}";
-                // Ensures that this received DeathLink won't cause us to trigger a new DeathLink ourselves
-                PreventDeathLink = true;
-                // Add to the count and save
-                APSaveData.DeathLinkCount++;
-                APSaveData.Save();
+                DeathLinkManager.ApplyDeathLink(g, lastDeathLink);
             }
 
             lastDeathLink = null;

@@ -164,14 +164,44 @@ internal class ModEntry : SimpleMod
                 ModSettings.MakePadding(
                     ModSettings.MakeText(() => LocalizeSettings("profileWarning")),
                     4, 8),
-                ModSettings.MakeCheckbox(
+                ModSettings.MakeEnumStepper(
                         () => LocalizeSettings("deathlink", "settingName"),
-                        () => Archipelago.APSaveData!.DeathLinkActive,
-                        (_, _, value) => Archipelago.APSaveData!.DeathLinkActive = value)
-                    .SetTooltips(() => [
+                        () => Archipelago.APSaveData!.DeathLinkMode,
+                        value => Archipelago.APSaveData!.DeathLinkMode = value)
+                    .SetValueFormatter(value => value switch
+                    {
+                        DeathLinkMode.Off => LocalizeSettings("deathlink", "nameOff"),
+                        DeathLinkMode.Missing => LocalizeSettings("deathlink", "nameMissing"),
+                        DeathLinkMode.HullDamage => LocalizeSettings("deathlink", "nameHullDamage"),
+                        _ => LocalizeSettings("deathlink", "nameDeath")
+                    })
+                    .SetValueWidth(_ => 105)
+                    .SetTooltips(() => new List<Tooltip>
+                    {
                         new TTText(LocalizeSettings("deathlink", "tooltipName")),
-                        new TTText(LocalizeSettings("deathlink", "desc"))
-                    ]),
+                        new TTText(LocalizeSettings("deathlink", "desc")),
+                        new TTDivider()
+                    }.Append(new TTText(Archipelago.APSaveData!.DeathLinkMode switch
+                    {
+                        DeathLinkMode.Off => LocalizeSettings("deathlink", "descOff"),
+                        DeathLinkMode.Missing => LocalizeSettings("deathlink", "descMissing"),
+                        DeathLinkMode.HullDamage => LocalizeSettings("deathlink", "descHullDamage"),
+                        _ => LocalizeSettings("deathlink", "descDeath")
+                    }))),
+                ModSettings.MakeConditional(
+                    ModSettings.MakeNumericStepper(
+                            () => LocalizeSettings("deathlinkHullDamage", "settingName"),
+                            () => Archipelago.APSaveData!.DeathLinkHullDamage,
+                            value => Archipelago.APSaveData!.DeathLinkHullDamage = value,
+                            minValue: 1,
+                            maxValue: 50)
+                        .SetTooltips(() => new List<Tooltip>
+                        {
+                            new TTText(LocalizeSettings("deathlinkHullDamage", "tooltipName")),
+                            new TTText(LocalizeSettings("deathlinkHullDamage", "desc"))
+                        }),
+                    () => Archipelago.APSaveData!.DeathLinkMode == DeathLinkMode.HullDamage
+                    ),
                 ModSettings.MakeEnumStepper(
                         () => LocalizeSettings("automaticScouting", "settingName"),
                         () => Archipelago.APSaveData!.CardScoutMode,
@@ -188,12 +218,12 @@ internal class ModEntry : SimpleMod
                         new TTText(LocalizeSettings("automaticScouting", "tooltipName")),
                         new TTText(LocalizeSettings("automaticScouting", "desc")),
                         new TTDivider(),
-                    }.Append(Archipelago.APSaveData!.CardScoutMode switch
+                    }.Append(new TTText(Archipelago.APSaveData!.CardScoutMode switch
                     {
-                        CardScoutMode.DontScout => new TTText(LocalizeSettings("automaticScouting", "descDontScout")),
-                        CardScoutMode.ScoutOnly => new TTText(LocalizeSettings("automaticScouting", "descScoutOnly")),
-                        _ => new TTText(LocalizeSettings("automaticScouting", "descCreateHint"))
-                    })),
+                        CardScoutMode.DontScout => LocalizeSettings("automaticScouting", "descDontScout"),
+                        CardScoutMode.ScoutOnly => LocalizeSettings("automaticScouting", "descScoutOnly"),
+                        _ => LocalizeSettings("automaticScouting", "descCreateHint")
+                    }))),
                 ModSettings.MakeCheckbox(
                         () => LocalizeSettings("bypassDifficulty", "settingName"),
                         () => Archipelago.APSaveData!.BypassDifficulty,
@@ -213,7 +243,7 @@ internal class ModEntry : SimpleMod
             ]).SubscribeToOnMenuClose(_ =>
             {
                 APSaveData.Save();
-                if (Archipelago.APSaveData!.DeathLinkActive)
+                if (Archipelago.APSaveData!.DeathLinkMode != DeathLinkMode.Off)
                     Archipelago.DeathLinkService!.EnableDeathLink();
                 else
                     Archipelago.DeathLinkService!.DisableDeathLink();
