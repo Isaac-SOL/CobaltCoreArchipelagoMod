@@ -458,12 +458,6 @@ public class Archipelago
                 StarterShip.ships[shipName].ship.parts = Mutil.DeepCopy(new List<Part>(shuffledParts));
             }
         }
-        // Patch difficulties
-        NewRunOptions.difficulties = Mutil.DeepCopy(ModEntry.BaseDifficulties);
-        if (!APSaveData.BypassDifficulty && SlotDataHelper.Value.MinimumDifficulty > 0)
-        {
-            NewRunOptions.difficulties = NewRunOptions.difficulties.Where(difficulty => difficulty.level >= SlotDataHelper.Value.MinimumDifficulty).ToList();
-        }
         // Patch memories
         Vault.charsWithLore = Mutil.DeepCopy(ModEntry.BaseCharsWithLore);
         if (SlotDataHelper.Value.AddCharacterMemories)
@@ -689,7 +683,6 @@ public struct SlotDataHelper
     public bool ShuffleShipParts { get; private set; }
     public List<Type> StartingCards { get; private set; }
     public Dictionary<Deck, List<Type>> DeckStartingCards { get; private set; }
-    public int MinimumDifficulty { get; private set; }
     public WinCondition WinCondition { get; private set; }
     public int WinReqTotal { get; private set; }
     public int WinReqPerChar { get; private set; }
@@ -732,7 +725,6 @@ public struct SlotDataHelper
                 var deck = ((CardMeta)Attribute.GetCustomAttribute(card, typeof(CardMeta))!).deck;
                 res.DeckStartingCards[deck].Add(card);
             }
-            res.MinimumDifficulty = Convert.ToInt32(slotData["minimum_difficulty"]);
             res.WinCondition = (WinCondition)Convert.ToInt32(slotData["win_condition"]);
             res.WinReqTotal = Convert.ToInt32(slotData["memories_required_total"]);
             res.WinReqPerChar = Convert.ToInt32(slotData["memories_required_per_character"]);

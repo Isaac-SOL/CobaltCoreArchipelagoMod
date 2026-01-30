@@ -118,11 +118,6 @@ public class PopulateRunPatch
     {
         Debug.Assert(Archipelago.Instance.APSaveData != null, "Archipelago.Instance.APSaveData != null");
 
-        if (!Archipelago.Instance.APSaveData.BypassDifficulty && difficulty < Archipelago.InstanceSlotData.MinimumDifficulty)
-        {
-            difficulty = Archipelago.InstanceSlotData.MinimumDifficulty;
-        }
-
         __instance.storyVars.spikeName = new List<StoryVars.SpikeNames>
         {
             StoryVars.SpikeNames.spiketwo,

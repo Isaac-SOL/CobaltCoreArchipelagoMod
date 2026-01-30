@@ -30,7 +30,6 @@ internal class ModEntry : SimpleMod
 
     internal Archipelago Archipelago;
     internal static Dictionary<string, StarterShip> BaseShips { get; set; } = new();
-    internal static List<NewRunOptions.DifficultyLevel> BaseDifficulties { get; set; } = [];
     internal static List<Deck> BaseCharsWithLore { get; set; } = [];
 
     internal IDeckEntry ArchipelagoDeck;
@@ -86,7 +85,6 @@ internal class ModEntry : SimpleMod
         
         // Fill out static data
         BaseShips = Mutil.DeepCopy(StarterShip.ships);
-        BaseDifficulties = Mutil.DeepCopy(NewRunOptions.difficulties);
         BaseCharsWithLore = Mutil.DeepCopy(Vault.charsWithLore);
 
         AnyLocalizations = new JsonLocalizationProvider(
@@ -251,13 +249,6 @@ internal class ModEntry : SimpleMod
                     Archipelago.DeathLinkService!.EnableDeathLink();
                 else
                     Archipelago.DeathLinkService!.DisableDeathLink();
-                NewRunOptions.difficulties = Mutil.DeepCopy(BaseDifficulties);
-                if (!Archipelago.APSaveData.BypassDifficulty && Archipelago.SlotDataHelper!.Value.MinimumDifficulty > 0)
-                {
-                    NewRunOptions.difficulties = NewRunOptions.difficulties.Where(difficulty =>
-                                difficulty.level >= Archipelago.SlotDataHelper!.Value.MinimumDifficulty)
-                        .ToList();
-                }
             })
         );
 
