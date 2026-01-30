@@ -13,6 +13,7 @@ using Archipelago.MultiClient.Net.MessageLog.Messages;
 using Archipelago.MultiClient.Net.Models;
 using CobaltCoreArchipelago.Features;
 using CobaltCoreArchipelago.GameplayPatches;
+using CobaltCoreArchipelago.MenuPatches;
 using HarmonyLib;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json.Linq;
@@ -434,6 +435,9 @@ public class Archipelago
         APSaveData.RoomId = Session.RoomState.Seed;
         MessagesReceived.Clear();
         MessagePartsReceived.Clear();
+        MessagePartsReceived.Add([
+            (ModEntry.Instance.Localizations.Localize(["mainMenu", "welcomeMessage"]), Colors.white)
+        ]);
         
         // Patch starting decks
         foreach (var deck in ItemToDeck.Values)
@@ -570,6 +574,7 @@ public class Archipelago
         {
             MessagesReceived.Add(sb.ToString());
             MessagePartsReceived.Add(parts.ToArray());
+            if (MainMenuPatch.messagesPos != 0) MainMenuPatch.messagesPos++;
         }
     }
 

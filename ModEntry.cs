@@ -132,8 +132,11 @@ internal class ModEntry : SimpleMod
         ConnectionInfoInput.TextBoxSpr = RegisterSprite(package, "assets/UI/Textbox.png").Sprite;
         ConnectionInfoInput.TextBoxHoverSpr = RegisterSprite(package, "assets/UI/Textbox_hover.png").Sprite;
 
+        MainMenuPatch.TextBoxSpr = RegisterSprite(package, "assets/UI/Textbox_mainMenu.png").Sprite;
+        MainMenuPatch.TextBoxHoverSpr = RegisterSprite(package, "assets/UI/Textbox_mainMenu_hover.png").Sprite;
+
         DrawCorePatch.SmolCobaltSpr = RegisterSprite(package, "assets/UI/SmolCobalt.png").Sprite;
-        MainMenuRenderPatch.ArchipelagoTitleSpr = RegisterSprite(package, "assets/UI/ArchipelagoLogo.png").Sprite;
+        MainMenuPatch.ArchipelagoTitleSpr = RegisterSprite(package, "assets/UI/ArchipelagoLogo.png").Sprite;
         MkSlotPatch.ArchipelagoSaveSpr = RegisterSprite(package, "assets/UI/ArchipelagoSave.png").Sprite;
         MkSlotPatch.NotArchipelagoSaveSpr = RegisterSprite(package, "assets/UI/NotArchipelagoSave2.png").Sprite;
         
@@ -269,6 +272,9 @@ internal class ModEntry : SimpleMod
                 args.SetOverride(ModCards.UnplayableCardTrait, true);
             }
         };
+
+        // TextInput in main menu (easier to do through the manager rather than disconnect/reconnect every time)
+        MG.inst.Window.TextInput += MainMenuPatch.OnTextInput;
     }
 
     private string LocalizeSettings(params string[] key) => Localizations.Localize(new List<string>{"settings"}.Concat(key).ToArray());
