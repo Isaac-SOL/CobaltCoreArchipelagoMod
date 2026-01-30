@@ -116,6 +116,7 @@ public static class ItemApplier
                 var newArtifactMeta = newArtifact.GetMeta();
                 var local = item.sender == Archipelago.Instance.APSaveData.Slot;
                 var hasDeck = state.characters.Any(character => character.deckType == newArtifactMeta.owner);
+                // TODO Ship check not working for some reason!
                 var hasShip = Archipelago.ItemToDeck.ContainsValue(newArtifactMeta.owner)
                               || newArtifactMeta.owner.Key() == state.ship.key;
                 if (slotData.ImmediateArtifactRewards switch

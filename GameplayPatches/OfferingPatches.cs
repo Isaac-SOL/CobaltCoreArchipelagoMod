@@ -322,15 +322,3 @@ public class ArtifactOfferingPatch
         });
     }
 }
-
-// TODO this causes a crash "duplicate ui key" when the player has multiple locked / archipelago artifacts
-// [HarmonyPatch(typeof(State), nameof(State.AddNonCharacterArtifact))]
-// class AddNonCharacterArtifactPatch
-// {
-//     // Allow having multiple of the same artifact (for archipelago and locked artifacts)
-//     public static bool Prefix(State __instance, Artifact artifact)
-//     {
-//         __instance.artifacts.Add(artifact);
-//         return false;
-//     }
-// }

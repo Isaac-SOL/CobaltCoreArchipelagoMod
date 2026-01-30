@@ -234,7 +234,7 @@ internal class ModEntry : SimpleMod
             if (Archipelago.CardToItem.TryGetValue(args.Card.GetType(), out var cardItem)
                 && !Archipelago.Instance.APSaveData.HasItem(cardItem)
                 // All cards are unlocked during the finale (for now at least)
-                && MG.inst.g.state.route is not Combat { otherShip.ai: FinaleFrienemy })
+                && args.State.route is not Combat { otherShip.ai: FinaleFrienemy })
             {
                 args.SetOverride(ModCards.UnplayableCardTrait, true);
             }
