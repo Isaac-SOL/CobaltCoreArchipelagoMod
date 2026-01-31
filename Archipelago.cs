@@ -378,7 +378,8 @@ public class Archipelago
     private static readonly object deathLinkLock = new();
     public List<string> MessagesReceived { get; } = [];
     public List<(string message, Color color)[]> MessagePartsReceived { get; } = [];
-    private static readonly object messagesReceivedLock = new();
+    internal static readonly object messagesReceivedLock = new();
+    private const int MaxMessages = 2000;
 
     public Archipelago()
     {
@@ -568,7 +569,14 @@ public class Archipelago
         {
             MessagesReceived.Add(sb.ToString());
             MessagePartsReceived.Add(parts.ToArray());
-            if (MainMenuPatch.messagesPos != 0) MainMenuPatch.messagesPos++;
+            if (MessagePartsReceived.Count > MaxMessages)
+            {
+                MessagesReceived.RemoveAt(0);
+                MessagePartsReceived.RemoveAt(0);
+            }
+            // Move the cursor to keep it in place even if new messages appear (except if it's at the bottom)
+            if (MainMenuPatch.messagesPos != 0)
+                MainMenuPatch.messagesPos = Math.Min(MainMenuPatch.messagesPos + 1, MaxMessages);
         }
     }
 

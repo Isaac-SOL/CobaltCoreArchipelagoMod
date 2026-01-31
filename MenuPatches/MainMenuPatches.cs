@@ -103,7 +103,7 @@ public class MainMenuPatch
     internal static double blinkStartTime;
     internal static int messagesPos = 0;
     
-    internal static int MaxMessages => commandLineSelected ? 15 : 5;
+    internal static int MaxMessages => commandLineSelected ? 20 : 5;
     
     [HarmonyPatch(nameof(MainMenu.Render))]
     [HarmonyPostfix]
@@ -147,30 +147,34 @@ public class MainMenuPatch
         // Draw AP messages
         // I think in order to do a fade we have no choice but to fade each part separately
         // This is a lot of work each frame though...
-        var parts = Archipelago.Instance.MessagePartsReceived;
-        var partsStart = Math.Max(parts.Count - messagesPos - MaxMessages, 0);
-        var partsEnd = Math.Max(parts.Count - messagesPos, 0);
-        var lastMessages = parts.Take(new Range(partsStart, partsEnd)).Reverse();
-        var x = 185.0;
-        var y = 250.0;
-        int i = 0;
-        foreach (var messageParts in lastMessages)
+        lock (Archipelago.messagesReceivedLock)
         {
-            var alpha = (double)(MaxMessages - i) / MaxMessages;
-            alpha = Math.Pow(alpha, 0.75);
-            var fadedParts = messageParts.Select(part => (part.message, part.color.fadeAlpha(alpha))).ToArray();
-            var sb = new StringBuilder();
-            foreach (var part in fadedParts)
+            var parts = Archipelago.Instance.MessagePartsReceived;
+            var partsStart = Math.Max(parts.Count - messagesPos - MaxMessages, 0);
+            var partsEnd = Math.Max(parts.Count - messagesPos, 0);
+            var lastMessages = parts.Take(new Range(partsStart, partsEnd)).Reverse();
+            var x = 185.0;
+            var y = 250.0;
+            int i = 0;
+            foreach (var messageParts in lastMessages)
             {
-                sb.Append($"<c={part.Item2}>{part.message}</c>");
+                var alpha = (double)(MaxMessages - i) / MaxMessages;
+                alpha = Math.Pow(alpha, 0.65);
+                var fadedParts = messageParts.Select(part => (part.message, part.color.fadeAlpha(alpha))).ToArray();
+                var sb = new StringBuilder();
+                foreach (var part in fadedParts)
+                {
+                    var effMessage = string.IsNullOrWhiteSpace(part.message) ? "." : part.message;
+                    sb.Append($"<c={part.Item2}>{effMessage}</c>");
+                }
+                var message = sb.ToString();
+                var fakeRect = Draw.Text(message, x, y, maxWidth: 250.0, dontDraw: true);
+                y -= fakeRect.h + 5.0;
+                var pinkColor = Colors.boldPink.fadeAlpha(alpha);
+                Draw.Text($"<c={pinkColor}>></c>", x - 5.0, y, outline: Colors.black);
+                Draw.Text(message, x, y, maxWidth: 250.0, outline: Colors.black);
+                i++;
             }
-            var message = sb.ToString();
-            var fakeRect = Draw.Text(message, x, y, maxWidth: 250.0, dontDraw: true);
-            y -= fakeRect.h + 5.0;
-            var pinkColor = Colors.boldPink.fadeAlpha(alpha);
-            Draw.Text($"<c={pinkColor}>></c>", x - 5.0, y, outline: Colors.black);
-            Draw.Text(message, x, y, maxWidth: 250.0, outline: Colors.black);
-            i++;
         }
     }
     
