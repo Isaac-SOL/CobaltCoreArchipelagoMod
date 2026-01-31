@@ -423,6 +423,16 @@ public class Archipelago
             Logger.LogError("Stored seed is different from Archipelago host seed");
             code = ArchipelagoErrorCode.RoomIdConflict;
         }
+
+        try
+        {
+            CobaltCoreArchipelago.SlotDataHelper.FromSlotData(SlotData);
+        }
+        catch (SlotDataInvalidException e)
+        {
+            Logger.LogError("Received slot data is invalid for this version:\n{error}", e);
+            code = ArchipelagoErrorCode.SlotDataInvalid;
+        }
         
         return (loginResult, code);
     }
@@ -651,7 +661,8 @@ public enum ArchipelagoErrorCode
 {
     Ok = 0,
     ConnectionIssue,
-    RoomIdConflict
+    RoomIdConflict,
+    SlotDataInvalid
 }
 
 public enum WinCondition

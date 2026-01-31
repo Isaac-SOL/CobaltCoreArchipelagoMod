@@ -13,6 +13,7 @@
         "invalidPort": "Invalid port number",
         "connectionIssue": "Failed to connect to Archipelago host.\nMake sure the address, port, slot name and password are correct.",
         "roomIdConflict": "The room ID has changed since the last time you connected with this save.\nAre you <c=card>absolutely</c> sure you are connecting to the right address/port?",
+        "slotDataInvalid": "The slot data sent by the server could not be parsed.\nAre you using the right version of the mod and APWorld?",
         "connectAnyway": "CONNECT\nANYWAY",
         "cantConnect": "Connection to the host failed.",
         "retry": "RETRY",
