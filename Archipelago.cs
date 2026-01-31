@@ -707,6 +707,7 @@ public struct SlotDataHelper
     public int WinReqPerChar { get; private set; }
     public bool AddCharacterMemories { get; private set; }
     public bool ShuffleMemories { get; private set; }
+    public bool UnlockMemoryForAllCharacters { get; private set; }
     public bool DoFutureMemory { get; private set; }
     public bool ShuffleCards { get; private set; }
     public bool ShuffleArtifacts { get; private set; }
@@ -748,6 +749,7 @@ public struct SlotDataHelper
             res.WinReqTotal = Convert.ToInt32(slotData["memories_required_total"]);
             res.WinReqPerChar = Convert.ToInt32(slotData["memories_required_per_character"]);
             res.ShuffleMemories = Convert.ToBoolean(slotData["shuffle_memories"]);
+            res.UnlockMemoryForAllCharacters = Convert.ToBoolean(slotData["unlock_memory_for_all_characters"]);
             res.DoFutureMemory = Convert.ToBoolean(slotData["do_future_memory"]);
             res.ShuffleCards = Convert.ToBoolean(slotData["shuffle_cards"]);
             res.ShuffleArtifacts = Convert.ToBoolean(slotData["shuffle_artifacts"]);

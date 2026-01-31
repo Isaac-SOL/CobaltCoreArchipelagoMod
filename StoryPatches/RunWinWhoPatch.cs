@@ -22,6 +22,11 @@ public class RunWinWhoPatch
                 .First(m => m.Name.StartsWith($"<{nameof(RunWinHelpers.GetChoices)}>") && m.ReturnType == typeof(Choice)),
             transpiler: new HarmonyMethod(typeof(RunWinWhoPatch).GetMethod(nameof(Transpiler)))
         );
+
+        harmony.Patch(
+            original: typeof(RunWinHelpers).GetMethod(nameof(RunWinHelpers.GetChoices)),
+            postfix: new HarmonyMethod(typeof(RunWinWhoPatch).GetMethod(nameof(GetChoicesPostfix)))
+        );
     }
     
     // Allow CAT and Books to appear on the final choices thrice like other characters
@@ -54,5 +59,27 @@ public class RunWinWhoPatch
     public static bool SkipCharChoice(Deck deck)
     {
         return !Archipelago.InstanceSlotData.AddCharacterMemories && deck is Deck.colorless or Deck.shard;
+    }
+
+    public static void GetChoicesPostfix(List<Choice> __result, State s)
+    {
+        ModEntry.Instance.Logger.LogWarning("GetChoicesPostfix");
+        if (Archipelago.InstanceSlotData.UnlockMemoryForAllCharacters)
+        {
+            __result.Add(new Choice
+            {
+                label = "<c=boldPink>All of them!</c>",
+                key = ".runWin_AllOfThem",
+                actions = s.characters
+                    .Where(c => s.persistentStoryVars.memoryUnlockLevel.GetValueOrDefault((Deck)c.deckType!, 0) < 3
+                                && !SkipCharChoice((Deck)c.deckType!))
+                    .Select(c => new ARunWinCharChoice
+                    {
+                        deck = (Deck)c.deckType!
+                    })
+                    .Cast<CardAction>()
+                    .ToList()
+            });
+        }
     }
 }

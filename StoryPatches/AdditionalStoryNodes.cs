@@ -37,6 +37,27 @@ internal class AdditionalStoryNodes
     
     internal static readonly Dictionary<string, StoryNode> memoryNodes = new()
     {
+        // Triple memory unlock
+        {
+            "RunWinWho_AllOfThem",
+            new StoryNode
+            {
+                type = NodeType.@event,
+                introDelay = false,
+                allPresent = [],
+                bg = "BGRunWin",
+                lookup = [ "runWin_AllOfThem" ],
+                lines =
+                [
+                    new CustomSay
+                    {
+                        who = AmVoid,
+                        flipped = true,
+                        lineKey = ["story", "memory", "AllThreeEndTalk", "Void1"]
+                    }
+                ]
+            }
+        },
         // Books final talks
         {
             "RunWinWho_Shard_1",

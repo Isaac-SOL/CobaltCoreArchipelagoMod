@@ -126,6 +126,10 @@
     },
     "story": {
         "memory": {
+            "AllThreeEndTalk": {
+                "Void1": "Then so it shall be."
+            },
+            
             "BooksEndTalk1": {
                 "Books1": "I'm Books!",
                 "Void1": "Cool"

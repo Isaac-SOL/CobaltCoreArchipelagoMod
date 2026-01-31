@@ -70,6 +70,8 @@ public class UnlockCharPatch
     }
 }
 
+// TODO DoMigrations unlocks Books without using the UnlockChar function!
+
 [HarmonyPatch(typeof(StoryVars), nameof(StoryVars.UnlockShip))]
 public class UnlockShipPatch
 {
