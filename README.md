@@ -172,6 +172,11 @@ with the multiworld.
 
 ## Known issues
 
+- Due to how items are set up at the moment, many items are available right
+at the start, causing the multiworld to have a very big Sphere 1. This causes
+no functional issues but may make the experience more tedious for players.
+- Most win conditions make the game very long for synced games at the moment.
+If you want shorter games, I advise using the total_memories setting.
 - Using Nickel's import function to import a save from the vanilla game will
 immediately throw you onto the main menu without connecting to a host. This is not
 supported and will probably crash quickly, but it's fine as long as you close
@@ -179,6 +184,8 @@ the game immediately.
 - Sometimes, after finishing a run, you may see notifications for new
 unlocked characters or ships that aren't actually unlocked yet. This does not
 affect gameplay, the unlocks work correctly, it's the notifications that are bugged.
+- If Combat QoL is installed, you will be able to locally undo AP checks and received
+AP items. There is no way to restore these undone actions.
 
 ## Credits
 
