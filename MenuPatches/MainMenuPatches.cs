@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Reflection.Emit;
 using System.Text;
+using CobaltCoreArchipelago.Actions;
 using CobaltCoreArchipelago.ConnectionInfoMenu;
 using HarmonyLib;
 using Microsoft.Extensions.Logging;
@@ -129,7 +130,7 @@ public class MainMenuPatch
             new UIKey(ArchipelagoUK.mainMenu_commandLine.ToUK()),
             TextBoxSpr, TextBoxHoverSpr,
             boxColor: Colors.buttonBoxNormal,
-            onMouseDown: __instance
+            onMouseDown: FeatureFlags.Debug ? null : __instance  // Not clickable if debug mode is active
         );
 
         var textToDraw = commandText;
@@ -143,6 +144,16 @@ public class MainMenuPatch
         // Draw editable text
         Draw.Text(textToDraw, immButton.v.x + 5.0, immButton.v.y + 8.0,
                   color: immButton.isHover ? Colors.textChoiceHoverActive : Colors.textChoice);
+        
+        // Warning if we're in debug mode
+        if (FeatureFlags.Debug)
+        {
+            Draw.Sprite(StableSpr.icons_hurt, immButton.v.x + 6, immButton.v.y + 6);
+            if (immButton.isHover)
+            {
+                g.tooltips.Add(immButton.v, new TTText(ModEntry.Instance.Localizations.Localize(["mainMenu", "debugModeWarning"])));
+            }
+        }
         
         // Draw AP messages
         // I think in order to do a fade we have no choice but to fade each part separately
@@ -182,7 +193,7 @@ public class MainMenuPatch
     [HarmonyPostfix]
     public static void OnMouseDownPostfix(G g, Box b)
     {
-        if (b.key == ArchipelagoUK.mainMenu_commandLine.ToUK())
+        if (b.key == ArchipelagoUK.mainMenu_commandLine.ToUK() && !FeatureFlags.Debug)
         {
             commandLineSelected = true;
             blinkStartTime = g.time;

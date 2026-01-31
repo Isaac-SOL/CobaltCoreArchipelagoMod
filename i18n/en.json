@@ -61,7 +61,8 @@
         }
     },
     "mainMenu": {
-        "welcomeMessage": "<c=card>Welcome to Archipelago!\nDon't forget to take a look at your <c=redd>Mod Settings</c> to setup options such as <c=redd>deathlink</c> and <c=redd>hint messages</c>!</c>"
+        "welcomeMessage": "<c=card>Welcome to Archipelago!\nDon't forget to take a look at your <c=redd>Mod Settings</c> to setup options such as <c=redd>deathlink</c> and <c=redd>hint messages</c>!</c>",
+        "debugModeWarning": "<c=redd>WARNING:</c> Debug mode is active, which can interfere with text input. Please deactivate debug mode in <c=card>Nickel's Mod Settings</c> to input commands."
     },
     "newRunOptions": {
         "shipUnlock": "You haven't unlocked this ship yet!",
