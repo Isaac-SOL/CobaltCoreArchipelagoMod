@@ -126,6 +126,8 @@
     },
     "story": {
         "memory": {
+            "twoChoice": "<c=boldPink>Both of them!</c>",
+            "allChoice": "<c=boldPink>All of them!</c>",
             "AllThreeEndTalk": {
                 "Void1": "Then so it shall be."
             },

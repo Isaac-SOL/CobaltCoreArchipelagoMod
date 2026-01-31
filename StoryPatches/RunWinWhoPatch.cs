@@ -64,11 +64,11 @@ public class RunWinWhoPatch
     public static void GetChoicesPostfix(List<Choice> __result, State s)
     {
         ModEntry.Instance.Logger.LogWarning("GetChoicesPostfix");
-        if (Archipelago.InstanceSlotData.UnlockMemoryForAllCharacters)
+        if (Archipelago.InstanceSlotData.UnlockMemoryForAllCharacters && __result.Count > 1)
         {
             __result.Add(new Choice
             {
-                label = "<c=boldPink>All of them!</c>",
+                label = ModEntry.Instance.Localizations.Localize(["story", "memory", __result.Count == 2 ? "twoChoice" : "allChoice"]),
                 key = ".runWin_AllOfThem",
                 actions = s.characters
                     .Where(c => s.persistentStoryVars.memoryUnlockLevel.GetValueOrDefault((Deck)c.deckType!, 0) < 3
