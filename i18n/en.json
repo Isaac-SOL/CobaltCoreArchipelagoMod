@@ -81,7 +81,8 @@
             "cannotUndoReason": "sending an Archipelago item"
         },
         "AInvalidateUndos": {
-            "cannotUndoReason": "receiving an item from Archipelago"
+            "reasonItemReceived": "receiving an item from Archipelago",
+            "reasonDeathlinkReceived": "receiving a deathlink"
         }
     },
     "card": {

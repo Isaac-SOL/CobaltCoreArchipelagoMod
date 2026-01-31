@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using Archipelago.MultiClient.Net.BounceFeatures.DeathLink;
+using CobaltCoreArchipelago.Actions;
 using CobaltCoreArchipelago.GameplayPatches;
 
 namespace CobaltCoreArchipelago.Features;
@@ -22,21 +23,57 @@ public class DeathLinkManager
                 // Just give the status effect. No risk of dying in this mode
                 if (combat is not null)
                 {
-                    combat.Queue(new AStatus
-                    {
-                        status = GetAssignableStatuses(state).Random(state.rngActions),
-                        statusAmount = 1,
-                        targetPlayer = true
-                    });
+                    combat.Queue([
+                        new AStatus
+                        {
+                            status = GetAssignableStatuses(state).Random(state.rngActions),
+                            statusAmount = 1,
+                            targetPlayer = true
+                        },
+                        new AInvalidateUndos
+                        {
+                            type = InvalidationTypes.DeathlinkReceived
+                        }
+                    ]);
                 }
                 break;
             case DeathLinkMode.HullDamage:
-                // Damage the player, and if it kills, perform like Death mode
-                state.ship.DirectHullDamage(state, combat!, Archipelago.Instance.APSaveData.DeathLinkHullDamage);
-                if (state.ship.hull == 0)
+                // Simulate if the action will kill the player.
+                // If it does, perform like death mode.
+                // Otherwise, damage them through an action
+                var fakeState = Mutil.DeepCopy(state);
+                fakeState.ship.DirectHullDamage(state, DB.fakeCombat, Archipelago.Instance.APSaveData.DeathLinkHullDamage);
+                if (fakeState.ship.hull == 0)
                 {
+                    state.ship.hull = 0;
                     SnapScreen(g, state, combat);
                     FinishApplyFullDeathLink(lastDeathLink);
+                }
+                else if (combat is not null)
+                {
+                    combat.Queue([
+                        new AHurt
+                        {
+                            hurtAmount = Archipelago.Instance.APSaveData.DeathLinkHullDamage,
+                            targetPlayer = false,
+                            hurtShieldsFirst = false,
+                            cannotKillYou = true
+                        },
+                        new AInvalidateUndos
+                        {
+                            type = InvalidationTypes.DeathlinkReceived
+                        }
+                    ]);
+                }
+                else
+                {
+                    new AHurt
+                    {
+                        hurtAmount = Archipelago.Instance.APSaveData.DeathLinkHullDamage,
+                        targetPlayer = false,
+                        hurtShieldsFirst = false,
+                        cannotKillYou = true
+                    }.Begin(g, state, DB.fakeCombat);
                 }
                 break;
             case DeathLinkMode.Death:
