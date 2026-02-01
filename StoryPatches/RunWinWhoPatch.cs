@@ -63,23 +63,30 @@ public class RunWinWhoPatch
 
     public static void GetChoicesPostfix(List<Choice> __result, State s)
     {
-        ModEntry.Instance.Logger.LogWarning("GetChoicesPostfix");
-        if (Archipelago.InstanceSlotData.UnlockMemoryForAllCharacters && __result.Count > 1)
+        // Show current memory counts for each character
+        var decksToAdd = new List<Deck>();
+        foreach (var choice in __result)
         {
-            __result.Add(new Choice
-            {
-                label = ModEntry.Instance.Localizations.Localize(["story", "memory", __result.Count == 2 ? "twoChoice" : "allChoice"]),
-                key = ".runWin_AllOfThem",
-                actions = s.characters
-                    .Where(c => s.persistentStoryVars.memoryUnlockLevel.GetValueOrDefault((Deck)c.deckType!, 0) < 3
-                                && !SkipCharChoice((Deck)c.deckType!))
-                    .Select(c => new ARunWinCharChoice
-                    {
-                        deck = (Deck)c.deckType!
-                    })
-                    .Cast<CardAction>()
-                    .ToList()
-            });
+            var deck = choice.actions.Count > 0 ? (choice.actions[0] as ARunWinCharChoice)?.deck : null;
+            if (deck is null) continue;
+            choice.label += $" ({s.persistentStoryVars.memoryUnlockLevel.GetValueOrDefault(deck.Value, 0)}/3)";
+            decksToAdd.Add(deck.Value);
         }
+        
+        // Add the choice to get all memories
+        if (!Archipelago.InstanceSlotData.UnlockMemoryForAllCharacters || decksToAdd.Count <= 1) return;
+        
+        __result.Add(new Choice
+        {
+            label = ModEntry.Instance.Localizations.Localize(["story", "memory", decksToAdd.Count == 2 ? "twoChoice" : "allChoice"]),
+            key = ".runWin_AllOfThem",
+            actions = decksToAdd
+                .Select(deck => new ARunWinCharChoice
+                {
+                    deck = deck
+                })
+                .Cast<CardAction>()
+                .ToList()
+        });
     }
 }
