@@ -5,6 +5,7 @@ using System.Linq;
 using Archipelago.MultiClient.Net.BounceFeatures.DeathLink;
 using CobaltCoreArchipelago.Actions;
 using CobaltCoreArchipelago.GameplayPatches;
+using Microsoft.Extensions.Logging;
 
 namespace CobaltCoreArchipelago.Features;
 
@@ -46,21 +47,24 @@ public class DeathLinkManager
                 var dmgAmount = apSaveData.DeathLinkMode == DeathLinkMode.HullDamage
                     ? apSaveData.DeathLinkHullDamage
                     : (int)Math.Ceiling(apSaveData.DeathLinkHullDamagePercent * 0.01 * state.ship.hullMax);
+                ModEntry.Instance.Logger.LogInformation("Received deathlink damage: {dmg}", dmgAmount);
                 var fakeState = Mutil.DeepCopy(state);
                 fakeState.ship.DirectHullDamage(state, DB.fakeCombat, dmgAmount);
-                if (fakeState.ship.hull == 0)
+                if (fakeState.ship.hull <= 0)
                 {
+                    ModEntry.Instance.Logger.LogInformation("Damage killed: performing normal deathlink");
                     state.ship.hull = 0;
                     SnapScreen(g, state, combat);
                     FinishApplyFullDeathLink(lastDeathLink);
                 }
                 else if (combat is not null)
                 {
+                    ModEntry.Instance.Logger.LogInformation("Damage will not kill: hull at {hull}", fakeState.ship.hull);
                     combat.Queue([
                         new AHurt
                         {
                             hurtAmount = dmgAmount,
-                            targetPlayer = false,
+                            targetPlayer = true,
                             hurtShieldsFirst = false,
                             cannotKillYou = true
                         },
@@ -72,10 +76,11 @@ public class DeathLinkManager
                 }
                 else
                 {
+                    ModEntry.Instance.Logger.LogInformation("Damage will not kill: hull at {hull}", fakeState.ship.hull);
                     new AHurt
                     {
                         hurtAmount = dmgAmount,
-                        targetPlayer = false,
+                        targetPlayer = true,
                         hurtShieldsFirst = false,
                         cannotKillYou = true
                     }.Begin(g, state, DB.fakeCombat);
