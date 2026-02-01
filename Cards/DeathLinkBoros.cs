@@ -109,7 +109,7 @@ public class DeathLinkBoros : Card, IRegisterable
             [
                 new AAttack
                 {
-                    damage = value
+                    damage = GetDmg(s, value)
                 }
             ]
         };
@@ -127,7 +127,7 @@ public class DeathLinkBoros : Card, IRegisterable
             Upgrade.A => Localize("descA"),
             Upgrade.B => Localize("descB"),
             _ => Localize("descBase")
-        }, value);
+        }, upgrade == Upgrade.None ? GetDmg(state, value) : value);
         description += step == 1
             ? Localize("descRampOne")
             : string.Format(Localize("descRamp"), remainder, step);
