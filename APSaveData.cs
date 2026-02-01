@@ -57,8 +57,6 @@ public class APSaveData
     [JsonProperty]
     internal CardScoutMode CardScoutMode { get; set; } = CardScoutMode.ScoutOnly;
     [JsonProperty]
-    internal bool BypassDifficulty { get; set; } = false;
-    [JsonProperty]
     internal bool MessagesInMenu { get; set; } = true;
     
     internal static IModStorage ModStorage => ModEntry.Instance.Helper.Storage;

@@ -50,11 +50,6 @@
             "nameCreateHint": "Create hint",
             "descCreateHint": "<c=card>Create hint:</c> cards & artifacts show which item they will give, create a hint for it, and message all players."
         },
-        "bypassDifficulty": {
-            "settingName": "Bypass difficulty setting",
-            "tooltipName": "<c=artifact>BYPASS DIFFICULTY SETTING</c>",
-            "desc": "Check to ignore the minimum difficulty setting in your YAML options, if you changed your mind for example."
-        },
         "messagesInMenu": {
             "settingName": "Main menu console",
             "tooltipName": "<c=artifact>MAIN MENU CONSOLE</c>",

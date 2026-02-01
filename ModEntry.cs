@@ -227,14 +227,6 @@ internal class ModEntry : SimpleMod
                         _ => LocalizeSettings("automaticScouting", "descCreateHint")
                     }))),
                 ModSettings.MakeCheckbox(
-                        () => LocalizeSettings("bypassDifficulty", "settingName"),
-                        () => Archipelago.APSaveData!.BypassDifficulty,
-                        (_, _, value) => Archipelago.APSaveData!.BypassDifficulty = value)
-                    .SetTooltips(() => [
-                        new TTText(LocalizeSettings("bypassDifficulty", "tooltipName")),
-                        new TTText(LocalizeSettings("bypassDifficulty", "desc"))
-                    ]),
-                ModSettings.MakeCheckbox(
                         () => LocalizeSettings("messagesInMenu", "settingName"),
                         () => Archipelago.APSaveData!.MessagesInMenu,
                         (_, _, value) => Archipelago.APSaveData!.MessagesInMenu = value)
