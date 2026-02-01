@@ -26,10 +26,19 @@ public class DeathLinkBoros : Card, IRegisterable
 
     private int GetHullDamageFactor() => Archipelago.Instance.APSaveData!.DeathLinkHullDamage switch
     {
-        1 => 5,
-        2 => 4,
-        3 or 4 => 3,
-        5 or 6 or 7 or 8 => 2,
+        <= 1 => 5,
+        <= 2 => 4,
+        <= 4 => 3,
+        <= 8 => 2,
+        _ => 1
+    };
+
+    private int GetHullDamagePercentFactor() => Archipelago.Instance.APSaveData!.DeathLinkHullDamagePercent switch
+    {
+        <= 10 => 5,
+        <= 20 => 4,
+        <= 40 => 3,
+        <= 80 => 2,
         _ => 1
     };
 
@@ -42,6 +51,10 @@ public class DeathLinkBoros : Card, IRegisterable
         (Upgrade.A,    DeathLinkMode.HullDamage) => GetHullDamageFactor(),
         (Upgrade.B,    DeathLinkMode.HullDamage) => GetHullDamageFactor() * 2,
         (Upgrade.None, DeathLinkMode.HullDamage) => GetHullDamageFactor(),
+
+        (Upgrade.A,    DeathLinkMode.HullDamagePercent) => GetHullDamagePercentFactor(),
+        (Upgrade.B,    DeathLinkMode.HullDamagePercent) => GetHullDamagePercentFactor() * 2,
+        (Upgrade.None, DeathLinkMode.HullDamagePercent) => GetHullDamagePercentFactor(),
 
         (Upgrade.A,    DeathLinkMode.Death) => 1,
         (Upgrade.B,    DeathLinkMode.Death) => 2,

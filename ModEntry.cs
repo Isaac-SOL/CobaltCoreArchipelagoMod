@@ -175,9 +175,10 @@ internal class ModEntry : SimpleMod
                         DeathLinkMode.Off => LocalizeSettings("deathlink", "nameOff"),
                         DeathLinkMode.Missing => LocalizeSettings("deathlink", "nameMissing"),
                         DeathLinkMode.HullDamage => LocalizeSettings("deathlink", "nameHullDamage"),
+                        DeathLinkMode.HullDamagePercent => LocalizeSettings("deathlink", "nameHullDamagePercent"),
                         _ => LocalizeSettings("deathlink", "nameDeath")
                     })
-                    .SetValueWidth(_ => 105)
+                    .SetValueWidth(_ => 115)
                     .SetTooltips(() => new List<Tooltip>
                     {
                         new TTText(LocalizeSettings("deathlink", "tooltipName")),
@@ -188,6 +189,7 @@ internal class ModEntry : SimpleMod
                         DeathLinkMode.Off => LocalizeSettings("deathlink", "descOff"),
                         DeathLinkMode.Missing => LocalizeSettings("deathlink", "descMissing"),
                         DeathLinkMode.HullDamage => LocalizeSettings("deathlink", "descHullDamage"),
+                        DeathLinkMode.HullDamagePercent => LocalizeSettings("deathlink", "descHullDamagePercent"),
                         _ => LocalizeSettings("deathlink", "descDeath")
                     }))),
                 ModSettings.MakeConditional(
@@ -203,6 +205,22 @@ internal class ModEntry : SimpleMod
                             new TTText(LocalizeSettings("deathlinkHullDamage", "desc"))
                         }),
                     () => Archipelago.APSaveData!.DeathLinkMode == DeathLinkMode.HullDamage
+                    ),
+                ModSettings.MakeConditional(
+                    ModSettings.MakeNumericStepper(
+                            () => LocalizeSettings("deathlinkHullDamagePercent", "settingName"),
+                            () => Archipelago.APSaveData!.DeathLinkHullDamagePercent,
+                            value => Archipelago.APSaveData!.DeathLinkHullDamagePercent = value,
+                            minValue: 5,
+                            maxValue: 95,
+                            step: 5)
+                        .SetValueFormatter(i => $"{i}%")
+                        .SetTooltips(() => new List<Tooltip>
+                        {
+                            new TTText(LocalizeSettings("deathlinkHullDamagePercent", "tooltipName")),
+                            new TTText(LocalizeSettings("deathlinkHullDamagePercent", "desc"))
+                        }),
+                    () => Archipelago.APSaveData!.DeathLinkMode == DeathLinkMode.HullDamagePercent
                     ),
                 ModSettings.MakeEnumStepper(
                         () => LocalizeSettings("automaticScouting", "settingName"),

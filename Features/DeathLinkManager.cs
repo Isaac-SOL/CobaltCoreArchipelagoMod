@@ -14,10 +14,11 @@ public class DeathLinkManager
 
     internal static void ApplyDeathLink(G g, DeathLink lastDeathLink)
     {
-        Debug.Assert(Archipelago.Instance.APSaveData != null, "Archipelago.Instance.APSaveData != null");
+        var apSaveData = Archipelago.Instance.APSaveData;
+        Debug.Assert(apSaveData != null, "Archipelago.Instance.APSaveData != null");
         var state = g.state;
         var combat = state.route as Combat;
-        switch (Archipelago.Instance.APSaveData.DeathLinkMode)
+        switch (apSaveData.DeathLinkMode)
         {
             case DeathLinkMode.Missing:
                 // Just give the status effect. No risk of dying in this mode
@@ -38,11 +39,15 @@ public class DeathLinkManager
                 }
                 break;
             case DeathLinkMode.HullDamage:
+            case DeathLinkMode.HullDamagePercent:
                 // Simulate if the action will kill the player.
                 // If it does, perform like death mode.
                 // Otherwise, damage them through an action
+                var dmgAmount = apSaveData.DeathLinkMode == DeathLinkMode.HullDamage
+                    ? apSaveData.DeathLinkHullDamage
+                    : (int)Math.Ceiling(apSaveData.DeathLinkHullDamagePercent * 0.01 * state.ship.hullMax);
                 var fakeState = Mutil.DeepCopy(state);
-                fakeState.ship.DirectHullDamage(state, DB.fakeCombat, Archipelago.Instance.APSaveData.DeathLinkHullDamage);
+                fakeState.ship.DirectHullDamage(state, DB.fakeCombat, dmgAmount);
                 if (fakeState.ship.hull == 0)
                 {
                     state.ship.hull = 0;
@@ -54,7 +59,7 @@ public class DeathLinkManager
                     combat.Queue([
                         new AHurt
                         {
-                            hurtAmount = Archipelago.Instance.APSaveData.DeathLinkHullDamage,
+                            hurtAmount = dmgAmount,
                             targetPlayer = false,
                             hurtShieldsFirst = false,
                             cannotKillYou = true
@@ -69,7 +74,7 @@ public class DeathLinkManager
                 {
                     new AHurt
                     {
-                        hurtAmount = Archipelago.Instance.APSaveData.DeathLinkHullDamage,
+                        hurtAmount = dmgAmount,
                         targetPlayer = false,
                         hurtShieldsFirst = false,
                         cannotKillYou = true
@@ -85,7 +90,7 @@ public class DeathLinkManager
         }
                 
         // Add to the count and save
-        Archipelago.Instance.APSaveData.DeathLinkCount++;
+        apSaveData.DeathLinkCount++;
         APSaveData.Save();
     }
     

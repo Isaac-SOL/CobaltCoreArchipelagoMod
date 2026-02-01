@@ -55,6 +55,8 @@ public class APSaveData
     [JsonProperty]
     internal int DeathLinkHullDamage { get; set; } = 4;
     [JsonProperty]
+    internal int DeathLinkHullDamagePercent { get; set; } = 25;
+    [JsonProperty]
     internal CardScoutMode CardScoutMode { get; set; } = CardScoutMode.ScoutOnly;
     [JsonProperty]
     internal bool MessagesInMenu { get; set; } = true;
@@ -219,5 +221,6 @@ internal enum DeathLinkMode
     Off = 0,
     Missing,
     HullDamage,
+    HullDamagePercent,
     Death
 }

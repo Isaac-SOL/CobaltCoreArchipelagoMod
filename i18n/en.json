@@ -31,6 +31,8 @@
             "descMissing": "<c=card>Missing!:</c> if another player dies, one of your character goes missing. If you die, other players die as well.\nGood if other players die frequently.",
             "nameHullDamage": "Hull damage",
             "descHullDamage": "<c=card>Hull damage:</c> if another player dies, you will lose some hull. If you die, other players die as well.\nGood if other players die a normal amount.",
+            "nameHullDamagePercent": "Hull damage (%)",
+            "descHullDamagePercent": "<c=card>Hull damage:</c> if another player dies, you will lose some hull. If you die, other players die as well.\nGood if other players die a normal amount.",
             "nameDeath": "Die",
             "descDeath": "<c=card>Die:</c> if another player dies, you die. If you die, other players die as well.\nGood if other players die rarely."
         },
@@ -38,6 +40,11 @@
             "settingName": "Deathlink Hull Damage",
             "tooltipName": "<c=artifact>DEATHLINK HULL DAMAGE</c>",
             "desc": "How much hull you will lose when you receive a deathlink from another player."
+        },
+        "deathlinkHullDamagePercent": {
+            "settingName": "Deathlink Hull Damage",
+            "tooltipName": "<c=artifact>DEATHLINK HULL DAMAGE</c>",
+            "desc": "How much percentage of your max hull you will lose when you receive a deathlink from another player (rounded up)."
         },
         "automaticScouting": {
             "settingName": "Auto-scouting",
