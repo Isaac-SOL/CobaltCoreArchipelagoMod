@@ -116,9 +116,6 @@ public static class ItemApplier
                 var newArtifactMeta = newArtifact.GetMeta();
                 var local = item.sender == Archipelago.Instance.APSaveData.Slot;
                 var hasDeck = state.characters.Any(character => character.deckType == newArtifactMeta.owner);
-                // TODO Ship check not working for some reason!
-                var hasShip = Archipelago.ItemToDeck.ContainsValue(newArtifactMeta.owner)
-                              || newArtifactMeta.owner.Key() == state.ship.key;
                 if (slotData.ImmediateArtifactRewards switch
                     {
                         CardRewardsMode.IfLocal => local,
@@ -126,7 +123,7 @@ public static class ItemApplier
                         CardRewardsMode.IfLocalAndHasDeck => local && hasDeck,
                         CardRewardsMode.Always => true,
                         _ => false
-                    } && hasShip)
+                    } && !ArtifactReward.GetBlockedArtifacts(state).Contains(artifact))
                 {
                     if (combat is not null && !combat.EitherShipIsDead(state))
                     {
