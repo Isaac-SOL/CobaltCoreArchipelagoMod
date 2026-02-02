@@ -82,9 +82,20 @@ public class CardOfferingPatch
                     card.temporaryOverride = true;
                 if (discount != 0)
                     card.discount = discount;
-                __result.Add(card);
-                __result.RemoveAt(s.rngCardOfferings.NextInt() % __result.Count);
-                __result = __result.Shuffle(s.rngCardOfferings).ToList();
+                
+                if (targetCount == 1)
+                {
+                    // If there's only one card in the reward, ensure that it is the usable one
+                    __result.Clear();
+                    __result.Add(card);
+                }
+                else
+                {
+                    // Otherwise just add it among the possible choices
+                    __result.Add(card);
+                    __result.RemoveAt(s.rngCardOfferings.NextInt() % __result.Count);
+                    __result = __result.Shuffle(s.rngCardOfferings).ToList();
+                }
             }
         }
         
