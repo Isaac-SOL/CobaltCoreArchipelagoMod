@@ -71,6 +71,16 @@
         "shipUnlock": "You haven't unlocked this ship yet!",
         "charUnlock": "You haven't unlocked this character yet!"
     },
+    "cardBrowse": {
+        "bootOptionUnlockedCardName": "Pick an <c=boldPink>unlocked</c> card",
+        "bootOptionUnlockedCardDesc": "unlocked cards",
+        "bootOptionUnlockedCardTitle": "Unlocked cards: {0} cards",
+        "eventMissedAPCardName": "Pick a missed <c=boldPink>archipelago</c> card",
+        "eventMissedAPCardDesc": "missed archipelago items",
+        "eventMissedAPCardTitle": "Missed archipelago items: {0} cards",
+        "addCardActionDoing": "Select a card to add to your deck.",
+        "addCardActionDone": "The card has been added to your deck."
+    },
     "deck": {
         "name": "Archipelago",
         "lockedName": "Locked"
