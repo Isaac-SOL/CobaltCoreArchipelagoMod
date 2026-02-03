@@ -4,7 +4,7 @@
 
 A Cobalt Core mod for [the Archipelago multi-game randomizer system](https://archipelago.gg/).
 
-- Version: 1.0.2
+- Version: 1.1.0
 - Archipelago version: 0.6.5
 - Cobalt Core version: 1.2.8
 - Nickel Version: 1.20.3
@@ -158,9 +158,6 @@ an undertaking I will probably not do it myself.
 
 - In-game tracker: A way to know how many cards and artifacts are left to be
 found on each character
-- In-game console: A way to use commands directly from in-game.
-- Hint system integration: A way to hint any character, ship, card or artifact
-by pressing a button.
 - Actual dialogue for the additional Books and CAT memories.
 - Additional in-combat dialogue between characters when getting new items from other players,
 or unlocking items for other players. Lots of dialogue if possible!
@@ -182,6 +179,7 @@ affect gameplay, the unlocks work correctly, it's the notifications that are bug
 - Shockah for making Nickel and helping me with various issues
 - rft50 for making the DemoMod that eased me into modding Cobalt Core
 considering I had no idea what I was doing
+- All players who have tested the mod and given feedback, notably JyGein and Exuno
 - Ixrec for making the great Nine Sols AP mod whose code helped
 me figure out how an AP integration is supposed to work considering I *also* had no
 idea what I was doing on that front either
