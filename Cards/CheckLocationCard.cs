@@ -232,14 +232,14 @@ public class CheckLocationCard : Card, IRegisterable
         Debug.Assert(Archipelago.Instance.APSaveData != null, "Archipelago.Instance.APSaveData != null");
         if (locationItemName is null) return false;
         if (!IsLocal()) return false;
-        if (!Archipelago.ItemToArtifact.ContainsKey(locationItemName)) return false;
+        if (!Archipelago.ItemToArtifact.TryGetValue(locationItemName, out var artifact)) return false;
         if (Archipelago.Instance.APSaveData.HasItem(locationItemName)) return false;
         return Archipelago.InstanceSlotData.ImmediateArtifactRewards switch
         {
             CardRewardsMode.Always or CardRewardsMode.IfLocal => true,
             CardRewardsMode.IfHasDeck or CardRewardsMode.IfLocalAndHasDeck => HasDeck(state),
             _ => false
-        };
+        } && !ArtifactReward.GetBlockedArtifacts(state).Contains(artifact);
     }
 
     internal void SetTextInfo(string itemName, string slotName, string itemColor)

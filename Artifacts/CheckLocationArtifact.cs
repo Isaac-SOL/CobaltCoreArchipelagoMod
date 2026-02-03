@@ -136,7 +136,7 @@ public class CheckLocationArtifact : Artifact, IRegisterable
             CardRewardsMode.Always or CardRewardsMode.IfLocal => true,
             CardRewardsMode.IfHasDeck or CardRewardsMode.IfLocalAndHasDeck => HasDeck(state),
             _ => false
-        };
+        } && !ArtifactReward.GetBlockedArtifacts(state).Contains(Archipelago.ItemToArtifact[givenArtifact]);
     }
 
     internal void SetTextInfo(string itemName, string slotName, string itemColor)
