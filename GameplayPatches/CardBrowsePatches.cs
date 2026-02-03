@@ -5,6 +5,7 @@ using System.Linq;
 using System.Reflection.Emit;
 using CobaltCoreArchipelago.Actions;
 using HarmonyLib;
+using Microsoft.Extensions.Logging;
 using Nanoray.Shrike;
 using Nanoray.Shrike.Harmony;
 
@@ -39,9 +40,7 @@ public class CardBrowseListPatch
         switch (data!.filterMode)
         {
             case CardBrowseAPData.FilterMode.UnlockedCardsNotInDeck:
-                __instance._listCache.Clear();
-                __result.Clear();
-
+                // Just replace the cache, DO NOT clear it, it could be referencing a saved value such as cardsOwned
                 __instance._listCache = pickableCardsCache;
                 break;
             case CardBrowseAPData.FilterMode.FoundMissingLocations:
@@ -69,6 +68,7 @@ public class CardBrowseListPatch
                 .OrderBy(c => c.GetLocName())
                 .OrderBy(c => c.GetMeta().deck)
                 .OrderBy(c => c.GetMeta().rarity),
+            
             _ => null
         };
 
@@ -87,6 +87,7 @@ public class CardBrowseListPatch
 [HarmonyPatch(typeof(CardBrowse), nameof(CardBrowse.Render))]
 public static class CardBrowseRenderPatch
 {
+    // Change the title that appears at the top of the card browser
     public static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions, ILGenerator generator)
     {
         List<CodeInstruction> storedInstructions = new(instructions);
