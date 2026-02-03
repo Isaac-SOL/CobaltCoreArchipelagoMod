@@ -161,11 +161,9 @@ found on each character
 - In-game console: A way to use commands directly from in-game.
 - Hint system integration: A way to hint any character, ship, card or artifact
 by pressing a button.
-- Actual dialogue for the additional Books and CAT memories. (If you're interested
-in writing those, hit me up!)
+- Actual dialogue for the additional Books and CAT memories.
 - Additional in-combat dialogue between characters when getting new items from other players,
 or unlocking items for other players. Lots of dialogue if possible!
-(Also interested in writers for these!)
 - Potentially additional cards or artifacts which give the game more interactivity
 with the multiworld.
 
