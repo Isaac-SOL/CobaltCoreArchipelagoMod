@@ -85,13 +85,7 @@ public static class ArtifactRewardRenderPatch
                 Archipelago.Instance.ScoutLocationInfo(locations).ContinueWith(task =>
                 {
                     for (var i = 0; i < checkArtifacts.Count; i++)
-                    {
-                        var info = task.Result[i];
-                        if (info is null)
-                            checkArtifacts[i].SetTextInfo("[]", "[]", APColors.Trap);
-                        else
-                            checkArtifacts[i].SetTextInfo(info.ItemName, info.Player.Name, info.GetColor());
-                    }
+                        checkArtifacts[i].LoadInfo(task.Result[i]);
                 });
             }
         }

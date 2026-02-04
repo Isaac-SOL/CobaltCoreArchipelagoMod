@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
+using Archipelago.MultiClient.Net.Models;
 using HarmonyLib;
 using Nanoray.PluginManager;
 using Newtonsoft.Json;
@@ -151,6 +152,14 @@ public class CheckLocationArtifact : Artifact, IRegisterable
             else if (Archipelago.ItemToArtifact.ContainsKey(locationItemName))
                 givenArtifact = locationItemName;
         }
+    }
+
+    internal void LoadInfo(ScoutedItemInfo? info)
+    {
+        if (info is null)
+            SetTextInfo("[]", "[]", APColors.Trap);
+        else
+            SetTextInfo(info.ItemName, info.Player.Name, info.GetColor());
     }
 }
 
