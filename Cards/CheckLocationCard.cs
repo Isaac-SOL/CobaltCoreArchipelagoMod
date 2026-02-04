@@ -163,6 +163,11 @@ public class CheckLocationCard : Card, IRegisterable
             description = description,
             art = this switch
             {
+                // Art by item classification
+                { locationItemColor: APColors.Progression } => ArtRare,
+                { locationItemColor: APColors.Useful } => ArtUncommon,
+                { locationItemColor: APColors.Filler or APColors.Trap } => ArtCommon,
+                // If locationItemColor is null, do by rarity instead
                 CheckLocationCardUncommon => ArtUncommon,
                 CheckLocationCardRare => ArtRare,
                 _ => ArtCommon
