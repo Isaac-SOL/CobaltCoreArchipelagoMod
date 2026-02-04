@@ -6,7 +6,8 @@ namespace CobaltCoreArchipelago.Features;
 
 public static class NotSoRandomManager
 {
-    private static List<string> RecentlySeenLocations => Archipelago.Instance.APSaveData!.RecentlySeenLocations;
+    private static HashSet<string> RecentlySeenLocations => Archipelago.Instance.APSaveData!.RecentlySeenLocations;
+    private static HashSet<string> AllSeenLocations => Archipelago.Instance.APSaveData!.AllSeenLocations;
     
     // Whenever we pick a location, we prevent it from being seen until there are no valid choices left
     internal static string RandomLocation(List<string> validChoices, Rand rng)
@@ -21,7 +22,7 @@ public static class NotSoRandomManager
         if (notSeenChoices.Count > 0) return notSeenChoices.Random(rng);
 
         // Otherwise, we put all valid choices "back into the deck"
-        RecentlySeenLocations.RemoveAll(validChoices.Contains);
+        RecentlySeenLocations.RemoveWhere(validChoices.Contains);
         return validChoices.Random(rng);
         // Note: we don't set the chosen location as seen immediately
         // because it may not end up actually being seen by the player
@@ -30,8 +31,8 @@ public static class NotSoRandomManager
     internal static void AddSeenLocation(string location)
     {
         Debug.Assert(Archipelago.Instance.APSaveData != null, "Archipelago.Instance.APSaveData != null");
-        if (!RecentlySeenLocations.Contains(location))
-            RecentlySeenLocations.Add(location);
+        RecentlySeenLocations.Add(location);
+        AllSeenLocations.Add(location);
     }
 
     internal static void AddSeenLocations(IEnumerable<string> locations)

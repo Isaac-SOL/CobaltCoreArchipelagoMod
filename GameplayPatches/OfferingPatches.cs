@@ -169,13 +169,7 @@ public class CardOfferingPatch
         Archipelago.Instance.ScoutLocationInfo(locations).ContinueWith(task =>
         {
             for (var i = 0; i < checkCards.Count; i++)
-            {
-                var info = task.Result[i];
-                if (info is null)
-                    checkCards[i].SetTextInfo("[]", "[]", APColors.Trap);
-                else
-                    checkCards[i].SetTextInfo(info.ItemName, info.Player.Name, info.GetColor());
-            }
+                checkCards[i].LoadInfo(task.Result[i]);
         });
     }
 

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
+using Archipelago.MultiClient.Net.Models;
 using CobaltCoreArchipelago.Actions;
 using Nanoray.PluginManager;
 using Nickel;
@@ -247,6 +248,14 @@ public class CheckLocationCard : Card, IRegisterable
         locationItemName = itemName;
         locationSlotName = slotName;
         locationItemColor = itemColor;
+    }
+
+    internal void LoadInfo(ScoutedItemInfo? info)
+    {
+        if (info is null)
+            SetTextInfo("[]", "[]", APColors.Trap);
+        else
+            SetTextInfo(info.ItemName, info.Player.Name, info.GetColor());
     }
 }
 

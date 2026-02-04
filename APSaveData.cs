@@ -47,7 +47,9 @@ public class APSaveData
     [JsonProperty]
     internal int DeathLinkCount { get; set; }
     [JsonProperty]
-    internal List<string> RecentlySeenLocations { get; set; }
+    internal HashSet<string> RecentlySeenLocations { get; set; }
+    [JsonProperty]
+    internal HashSet<string> AllSeenLocations { get; set; }
     
     // Mod settings
     [JsonProperty]
@@ -100,6 +102,7 @@ public class APSaveData
         AppliedInventory = new Dictionary<string, int>();
         LocationsChecked = [];
         RecentlySeenLocations = [];
+        AllSeenLocations = [];
     }
 
     internal static void LoadAllSaves()

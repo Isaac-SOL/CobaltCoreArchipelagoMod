@@ -24,7 +24,7 @@ public class Archipelago
 {
     public static Archipelago Instance { get; private set; } = null!;
 
-    public static Dictionary<string, Deck> ItemToDeck = new()
+    public static readonly Dictionary<string, Deck> ItemToDeck = new()
     {
         { "Dizzy", Deck.dizzy },
         { "Riggs", Deck.riggs },
@@ -36,7 +36,11 @@ public class Archipelago
         { "CAT",   Deck.colorless }
     };
 
-    public static Dictionary<string, string> ItemToStartingShip = new()
+    public static readonly Dictionary<Deck, string> DeckToItem = ItemToDeck
+        .Select(pair => (pair.Value, pair.Key))
+        .ToDictionary();
+
+    public static readonly Dictionary<string, string> ItemToStartingShip = new()
     {
         { "Artemis",    "artemis" },
         { "Ares",       "ares" },
@@ -45,11 +49,15 @@ public class Archipelago
         { "Tiderunner", "boat" },
     };
 
-    public static Dictionary<string, Deck> ItemToMemory = ItemToDeck
+    public static readonly Dictionary<string, string> StartingShipToItem = ItemToStartingShip
+        .Select(pair => (pair.Value, pair.Key))
+        .ToDictionary();
+
+    public static readonly Dictionary<string, Deck> ItemToMemory = ItemToDeck
         .Select(pair => (pair.Key + " Memory", pair.Value))
         .ToDictionary();
 
-    public static Dictionary<string, Type> ItemToCard = new()
+    public static readonly Dictionary<string, Type> ItemToCard = new()
     {
         // Dizzy Common
         { "Big Shield", typeof(BigShield) },
@@ -242,11 +250,11 @@ public class Archipelago
         { "Time Skip", typeof(TimestopCard) }
     };
 
-    public static Dictionary<Type, string> CardToItem = ItemToCard
+    public static readonly Dictionary<Type, string> CardToItem = ItemToCard
         .Select(pair => (pair.Value, pair.Key))
         .ToDictionary();
 
-    public static Dictionary<string, Type> ItemToArtifact = new()
+    public static readonly Dictionary<string, Type> ItemToArtifact = new()
     {
         // Basic Common
         { "Nanofiber Hull",  typeof(NanofiberHull) },
@@ -359,7 +367,7 @@ public class Archipelago
         { "Summon Control", typeof(SummonControl) },
     };
 
-    public static Dictionary<Type, string> ArtifactToItem = ItemToArtifact
+    public static readonly Dictionary<Type, string> ArtifactToItem = ItemToArtifact
         .Select(pair => (pair.Value, pair.Key))
         .ToDictionary();
     

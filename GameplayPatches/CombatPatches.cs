@@ -22,11 +22,7 @@ public static class SendCardToHandPatch
             // TODO: this WILL break if we draw multiple non-scouted AP cards in quick succession
             Archipelago.Instance.ScoutLocationInfo(apCard.locationName).ContinueWith(task =>
             {
-                var info = task.Result[0];
-                if (info is null)
-                    apCard.SetTextInfo("[]", "[]", APColors.Trap);
-                else
-                    apCard.SetTextInfo(info.ItemName, info.Player.Name, info.GetColor());
+                apCard.LoadInfo(task.Result[0]);
             });
         }
     }

@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Reflection.Emit;
 using CobaltCoreArchipelago.Actions;
+using CobaltCoreArchipelago.Cards;
 using HarmonyLib;
 using Microsoft.Extensions.Logging;
 using Nanoray.Shrike;
@@ -17,6 +18,8 @@ namespace CobaltCoreArchipelago.GameplayPatches;
 public class CardBrowseListPatch
 {
     internal static List<Card> pickableCardsCache = [];
+    internal static List<string> apLocationsCache = [];
+    internal static List<CheckLocationCard> fixedApCardsCache = [];
 
     internal static void PrepareCache(State s, CardBrowseAPData info)
     {
@@ -26,6 +29,27 @@ public class CardBrowseListPatch
                 pickableCardsCache = GetPickableUnlockedCardsList(s);
                 break;
             case CardBrowseAPData.FilterMode.FoundMissingLocations:
+                Debug.Assert(Archipelago.Instance.APSaveData != null, "Archipelago.Instance.APSaveData != null");
+                
+                apLocationsCache = GetPickableAPCardsList(s);
+                fixedApCardsCache = apLocationsCache
+                    .Select(name =>
+                                name.Contains("Common") ? new CheckLocationCard { locationName = name }
+                                : name.Contains("Uncommon") ? new CheckLocationCardUncommon { locationName = name }
+                                : new CheckLocationCardRare { locationName = name })
+                    .ToList();
+                pickableCardsCache = fixedApCardsCache
+                    .Cast<Card>()
+                    .ToList();
+                
+                if (Archipelago.Instance.APSaveData.CardScoutMode == CardScoutMode.DontScout) break;
+                
+                Archipelago.Instance.ScoutLocationInfo(apLocationsCache.ToArray()).ContinueWith(task =>
+                {
+                    for (var i = 0; i < fixedApCardsCache.Count; i++)
+                        fixedApCardsCache[i].LoadInfo(task.Result[i]);
+                });
+                CardBrowseRenderPatch.rescoutTimer = 0.0;
                 break;
         }
     }
@@ -34,18 +58,11 @@ public class CardBrowseListPatch
     public static void Postfix(CardBrowse __instance, ref List<Card> __result)
     {
         var modDataHelper = ModEntry.Instance.Helper.ModData;
-        if (!modDataHelper.TryGetModData(__instance, "AdditionalAPData", out CardBrowseAPData? data)) return;
+        if (!modDataHelper.TryGetModData(__instance, "AdditionalAPData", out CardBrowseAPData? _)) return;
         Debug.Assert(Archipelago.Instance.APSaveData != null, "Archipelago.Instance.APSaveData != null");
 
-        switch (data!.filterMode)
-        {
-            case CardBrowseAPData.FilterMode.UnlockedCardsNotInDeck:
-                // Just replace the cache, DO NOT clear it, it could be referencing a saved value such as cardsOwned
-                __instance._listCache = pickableCardsCache;
-                break;
-            case CardBrowseAPData.FilterMode.FoundMissingLocations:
-                break;
-        }
+        // Just replace the cache, DO NOT clear it, it could be referencing a saved value such as cardsOwned
+        __instance._listCache = pickableCardsCache;
 
         var orderedCards = __instance.sortMode switch
         {
@@ -81,6 +98,30 @@ public class CardBrowseListPatch
         .Select(cardType => (cardType.CreateInstance() as Card)!)
         .Where(card => s.characters.Any(c => c.deckType!.Value == card.GetMeta().deck)
                        && s.deck.All(deckCard => deckCard.GetType() != card.GetType()))
+        .ToList();
+    
+    internal static List<Artifact> GetPickableUnlockedArtifactsList(State s) => Archipelago.Instance.APSaveData!.FoundArtifacts
+        .Select(artifactType => (artifactType.CreateInstance() as Artifact)!)
+        .Where(artifact => s.characters.Any(c => c.deckType!.Value == artifact.GetMeta().owner)
+                           && s.artifacts.All(ownedArtifact => ownedArtifact.GetType() != artifact.GetType())
+                           && !ArtifactReward.GetBlockedArtifacts(s).Contains(artifact.GetType()))
+        .ToList();
+
+    internal static List<string> GetPickableAPLocationsList(State s) => Archipelago.Instance.APSaveData!.AllSeenLocations
+        .Intersect(Archipelago.Instance.Session!.Locations.AllMissingLocations
+                       .Select(l => Archipelago.Instance.Session.Locations.GetLocationNameFromId(l)))
+        .Where(name => s.characters
+                           .Select(c => Archipelago.DeckToItem[c.deckType!.Value])
+                           .Append("Basic")
+                           .Any(name.StartsWith))
+        .ToList();
+
+    internal static List<string> GetPickableAPCardsList(State s) => GetPickableAPLocationsList(s)
+        .Where(name => name.Contains("Card"))
+        .ToList();
+
+    internal static List<string> GetPickableAPArtifactsList(State s) => GetPickableAPLocationsList(s)
+        .Where(name => name.Contains("Artifact"))
         .ToList();
 }
 
@@ -125,5 +166,41 @@ public static class CardBrowseRenderPatch
                               CardBrowseListPatch.pickableCardsCache.Count),
             _ => defaultTitle
         };
+    }
+    
+    // Auto rescout AP cards
+    
+    internal static double rescoutTimer = 0.0;
+
+    public static void Postfix(CardBrowse __instance, G g)
+    {
+        var modDataHelper = ModEntry.Instance.Helper.ModData;
+        if (!modDataHelper.TryGetModData(__instance, "AdditionalAPData", out CardBrowseAPData? data))
+            return;
+        
+        if (data!.filterMode != CardBrowseAPData.FilterMode.FoundMissingLocations) return;
+        
+        Debug.Assert(Archipelago.Instance.APSaveData != null, "Archipelago.Instance.APSaveData != null");
+        
+        if (Archipelago.Instance.APSaveData.CardScoutMode == CardScoutMode.DontScout) return;
+
+        // Recheck not scouted AP checks every 5 seconds
+        if (rescoutTimer > 5.0)
+        {
+            rescoutTimer -= 5.0;
+
+            var checkCards = CardBrowseListPatch.fixedApCardsCache;
+            var locations = checkCards.Select(card => card.locationName).ToArray();
+
+            if (locations.Length > 0)
+            {
+                Archipelago.Instance.ScoutLocationInfo(locations).ContinueWith(task =>
+                {
+                    for (var i = 0; i < checkCards.Count; i++)
+                        checkCards[i].LoadInfo(task.Result[i]);
+                });
+            }
+        }
+        rescoutTimer += g.dt;
     }
 }
