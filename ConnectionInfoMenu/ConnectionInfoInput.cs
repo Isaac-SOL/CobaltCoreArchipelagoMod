@@ -283,8 +283,6 @@ public class ConnectionInfoInput : Route, OnInputPhase, OnMouseDown
 
     internal void OnTextInput(object? sender, TextInputEventArgs args)
     {
-        ModEntry.Instance.Logger.LogDebug("Key: {key}, Character: {character}, Code: {code}",
-                                          args.Key, args.Character, (int)args.Character);
         if (selectedTextField == -1) return;
         
         // If we have a pending connection, drop it

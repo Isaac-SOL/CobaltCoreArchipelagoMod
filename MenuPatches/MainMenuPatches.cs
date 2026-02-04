@@ -240,8 +240,6 @@ public class MainMenuPatch
 
     internal static void OnTextInput(object? sender, TextInputEventArgs args)
     {
-        ModEntry.Instance.Logger.LogDebug("Key: {key}, Character: {character}, Code: {code}",
-                                          args.Key, args.Character, (int)args.Character);
         if (!commandLineSelected
             || MG.inst.g.metaRoute is null
             || MG.inst.g.metaRoute.subRoute is not null) return;
