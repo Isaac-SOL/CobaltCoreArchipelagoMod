@@ -212,9 +212,11 @@ public class CheckLocationCard : Card, IRegisterable
     private bool HasDeck(State state) =>
         locationItemName is not null
         && (
-            (DB.cardMetas.TryGetValue(Archipelago.ItemToCard[locationItemName].Name, out var cardMeta)
+            (Archipelago.ItemToCard.TryGetValue(locationItemName, out var cardType)
+             && DB.cardMetas.TryGetValue(cardType.Name, out var cardMeta)
              && state.characters.Any(character => character.deckType == cardMeta.deck))
-            || (DB.artifactMetas.TryGetValue(Archipelago.ItemToArtifact[locationItemName].Name, out var artifactMeta)
+            || (Archipelago.ItemToArtifact.TryGetValue(locationItemName, out var artifactType)
+                && DB.artifactMetas.TryGetValue(artifactType.Name, out var artifactMeta)
                 && state.characters.Any(character => character.deckType == artifactMeta.owner))
         );
 
@@ -245,7 +247,7 @@ public class CheckLocationCard : Card, IRegisterable
             CardRewardsMode.Always or CardRewardsMode.IfLocal => true,
             CardRewardsMode.IfHasDeck or CardRewardsMode.IfLocalAndHasDeck => HasDeck(state),
             _ => false
-        } && !ArtifactReward.GetBlockedArtifacts(state).Contains(artifact);
+        };
     }
 
     internal void SetTextInfo(string itemName, string slotName, string itemColor)

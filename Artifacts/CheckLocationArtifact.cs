@@ -107,10 +107,14 @@ public class CheckLocationArtifact : Artifact, IRegisterable
     }
 
     private bool HasDeck(State state) =>
-        (givenCard is not null && DB.cardMetas.TryGetValue(Archipelago.ItemToCard[givenCard].Name, out var cardMeta)
-                               && state.characters.Any(character => character.deckType == cardMeta.deck))
-        || (givenArtifact is not null && DB.artifactMetas.TryGetValue(givenArtifact, out var artifactMeta)
-                                      && state.characters.Any(character => character.deckType == artifactMeta.owner));
+        (givenCard is not null
+         && Archipelago.ItemToCard.TryGetValue(givenCard, out var cardType)
+         && DB.cardMetas.TryGetValue(cardType.Name, out var cardMeta)
+         && state.characters.Any(character => character.deckType == cardMeta.deck))
+        || (givenArtifact is not null
+            && Archipelago.ItemToArtifact.TryGetValue(givenArtifact, out var artifactType)
+            && DB.artifactMetas.TryGetValue(artifactType.Name, out var artifactMeta)
+            && state.characters.Any(character => character.deckType == artifactMeta.owner));
 
     private bool WillAddCardToDeck(State state)
     {
@@ -137,7 +141,7 @@ public class CheckLocationArtifact : Artifact, IRegisterable
             CardRewardsMode.Always or CardRewardsMode.IfLocal => true,
             CardRewardsMode.IfHasDeck or CardRewardsMode.IfLocalAndHasDeck => HasDeck(state),
             _ => false
-        } && !ArtifactReward.GetBlockedArtifacts(state).Contains(Archipelago.ItemToArtifact[givenArtifact]);
+        };
     }
 
     internal void SetTextInfo(string itemName, string slotName, string itemColor)
