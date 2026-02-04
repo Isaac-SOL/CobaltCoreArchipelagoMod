@@ -21,6 +21,7 @@ public class GetUnlockedCharsPatch
     static void Postfix(ref HashSet<Deck> __result, StoryVars __instance)
     {
         __result.Clear();
+        UnlockCharPatch.RewriteUnlockedCharsFromAP(__instance);
         foreach (var unlockedChar in __instance.unlockedChars)
         {
             __result.Add(unlockedChar);
@@ -31,17 +32,15 @@ public class GetUnlockedCharsPatch
 [HarmonyPatch(typeof(StoryVars), nameof(StoryVars.GetUnlockedShips))]
 public class GetUnlockedShipsPatch
 {
-    static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions, ILGenerator generator)
+    [HarmonyPriority(Priority.Low)]
+    static void Postfix(ref HashSet<string> __result, StoryVars __instance)
     {
-        List<CodeInstruction> storedInstructions = new(instructions);
-        var codeMatcher = new CodeMatcher(storedInstructions, generator);
-        // Remove HashSet fill with artemis
-        codeMatcher.MatchStartForward(
-                CodeMatch.WithOpcodes([OpCodes.Newobj])
-            ).ThrowIfInvalid("Could not find HashSet creation in instructions")
-            .Advance()
-            .RemoveInstructions(4);
-        return codeMatcher.Instructions();
+        __result.Clear();
+        UnlockShipPatch.RewriteUnlockedShipsFromAP(__instance);
+        foreach (var unlockedShip in __instance.unlockedShips)
+        {
+            __result.Add(unlockedShip);
+        }
     }
 }
 
@@ -52,12 +51,11 @@ public class UnlockCharPatch
 {
     // Nickel seems to be interfering with this function, so we let it happen and then clear if necessary in postfix
     [HarmonyPriority(Priority.Low)]
-    static void Postfix(ref StoryVars __instance, Deck deck)
+    static void Postfix(ref StoryVars __instance)
     {
         if (Archipelago.Instance.APSaveData is null) return;  // May be called before a slot is loaded ?
         // Rewrite unlockedChars entirely from AP inventory
         RewriteUnlockedCharsFromAP(__instance);
-        ModEntry.Instance.Logger.LogWarning("Called UnlockCharPatch on {deck}", deck);
     }
 
     internal static void RewriteUnlockedCharsFromAP(StoryVars storyVars)
@@ -70,19 +68,16 @@ public class UnlockCharPatch
     }
 }
 
-// TODO DoMigrations unlocks Books without using the UnlockChar function!
-
 [HarmonyPatch(typeof(StoryVars), nameof(StoryVars.UnlockShip))]
 public class UnlockShipPatch
 {
     // Nickel seems to be interfering with this function, so we let it happen and then clear if necessary in postfix
     [HarmonyPriority(Priority.Low)]
-    static void Postfix(ref StoryVars __instance, string shipkey)
+    static void Postfix(ref StoryVars __instance)
     {
         if (Archipelago.Instance.APSaveData is null) return;  // May be called before a slot is loaded ?
         // Rewrite unlockedShips entirely from AP inventory
         RewriteUnlockedShipsFromAP(__instance);
-        ModEntry.Instance.Logger.LogWarning("Called UnlockShipPatch on {ship}", shipkey);
     }
 
     internal static void RewriteUnlockedShipsFromAP(StoryVars storyVars)
@@ -92,6 +87,28 @@ public class UnlockShipPatch
         storyVars.unlockedShipsToAnnounce = storyVars.unlockedShipsToAnnounce
             .Where(shipkey => Archipelago.Instance.APSaveData.HasShip(shipkey))
             .ToList();
+    }
+}
+
+// Recheck right before we have to show the unlocked chars/ships
+
+[HarmonyPatch(typeof(UnlockedDeck), nameof(UnlockedDeck.MakeIfHasRewards))]
+public class PreCheckUnlockedDecksPatch
+{
+    [HarmonyPriority(Priority.High)]
+    static void Prefix(State s)
+    {
+        UnlockCharPatch.RewriteUnlockedCharsFromAP(s.storyVars);
+    }
+}
+
+[HarmonyPatch(typeof(UnlockedShip), nameof(UnlockedShip.MakeIfHasRewards))]
+public class PreCheckUnlockedShipsPatch
+{
+    [HarmonyPriority(Priority.High)]
+    static void Prefix(State s)
+    {
+        UnlockShipPatch.RewriteUnlockedShipsFromAP(s.storyVars);
     }
 }
 
@@ -118,7 +135,6 @@ public class UnlockOneMemoryPatch
             var count = __instance.memoryUnlockLevel.TryGetValue(deck, out var currCount) ? currCount + 1 : 1;
             UnlockReplacements.SetMemoryCount(s, deck, count);
         }
-        ModEntry.Instance.Logger.LogWarning("Called UnlockOneMemoryPatch on {memory}", deck);
         return false;
     }
 }
