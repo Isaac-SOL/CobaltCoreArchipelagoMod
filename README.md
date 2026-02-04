@@ -12,15 +12,18 @@ A Cobalt Core mod for [the Archipelago multi-game randomizer system](https://arc
 
 The mod may work with other versions, but has not been tested on them.
 
-[Associated APWorld repository](https://github.com/Isaac-SOL/Archipelago-CobaltCore/tree/cobalt-core/worlds/cobalt_core)
+[Associated APWorld repository](https://github.com/Isaac-SOL/Archipelago-CobaltCore/tree/cobalt-core/worlds/cobalt_core) (direct link to the relevant folder/branch)
 
-## Current Status (January 2026)
+## Current Status (February 2026)
 
-Just released! I have tested it on my own with some friends but there may still be
-some bugs I couldn't find yet. If you encounter any issues while playing,
+The mod has been tested my many people who have given lots of very useful feedback.
+It is stable enough to be used in a game, though the random aspect still needs
+a few tweaks to make progression smoother.
+
+If you encounter any issues while playing,
 please ping me on Discord (`saltyisaac`) in the Cobalt Core channel on the
 [Archipelago Server](https://discord.gg/8Z65BR2), or make an issue on this
-repository. (Please ensure that no one has reported it yet, to the best
+repository. (Please ensure that no one else has reported it yet, to the best
 of your ability!)
 
 I am also looking for feedback on how much fun the mod is to play, balance details
@@ -141,7 +144,6 @@ You are now connected and ready to start playing with other people!
 - UI Suite ([NexusMods](https://www.nexusmods.com/cobaltcore/mods/45))
 - Combat QoL >= 1.6.1 ([NexusMods](https://www.nexusmods.com/cobaltcore/mods/49))
 - More Difficulty Options ([NexusMods](https://www.nexusmods.com/cobaltcore/mods/15), [GitHub](https://github.com/TheJazMaster/MoreDifficulties/releases/latest)):
-Higher difficulties work, you just can't set them as the minimum.
 Be careful, alternate starting cards aren't unlocked at the start!
 - Extra Boot Options ([NexusMods](https://www.nexusmods.com/cobaltcore/mods/80), [GitHub](https://github.com/Vin-117/CobaltCoreExtraBootOptions/releases))
 
@@ -156,11 +158,14 @@ an undertaking I will probably not do it myself.
 
 ## Planned features (no promises!)
 
+- Overhaul of item placement and overall progression, to emphasize making decisions
+while not locking players into long, mostly useless runs
 - In-game tracker: A way to know how many cards and artifacts are left to be
 found on each character
 - Actual dialogue for the additional Books and CAT memories.
 - Additional in-combat dialogue between characters when getting new items from other players,
 or unlocking items for other players. Lots of dialogue if possible!
+- Support for Custom Run Options, including unmanned/solo/duo runs
 - Potentially additional cards or artifacts which give the game more interactivity
 with the multiworld.
 
@@ -170,9 +175,6 @@ with the multiworld.
 immediately throw you onto the main menu without connecting to a host. This is not
 supported and will probably crash quickly, but it's fine as long as you close
 the game immediately.
-- Sometimes, after finishing a run, you may see notifications for new
-unlocked characters or ships that aren't actually unlocked yet. This does not
-affect gameplay, the unlocks work correctly, it's the notifications that are bugged.
 
 ## Credits
 
