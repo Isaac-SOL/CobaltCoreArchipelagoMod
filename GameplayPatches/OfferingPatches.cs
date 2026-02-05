@@ -47,6 +47,7 @@ public class CardOfferingPatch
         Debug.Assert(Archipelago.Instance.APSaveData != null, "Archipelago.Instance.APSaveData != null");
         
         if (!Archipelago.InstanceSlotData.ShuffleCards) return;
+        if (__result.Count == 0) return;
         
         // PHASE 1: Make each given card unusable if it is an item but not unlocked
         
@@ -59,7 +60,8 @@ public class CardOfferingPatch
         if (Archipelago.InstanceSlotData.GetMoreFoundItems)
         {
             var bonusCardAttempts = 0;
-            while (__result.Count < targetCount + 1 && bonusCardAttempts++ < 5)
+            var done = false;
+            while (!done && bonusCardAttempts++ < 5)
             {
                 var deck = limitDeck ?? availableDecks.Random(s.rngCardOfferings);
                 var rarity = rarityOverride ?? CardReward.GetRandomRarity(s.rngCardOfferings, battleType);
@@ -83,7 +85,14 @@ public class CardOfferingPatch
                     card.temporaryOverride = true;
                 if (discount != 0)
                     card.discount = discount;
-                
+
+                if (inCombat)
+                {
+                    // If this is a CAT summon, guarantee that the usable card will appear
+                    __result.RemoveAt(s.rngCardOfferingsMidcombat.NextInt() % __result.Count);
+                    __result.Add(card);
+                    __result = __result.Shuffle(s.rngCardOfferingsMidcombat).ToList();
+                }
                 if (targetCount == 1)
                 {
                     // If there's only one card in the reward, ensure that it is the usable one
@@ -97,6 +106,7 @@ public class CardOfferingPatch
                     __result.RemoveAt(s.rngCardOfferings.NextInt() % __result.Count);
                     __result = __result.Shuffle(s.rngCardOfferings).ToList();
                 }
+                done = true;
             }
         }
         
