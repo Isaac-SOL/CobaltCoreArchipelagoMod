@@ -10,6 +10,9 @@
   "UpdateChecks": {
     "GitHub": {
       "Repository": "Isaac-SOL/CobaltCoreArchipelagoMod"
+    },
+    "NexusMods": {
+      "ID": 81
     }
   }
 }
