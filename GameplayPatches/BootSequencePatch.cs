@@ -32,7 +32,8 @@ public class BootSequencePatch
                         browseData = new CardBrowseAPData
                         {
                             filterMode = CardBrowseAPData.FilterMode.UnlockedCardsNotInDeck
-                        }
+                        },
+                        allowCancel = true
                     }
                 ]
             });

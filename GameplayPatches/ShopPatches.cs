@@ -29,7 +29,8 @@ public class ShopPatch
                         browseData = new CardBrowseAPData
                         {
                             filterMode = CardBrowseAPData.FilterMode.FoundMissingLocations
-                        }
+                        },
+                        allowCancel = true
                     }
                 ]
             });
