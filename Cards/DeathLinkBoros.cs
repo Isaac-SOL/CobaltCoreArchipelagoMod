@@ -26,27 +26,23 @@ public class DeathLinkBoros : Card, IRegisterable
 
     private int GetHullDamageFactor() => Archipelago.Instance.APSaveData!.DeathLinkHullDamage switch
     {
-        <= 1 => 5,
-        <= 2 => 4,
-        <= 4 => 3,
-        <= 8 => 2,
+        <= 2 => 3,
+        <= 4 => 2,
         _ => 1
     };
 
     private int GetHullDamagePercentFactor() => Archipelago.Instance.APSaveData!.DeathLinkHullDamagePercent switch
     {
-        <= 10 => 5,
-        <= 20 => 4,
-        <= 40 => 3,
-        <= 80 => 2,
+        <= 20 => 3,
+        <= 40 => 2,
         _ => 1
     };
 
     private int GetDeathLinkStep() => (upgrade, Archipelago.Instance.APSaveData!.DeathLinkMode) switch
     {
-        (Upgrade.A,    DeathLinkMode.Missing) => 8,
-        (Upgrade.B,    DeathLinkMode.Missing) => 16,
-        (Upgrade.None, DeathLinkMode.Missing) => 8,
+        (Upgrade.A,    DeathLinkMode.Missing) => 4,
+        (Upgrade.B,    DeathLinkMode.Missing) => 6,
+        (Upgrade.None, DeathLinkMode.Missing) => 4,
 
         (Upgrade.A,    DeathLinkMode.HullDamage) => GetHullDamageFactor(),
         (Upgrade.B,    DeathLinkMode.HullDamage) => GetHullDamageFactor() * 2,
@@ -57,7 +53,7 @@ public class DeathLinkBoros : Card, IRegisterable
         (Upgrade.None, DeathLinkMode.HullDamagePercent) => GetHullDamagePercentFactor(),
 
         (Upgrade.A,    DeathLinkMode.Death) => 1,
-        (Upgrade.B,    DeathLinkMode.Death) => 2,
+        (Upgrade.B,    DeathLinkMode.Death) => 1,
         (Upgrade.None, DeathLinkMode.Death) => 1,
 
         _ => 10
@@ -70,7 +66,7 @@ public class DeathLinkBoros : Card, IRegisterable
         var step = GetDeathLinkStep();
         var value = deathLinks / step;
         var remainder = deathLinks % step;
-        return (step, value, remainder);
+        return (step, value + 2, remainder);
     }
 
     public override List<CardAction> GetActions(State s, Combat c)
