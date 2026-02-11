@@ -140,7 +140,10 @@ public class CardOfferingPatch
                 // But most of the time we add an actual check card with a set location
                 var locationChoices = Locations.AllMissingLocations
                     .Select(address => Locations.GetLocationNameFromId(address))
-                    .Where(name => name.StartsWith($"{deckName} {rarityName} Card") && !pickedLocations.Contains(name))
+                    .Where(name => name.StartsWith($"{deckName} {rarityName} Card")
+                                   && !pickedLocations.Contains(name)
+                                   && !s.deck.Any(deckCard => deckCard is CheckLocationCard deckApCard
+                                                              && deckApCard.locationName == name))
                     .ToList();
                 if (locationChoices.Count <= 0) continue;
 

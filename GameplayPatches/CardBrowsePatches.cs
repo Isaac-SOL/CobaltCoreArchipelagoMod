@@ -117,7 +117,8 @@ public class CardBrowseListPatch
         .ToList();
 
     internal static List<string> GetPickableAPCardsList(State s) => GetPickableAPLocationsList(s)
-        .Where(name => name.Contains("Card"))
+        .Where(name => name.Contains("Card")
+                       && !s.deck.Any(card => card is CheckLocationCard apCard && apCard.locationName == name))
         .ToList();
 
     internal static List<string> GetPickableAPArtifactsList(State s) => GetPickableAPLocationsList(s)
