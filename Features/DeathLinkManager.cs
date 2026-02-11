@@ -23,20 +23,26 @@ public class DeathLinkManager
         {
             case DeathLinkMode.Missing:
                 // Just give the status effect. No risk of dying in this mode
+                var action = new AStatus
+                {
+                    status = GetAssignableStatuses(state).Random(state.rngActions),
+                    statusAmount = 1,
+                    targetPlayer = true
+                };
+
                 if (combat is not null)
                 {
                     combat.Queue([
-                        new AStatus
-                        {
-                            status = GetAssignableStatuses(state).Random(state.rngActions),
-                            statusAmount = 1,
-                            targetPlayer = true
-                        },
+                        action,
                         new AInvalidateUndos
                         {
                             type = InvalidationTypes.DeathlinkReceived
                         }
                     ]);
+                }
+                else
+                {
+                    NextCombatManager.Queue(action);
                 }
                 break;
             case DeathLinkMode.HullDamage:

@@ -144,43 +144,35 @@ public static class ItemApplier
         }
         else if (item.name == "1 Energy")
         {
-            if (combat is not null)
+            var action = new AEnergy
             {
-                combat.Queue(new AEnergy
-                {
-                    changeAmount = 1
-                });
-            }
-            // TODO do it on next combat otherwise
+                changeAmount = 1
+            };
+            if (combat is not null) combat.Queue(action);
+            else NextCombatManager.Queue(action);
         }
         else if (item.name == "3 Temp Shield")
         {
-            if (combat is not null)
+            var action = new AStatus
             {
-                combat.Queue(new AStatus
-                {
-                    status = Status.tempShield,
-                    statusAmount = 3,
-                    targetPlayer = true,
-                    mode = AStatusMode.Add
-                });
-            }
-            else
-            {
-                state.ship.Add(Status.tempShield, 3);
-            }
+                status = Status.tempShield,
+                statusAmount = 3,
+                targetPlayer = true,
+                mode = AStatusMode.Add
+            };
+            if (combat is not null) combat.Queue(action);
+            else NextCombatManager.Queue(action);
         }
         else if (item.name == "Missing Trap!")
         {
-            if (combat is not null)
+            var action = new AStatus
             {
-                combat.Queue(new AStatus
-                {
-                    status = DeathLinkManager.GetAssignableStatuses(state).Random(state.rngActions),
-                    statusAmount = 1,
-                    targetPlayer = true
-                });
-            }
+                status = DeathLinkManager.GetAssignableStatuses(state).Random(state.rngActions),
+                statusAmount = 1,
+                targetPlayer = true
+            };
+            if (combat is not null) combat.Queue(action);
+            else NextCombatManager.Queue(action);
         }
         
         // If we have CombatQoL installed, any state update can be undone in combat unless we explicitly prevent it

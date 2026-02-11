@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
 using CobaltCoreArchipelago.Cards;
+using CobaltCoreArchipelago.Features;
 using HarmonyLib;
 
 namespace CobaltCoreArchipelago.GameplayPatches;
@@ -24,6 +25,18 @@ public static class SendCardToHandPatch
             {
                 apCard.LoadInfo(task.Result[0]);
             });
+        }
+    }
+}
+
+[HarmonyPatch(typeof(Combat), nameof(Combat.Make))]
+public static class CombatStartPatch
+{
+    public static void Postfix(Combat __result)
+    {
+        while (NextCombatManager.HasCombatStartActions())
+        {
+            __result.Queue(NextCombatManager.Dequeue());
         }
     }
 }
