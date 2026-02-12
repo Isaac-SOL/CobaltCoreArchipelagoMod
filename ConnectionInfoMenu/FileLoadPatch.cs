@@ -103,7 +103,6 @@ public class NewGamePatch
             state.storyVars.RecordEnemyDefeated(kvp.Key);  // No idea but just in case
         // Start a loop and end it immediately
         state.PopulateRun(StarterShip.ships["artemis"], chars: startingChars);
-        state.ship.hull = 0;
         state.storyVars.ResetAfterRun();
         state.ChangeRoute(() => new NewRunOptions());
         return state;
