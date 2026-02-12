@@ -11,7 +11,6 @@ using System.Reflection;
 using CobaltCoreArchipelago.Actions;
 using CobaltCoreArchipelago.Artifacts;
 using CobaltCoreArchipelago.Cards;
-using CobaltCoreArchipelago.External;
 using CobaltCoreArchipelago.ConnectionInfoMenu;
 using CobaltCoreArchipelago.MenuPatches;
 using CobaltCoreArchipelago.StoryPatches;
