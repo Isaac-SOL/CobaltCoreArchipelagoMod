@@ -153,19 +153,6 @@ internal class ModEntry : SimpleMod
 
         ModSettings.RegisterModSettings(
             ModSettings.MakeList([
-                ModSettings.MakeProfileSelector(
-                    () => package.Manifest.DisplayName ?? package.Manifest.UniqueName,
-                    // This is an attempt at making a dummy because I have no idea what is going on here
-                    ProfileBasedValue.Create(
-                        () => IModSettingsApi.ProfileMode.Slot,
-                        _ => {},
-                        _ => new List<int>(),
-                        (_, _) => {}
-                    )
-                ),
-                ModSettings.MakePadding(
-                    ModSettings.MakeText(() => LocalizeSettings("profileWarning")),
-                    4, 8),
                 ModSettings.MakeEnumStepper(
                         () => LocalizeSettings("deathlink", "settingName"),
                         () => Archipelago.APSaveData!.DeathLinkMode,
@@ -205,7 +192,7 @@ internal class ModEntry : SimpleMod
                             new TTText(LocalizeSettings("deathlinkHullDamage", "desc"))
                         }),
                     () => Archipelago.APSaveData!.DeathLinkMode == DeathLinkMode.HullDamage
-                    ),
+                ),
                 ModSettings.MakeConditional(
                     ModSettings.MakeNumericStepper(
                             () => LocalizeSettings("deathlinkHullDamagePercent", "settingName"),
@@ -221,34 +208,36 @@ internal class ModEntry : SimpleMod
                             new TTText(LocalizeSettings("deathlinkHullDamagePercent", "desc"))
                         }),
                     () => Archipelago.APSaveData!.DeathLinkMode == DeathLinkMode.HullDamagePercent
-                    ),
-                ModSettings.MakeEnumStepper(
-                        () => LocalizeSettings("automaticScouting", "settingName"),
-                        () => Archipelago.APSaveData!.CardScoutMode,
-                        value => Archipelago.APSaveData!.CardScoutMode = value)
-                    .SetValueFormatter(value => value switch
-                    {
-                        CardScoutMode.DontScout => LocalizeSettings("automaticScouting", "nameDontScout"),
-                        CardScoutMode.ScoutOnly => LocalizeSettings("automaticScouting", "nameScoutOnly"),
-                        _ => LocalizeSettings("automaticScouting", "nameCreateHint")
-                    })
-                    .SetValueWidth(_ => 105)
-                    .SetTooltips(() => new List<Tooltip>
-                    {
-                        new TTText(LocalizeSettings("automaticScouting", "tooltipName")),
-                        new TTText(LocalizeSettings("automaticScouting", "desc")),
-                        new TTDivider(),
-                    }.Append(new TTText(Archipelago.APSaveData!.CardScoutMode switch
-                    {
-                        CardScoutMode.DontScout => LocalizeSettings("automaticScouting", "descDontScout"),
-                        CardScoutMode.ScoutOnly => LocalizeSettings("automaticScouting", "descScoutOnly"),
-                        _ => LocalizeSettings("automaticScouting", "descCreateHint")
-                    }))),
+                ),
+                ModSettings.MakePadding(
+                    ModSettings.MakeEnumStepper(
+                            () => LocalizeSettings("automaticScouting", "settingName"),
+                            () => Archipelago.APSaveData!.CardScoutMode,
+                            value => Archipelago.APSaveData!.CardScoutMode = value)
+                        .SetValueFormatter(value => value switch
+                        {
+                            CardScoutMode.DontScout => LocalizeSettings("automaticScouting", "nameDontScout"),
+                            CardScoutMode.ScoutOnly => LocalizeSettings("automaticScouting", "nameScoutOnly"),
+                            _ => LocalizeSettings("automaticScouting", "nameCreateHint")
+                        })
+                        .SetValueWidth(_ => 105)
+                        .SetTooltips(() => new List<Tooltip>
+                        {
+                            new TTText(LocalizeSettings("automaticScouting", "tooltipName")),
+                            new TTText(LocalizeSettings("automaticScouting", "desc")),
+                            new TTDivider(),
+                        }.Append(new TTText(Archipelago.APSaveData!.CardScoutMode switch
+                        {
+                            CardScoutMode.DontScout => LocalizeSettings("automaticScouting", "descDontScout"),
+                            CardScoutMode.ScoutOnly => LocalizeSettings("automaticScouting", "descScoutOnly"),
+                            _ => LocalizeSettings("automaticScouting", "descCreateHint")
+                        }))), 8, 0),
                 ModSettings.MakeCheckbox(
                         () => LocalizeSettings("messagesInMenu", "settingName"),
                         () => Archipelago.APSaveData!.MessagesInMenu,
                         (_, _, value) => Archipelago.APSaveData!.MessagesInMenu = value)
-                    .SetTooltips(() => [
+                    .SetTooltips(() =>
+                    [
                         new TTText(LocalizeSettings("messagesInMenu", "tooltipName")),
                         new TTText(LocalizeSettings("messagesInMenu", "desc"))
                     ])
