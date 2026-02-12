@@ -4,7 +4,7 @@
 
 A Cobalt Core mod for [the Archipelago multi-game randomizer system](https://archipelago.gg/).
 
-- Version: 1.1.0
+- Version: 1.1.1
 - Archipelago version: 0.6.5
 - Cobalt Core version: 1.2.8
 - Nickel Version: 1.20.3
