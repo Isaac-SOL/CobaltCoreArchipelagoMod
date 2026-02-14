@@ -47,17 +47,22 @@ public class CardOfferingPatch
         Debug.Assert(Archipelago.Instance.APSaveData != null, "Archipelago.Instance.APSaveData != null");
         
         if (!Archipelago.InstanceSlotData.ShuffleCards) return;
-        if (__result.Count == 0) return;
         
-        // PHASE 1: Make each given card unusable if it is an item but not unlocked
-        
-        // REMOVED: This is now handled with OnGetDynamicInnateCardTraitOverrides in ModEntry
-        
-        // PHASE 2: Add one found card if the option permits it
-        
-        var availableDecks = s.characters.Select(c => c.deckType).ToList();
         var targetCount = __result.Count;
-        if (Archipelago.InstanceSlotData.GetMoreFoundItems)
+        if (targetCount == 0) return;
+        
+        //   PHASE 1: Make each given card unusable if it is an item but not unlocked
+        
+        // Removed: This is now handled with OnGetDynamicInnateCardTraitOverrides in ModEntry
+        
+        //   PHASE 2: Add one found card if there is none and the option permits it
+        
+        // Check if a card needs to be added
+        var hasUnlockedCard = __result.Any(resCard => Archipelago.Instance.APSaveData.HasCardOrNotAP(resCard.GetType()));
+        
+        // Add the card
+        var availableDecks = s.characters.Select(c => c.deckType).ToList();
+        if (Archipelago.InstanceSlotData.GetMoreFoundItems && !hasUnlockedCard)
         {
             var bonusCardAttempts = 0;
             var done = false;
@@ -93,7 +98,7 @@ public class CardOfferingPatch
                     __result.Add(card);
                     __result = __result.Shuffle(s.rngCardOfferingsMidcombat).ToList();
                 }
-                if (targetCount == 1)
+                else if (targetCount == 1)
                 {
                     // If there's only one card in the reward, ensure that it is the usable one
                     __result.Clear();
@@ -112,7 +117,7 @@ public class CardOfferingPatch
         
         if (inCombat || isEvent) return;
         
-        // PHASE 3: Add archipelago check cards
+        //   PHASE 3: Add archipelago check cards
         
         var archipelagoCards = new List<Card>();
         var pickedLocations = new List<string>();
@@ -236,7 +241,7 @@ public class ArtifactOfferingPatch
         }
         else
         {
-            RegularReward(ref __result, s, count, limitDeck, limitPools, rngOverride);
+            RegularReward(ref __result, s, limitDeck, limitPools, rngOverride);
         }
     }
 
@@ -282,7 +287,7 @@ public class ArtifactOfferingPatch
 
     private static void RegularReward(
         ref List<Artifact> __result,
-        State s, int count,
+        State s,
         Deck? limitDeck,
         List<ArtifactPool>? limitPools,
         Rand? rngOverride)
@@ -291,7 +296,10 @@ public class ArtifactOfferingPatch
         
         if (!Archipelago.InstanceSlotData.ShuffleArtifacts) return;
 
-        // PHASE 1: Remove each artifact if it is an item but not unlocked
+        var targetCount = __result.Count;
+        if (targetCount == 0) return;
+
+        //   PHASE 1: Remove each artifact if it is an item but not unlocked
         
         var artifactsTemp = new List<Artifact>(__result);
         var selectedTypes = new List<Type>();  // Save in a list to exclude in next phase
@@ -306,7 +314,7 @@ public class ArtifactOfferingPatch
                 __result.Add(artifact);
         }
         
-        // PHASE 2: Add one found artifact if the option permits it
+        //   PHASE 2: Add one found artifact if the option permits it
         
         if (Archipelago.InstanceSlotData.GetMoreFoundItems)
         {
@@ -345,7 +353,7 @@ public class ArtifactOfferingPatch
             }
         }
         
-        // PHASE 3: Add archipelago check artifacts
+        //   PHASE 3: Add archipelago check artifacts
 
         var rng = rngOverride ?? s.rngArtifactOfferings;
         var availableDecks = s.characters.Select(c => c.deckType).ToList();
@@ -357,7 +365,7 @@ public class ArtifactOfferingPatch
         var archipelagoArtifacts = new List<CheckLocationArtifact>();
         var pickedLocations = new List<string>();
         var apArtifactsAttempts = 0;
-        while (apArtifactsAttempts++ < 10 && archipelagoArtifacts.Count < count)
+        while (apArtifactsAttempts++ < 10 && archipelagoArtifacts.Count < targetCount)
         {
             var deck = limitDeck ?? availableDecks.Random(rng);
             var deckName = Archipelago.ItemToDeck.FirstOrDefault(kvp => kvp.Value == deck, new KeyValuePair<string, Deck>("Basic", Deck.tooth)).Key;
@@ -377,7 +385,7 @@ public class ArtifactOfferingPatch
         
         // Concatenate both picks and cull at random to keep normal offering count
         __result.AddRange(archipelagoArtifacts);
-        while (__result.Count > count)
+        while (__result.Count > targetCount)
             __result.RemoveAt(s.rngCardOfferings.NextInt() % __result.Count);
         __result = __result.Shuffle(s.rngCardOfferings).ToList();
         
