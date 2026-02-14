@@ -2,6 +2,7 @@
 using System.Linq;
 using CobaltCoreArchipelago.Artifacts;
 using CobaltCoreArchipelago.Cards;
+using daisyowl.text;
 using HarmonyLib;
 using Microsoft.Extensions.Logging;
 
@@ -25,6 +26,13 @@ public static class CardRewardRenderPatch
     public static void Postfix(CardReward __instance, G g)
     {
         Debug.Assert(Archipelago.Instance.APSaveData != null, "Archipelago.Instance.APSaveData != null");
+        
+        // Show tip about AP cards
+        if (__instance.cards.Any(card => card is CheckLocationCard))
+        {
+            Draw.Text(ModEntry.Instance.Localizations.Localize(["cardReward", "apCardsTip"]),
+                      240, 245, align: TAlign.Center, color: Colors.textMain, outline: Colors.black);
+        }
         
         if (Archipelago.Instance.APSaveData.CardScoutMode == CardScoutMode.DontScout) return;
 

@@ -83,6 +83,9 @@
         "addCardActionDoing": "Select a card to add to your deck.",
         "addCardActionDone": "The card has been added to your deck."
     },
+    "cardReward": {
+        "apCardsTip": "<c=boldPink>Archipelago cards</c> that you don't pick will not reappear\nfor a while, but you can find them again at Cleo's shop."
+    },
     "deck": {
         "name": "Archipelago",
         "lockedName": "Locked"
