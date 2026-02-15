@@ -623,7 +623,7 @@ public class Archipelago
 
         lock (deathLinkLock)
         {
-            if (lastDeathLink is not null && state.storyVars.hasStartedGame && state.ship.hull > 0)
+            if (lastDeathLink is not null && !state.IsOutsideRun() && state.ship.hull > 0)
             {
                 DeathLinkManager.ApplyDeathLink(g, lastDeathLink);
             }
