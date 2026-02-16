@@ -254,7 +254,8 @@ internal class ModEntry : SimpleMod
         Helper.Content.Cards.OnGetDynamicInnateCardTraitOverrides += (_, args) =>
         {
             Debug.Assert(Archipelago.Instance.APSaveData != null, "Archipelago.Instance.APSaveData != null");
-            if (Archipelago.CardToItem.TryGetValue(args.Card.GetType(), out var cardItem)
+            if (Archipelago.InstanceSlotData.ShuffleCards
+                && Archipelago.CardToItem.TryGetValue(args.Card.GetType(), out var cardItem)
                 && !Archipelago.Instance.APSaveData.HasItem(cardItem)
                 // All cards are unlocked during the finale (for now at least)
                 && args.State.route is not Combat { otherShip.ai: FinaleFrienemy })

@@ -65,19 +65,22 @@ public class VaultRenderPatch
         {
             var required = Archipelago.InstanceSlotData.WinReqTotal;
             var found = memories.Sum(memorySet => memorySet.memoryKeys.Sum(entry => entry.unlocked ? 1 : 0));
-            goalString = $"Memories found:\n{found} / {required}";
+            goalString = string.Format(
+                ModEntry.Instance.Localizations.Localize(["vault", "goalTotalMemories"]),
+                found, required);
         }
         else // WinCondition.MemoryPerCharacter
         {
             var required = Archipelago.InstanceSlotData.WinReqPerChar;
             var completed = memories.Sum(memorySet => memorySet.memoryKeys.Sum(entry => entry.unlocked ? 1 : 0) >= required ? 1 : 0);
             var charAmount = memories.Count;
-            goalString = $"Memories required:\n{required} per character\n\n" +
-                         $"Characters completed:\n{completed} / {charAmount}";
+            goalString = string.Format(
+                ModEntry.Instance.Localizations.Localize(["vault", "goalPerCharacterMemories"]),
+                required, completed, charAmount);
         }
 
         Draw.Text(goalString,
-                  357.0, (winCon == WinCondition.TotalMemories ? 233.0 : 220.0) + slideIn,
+                  123.0, (winCon == WinCondition.TotalMemories ? 233.0 : 220.0) + slideIn,
                   align: TAlign.Center, color: Colors.buttonBoxNormal, outline: Colors.black);
     }
 }
