@@ -113,8 +113,9 @@ public class CardOfferingPatch
         var attempts = 0;
         while (archipelagoCards.Count < targetCount && attempts++ < 5)
         {
-            var deck = limitDeck ?? availableDecks.Random(s.rngCardOfferings);
-            var deckName = Archipelago.ItemToDeck.First(kvp => kvp.Value == deck).Key;
+            var deckNames = limitDeck is not null
+                ? [Archipelago.ItemToDeck.First(kvp => kvp.Value == limitDeck).Key]
+                : availableDecks.Select(d => Archipelago.ItemToDeck.First(kvp => kvp.Value == d).Key).ToList();
             var rarity = rarityOverride ?? GetRandomAPCheckRarity(s, battleType);
             var rarityName = rarity switch
             {
@@ -134,7 +135,7 @@ public class CardOfferingPatch
                 // But most of the time we add an actual check card with a set location
                 var locationChoices = Locations.AllMissingLocations
                     .Select(address => Locations.GetLocationNameFromId(address))
-                    .Where(name => name.StartsWith($"{deckName} {rarityName} Card")
+                    .Where(name => deckNames.Any(deckName => name.StartsWith($"{deckName} {rarityName} Card"))
                                    && !pickedLocations.Contains(name)
                                    && !s.deck.Any(deckCard => deckCard is CheckLocationCard deckApCard
                                                               && deckApCard.locationName == name))
@@ -402,11 +403,17 @@ public class ArtifactOfferingPatch
         var apArtifactsAttempts = 0;
         while (apArtifactsAttempts++ < 10 && archipelagoArtifacts.Count < targetCount)
         {
-            var deck = limitDeck ?? availableDecks.Random(rng);
-            var deckName = Archipelago.ItemToDeck.FirstOrDefault(kvp => kvp.Value == deck, new KeyValuePair<string, Deck>("Basic", Deck.tooth)).Key;
+            var deckNames = limitDeck is not null
+                ? [Archipelago.ItemToDeck.First(kvp => kvp.Value == limitDeck).Key]
+                : availableDecks
+                    .Select(d => Archipelago.ItemToDeck
+                                .FirstOrDefault(kvp => kvp.Value == d,
+                                                new KeyValuePair<string, Deck>("Basic", Deck.tooth)).Key)
+                    .ToList();
             var locationChoices = Locations.AllMissingLocations
                 .Select(address => Locations.GetLocationNameFromId(address))
-                .Where(name => name.StartsWith($"{deckName} {rarityName}Artifact") && !pickedLocations.Contains(name))
+                .Where(name => deckNames.Any(deckName => name.StartsWith($"{deckName} {rarityName}Artifact"))
+                               && !pickedLocations.Contains(name))
                 .ToList(); // Note the absence of space before "Artifact"
             if (locationChoices.Count <= 0) continue;
 
