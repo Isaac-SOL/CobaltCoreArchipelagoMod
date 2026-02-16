@@ -700,6 +700,13 @@ public enum CardRewardAttribute
     Retain = 32
 }
 
+public enum RewardsTweakMode
+{
+    None = 0,
+    MoreUnlocked = 1,
+    AllUnlocked = 2
+}
+
 
 public class SlotDataInvalidException(string message) : Exception(message);
 
@@ -721,7 +728,7 @@ public struct SlotDataHelper
     public bool ShuffleArtifacts { get; private set; }
     public int CheckCardDifficulty { get; private set; }
     public bool RarerChecksLater { get; private set; }
-    public bool GetMoreFoundItems { get; private set; }
+    public RewardsTweakMode RewardsTweak { get; private set; }
     public CardRewardsMode ImmediateCardRewards { get; private set; }
     public CardRewardAttribute ImmediateCardAttribute { get; private set; }
     public CardRewardsMode ImmediateArtifactRewards { get; private set; }
@@ -764,7 +771,7 @@ public struct SlotDataHelper
             res.CheckCardDifficulty = Convert.ToInt32(slotData["check_card_difficulty"]);
             res.RarerChecksLater = Convert.ToBoolean(slotData["rarer_checks_later"]);
             res.AddCharacterMemories = Convert.ToBoolean(slotData["add_character_memories"]);
-            res.GetMoreFoundItems = Convert.ToBoolean(slotData["get_more_found_items"]);
+            res.RewardsTweak = (RewardsTweakMode)Convert.ToInt32(slotData["rewards_tweak"]);
             res.ImmediateCardRewards = (CardRewardsMode)Convert.ToInt32(slotData["immediate_card_rewards"]);
             var attributes = (JArray)slotData["immediate_card_attributes"];
             foreach (var attribute in attributes)

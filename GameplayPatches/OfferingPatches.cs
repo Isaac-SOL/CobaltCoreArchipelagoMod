@@ -55,42 +55,17 @@ public class CardOfferingPatch
         
         // Removed: This is now handled with OnGetDynamicInnateCardTraitOverrides in ModEntry
         
-        //   PHASE 2: Add one found card if there is none and the option permits it
+        //   PHASE 2: Add found cards according to options
         
-        // Check if a card needs to be added
-        var hasUnlockedCard = __result.Any(resCard => Archipelago.Instance.APSaveData.HasCardOrNotAP(resCard.GetType()));
-        
-        // Add the card
         var availableDecks = s.characters.Select(c => c.deckType).ToList();
-        if (Archipelago.InstanceSlotData.GetMoreFoundItems && !hasUnlockedCard)
+        if (Archipelago.InstanceSlotData.RewardsTweak == RewardsTweakMode.MoreUnlocked
+            // Only add the card if none are playable
+            && !__result.Any(resCard => Archipelago.Instance.APSaveData.HasCardOrNotAP(resCard.GetType())))
         {
-            var bonusCardAttempts = 0;
-            var done = false;
-            while (!done && bonusCardAttempts++ < 5)
+            var card = RollNewUnlockedCard(ref __result, s, limitDeck, battleType, rarityOverride,
+                                           overrideUpgradeChances, makeAllCardsTemporary, discount, availableDecks);
+            if (card is not null)
             {
-                var deck = limitDeck ?? availableDecks.Random(s.rngCardOfferings);
-                var rarity = rarityOverride ?? CardReward.GetRandomRarity(s.rngCardOfferings, battleType);
-                var pickableCards = DB.releasedCards.Where(c =>
-                {
-                    if (!Archipelago.Instance.APSaveData.HasCard(c.GetType())) return false;
-                    var meta = c.GetMeta();
-                    if (meta.rarity != rarity) return false;
-                    return deck is not null
-                           && deck == meta.deck
-                           && meta is { dontOffer: false, unreleased: false };
-                }).ToList();
-                if (pickableCards.Count == 0) continue;
-                var cardType = pickableCards.Random(s.rngCardOfferings).GetType();
-                if (__result.Any(c => c.GetType() == cardType)) continue;
-                var card = (Card)cardType.CreateInstance();
-                card.drawAnim = 1.0;
-                card.upgrade = CardReward.GetUpgrade(s, s.rngCardOfferings, s.map, card, s.GetDifficulty() >= 1 ? 0.5 : 1.0, overrideUpgradeChances);
-                card.flipAnim = 1.0;
-                if (makeAllCardsTemporary)
-                    card.temporaryOverride = true;
-                if (discount != 0)
-                    card.discount = discount;
-
                 if (inCombat)
                 {
                     // If this is a CAT summon, guarantee that the usable card will appear
@@ -111,7 +86,21 @@ public class CardOfferingPatch
                     __result.RemoveAt(s.rngCardOfferings.NextInt() % __result.Count);
                     __result = __result.Shuffle(s.rngCardOfferings).ToList();
                 }
-                done = true;
+            }
+        }
+        else if (Archipelago.InstanceSlotData.RewardsTweak == RewardsTweakMode.AllUnlocked)
+        {
+            // Remove all locked cards and fill back up with unlocked cards
+            __result = __result
+                .Where(resCard => Archipelago.Instance.APSaveData.HasCardOrNotAP(resCard.GetType()))
+                .ToList();
+            var targetFill = targetCount - __result.Count;
+            for (var i = 0; i < targetFill; i++)
+            {
+                var card = RollNewUnlockedCard(ref __result, s, limitDeck, battleType, rarityOverride,
+                                               overrideUpgradeChances, makeAllCardsTemporary, discount, availableDecks);
+                if (card is not null)
+                    __result.Add(card);
             }
         }
         
@@ -190,6 +179,52 @@ public class CardOfferingPatch
             for (var i = 0; i < checkCards.Count; i++)
                 checkCards[i].LoadInfo(task.Result[i]);
         });
+    }
+
+    private static Card? RollNewUnlockedCard(
+        ref List<Card> __result,
+        State s,
+        Deck? limitDeck,
+        BattleType battleType,
+        Rarity? rarityOverride,
+        bool? overrideUpgradeChances,
+        bool makeAllCardsTemporary,
+        int discount,
+        List<Deck?> availableDecks)
+    {
+        Debug.Assert(Archipelago.Instance.APSaveData != null, "Archipelago.Instance.APSaveData != null");
+        
+        var bonusCardAttempts = 0;
+        while (bonusCardAttempts++ < 5)
+        {
+            var deck = limitDeck ?? availableDecks.Random(s.rngCardOfferings);
+            var rarity = rarityOverride ?? CardReward.GetRandomRarity(s.rngCardOfferings, battleType);
+            var pickableCards = DB.releasedCards.Where(c =>
+            {
+                if (!Archipelago.Instance.APSaveData.HasCard(c.GetType())) return false;
+                var meta = c.GetMeta();
+                if (meta.rarity != rarity) return false;
+                return deck is not null
+                       && deck == meta.deck
+                       && meta is { dontOffer: false, unreleased: false };
+            }).ToList();
+            if (pickableCards.Count == 0) continue;
+            var cardType = pickableCards.Random(s.rngCardOfferings).GetType();
+            if (__result.Any(c => c.GetType() == cardType)) continue;
+            var card = (Card)cardType.CreateInstance();
+            card.drawAnim = 1.0;
+            card.upgrade = CardReward.GetUpgrade(s, s.rngCardOfferings, s.map, card,
+                                                 s.GetDifficulty() >= 1 ? 0.5 : 1.0, overrideUpgradeChances);
+            card.flipAnim = 1.0;
+            if (makeAllCardsTemporary)
+                card.temporaryOverride = true;
+            if (discount != 0)
+                card.discount = discount;
+
+            return card;
+        }
+
+        return null;
     }
 
     private static Rarity GetRandomAPCheckRarity(State s, BattleType battleType)
@@ -316,7 +351,7 @@ public class ArtifactOfferingPatch
         
         //   PHASE 2: Add one found artifact if the option permits it
         
-        if (Archipelago.InstanceSlotData.GetMoreFoundItems)
+        if (Archipelago.InstanceSlotData.RewardsTweak != RewardsTweakMode.None)
         {
             var charDecks = new List<Deck?>();
             foreach (var character in s.characters)
