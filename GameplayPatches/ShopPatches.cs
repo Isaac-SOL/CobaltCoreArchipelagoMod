@@ -20,6 +20,7 @@ public class ShopPatch
             __result.Insert(__result.Count - 2, new Choice
             {
                 label = ModEntry.Instance.Localizations.Localize(["cardBrowse", "eventMissedAPCardName"]),
+                key = ".shopUpgradeCard",
                 actions =
                 [
                     new AAPCardSelect
@@ -43,6 +44,7 @@ public class ShopPatch
             {
                 label = string.Format(
                     ModEntry.Instance.Localizations.Localize(["cardBrowse", "eventMissedAPArtifactName"]), apArtifactsCount),
+                key = ".shopUpgradeCard",
                 actions =
                 [
                     new AAPArtifactOffering
