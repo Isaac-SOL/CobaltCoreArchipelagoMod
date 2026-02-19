@@ -632,19 +632,22 @@ public class Archipelago
         }
     }
 
-    internal async Task<ScoutedItemInfo?[]> ScoutLocationInfo(params string[] locationNames)
+    internal async Task<ScoutedItemInfo?[]> ScoutLocationInfo(params string?[] locationNames)
     {
         Debug.Assert(Session != null, nameof(Session) + " != null");
         Debug.Assert(APSaveData != null, nameof(APSaveData) + " != null");
-        var addresses = locationNames.Select(s => Session.Locations.GetLocationIdFromName("Cobalt Core", s)).ToArray();
+        var addresses = locationNames
+            .Select<string?, long?>(s => s is null ? null : Session.Locations.GetLocationIdFromName("Cobalt Core", s))
+            .ToArray();
         var info = await Session.Locations.ScoutLocationsAsync(
             APSaveData.CardScoutMode == CardScoutMode.CreateHint
                 ? HintCreationPolicy.CreateAndAnnounceOnce
                 : HintCreationPolicy.None,
-            addresses
+            addresses.Where(l => l is not null).Select(l => l!.Value).ToArray()
         );
-        var res = addresses.Select(a => info.GetValueOrDefault(a));
-        return res.ToArray();
+        return addresses
+            .Select(a => (info is null || a is null) ? null : info.GetValueOrDefault(a.Value))
+            .ToArray();
     }
 }
 
