@@ -710,8 +710,17 @@ public enum RewardsTweakMode
     AllUnlocked = 2
 }
 
+public enum ArtifactShuffleMode
+{
+    Off = 0,
+    Simple = 1,
+    Double = 2
+}
+
 
 public class SlotDataInvalidException(string message) : Exception(message);
+
+public class SlotDataVersionInvalidException(string message) : Exception(message);
 
 public struct SlotDataHelper
 {
@@ -728,7 +737,7 @@ public struct SlotDataHelper
     public bool UnlockMemoryForAllCharacters { get; private set; }
     public bool DoFutureMemory { get; private set; }
     public bool ShuffleCards { get; private set; }
-    public bool ShuffleArtifacts { get; private set; }
+    public ArtifactShuffleMode ShuffleArtifacts { get; private set; }
     public int CheckCardDifficulty { get; private set; }
     public bool RarerChecksLater { get; private set; }
     public RewardsTweakMode RewardsTweak { get; private set; }
@@ -745,6 +754,11 @@ public struct SlotDataHelper
         var res = new SlotDataHelper();
         try
         {
+            if (Convert.ToString(slotData["version_tag"]) != "1.1.5")
+            {
+                throw new SlotDataVersionInvalidException("This version of the mod requires APWorld version tag 1.1.5");
+            }
+            
             var startingCharacters = (JArray)slotData["starting_characters"];
             res.StartingCharacters = [];
             res.StartingCharacters.AddRange(startingCharacters.Select(s => Archipelago.ItemToDeck[s.ToString()]));
@@ -770,7 +784,7 @@ public struct SlotDataHelper
             res.UnlockMemoryForAllCharacters = Convert.ToBoolean(slotData["unlock_memory_for_all_characters"]);
             res.DoFutureMemory = Convert.ToBoolean(slotData["do_future_memory"]);
             res.ShuffleCards = Convert.ToBoolean(slotData["shuffle_cards"]);
-            res.ShuffleArtifacts = Convert.ToBoolean(slotData["shuffle_artifacts"]);
+            res.ShuffleArtifacts = (ArtifactShuffleMode)Convert.ToInt32(slotData["shuffle_artifacts"]);
             res.CheckCardDifficulty = Convert.ToInt32(slotData["check_card_difficulty"]);
             res.RarerChecksLater = Convert.ToBoolean(slotData["rarer_checks_later"]);
             res.AddCharacterMemories = Convert.ToBoolean(slotData["add_character_memories"]);

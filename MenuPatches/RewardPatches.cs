@@ -36,7 +36,7 @@ public static class CardRewardRenderPatch
         
         if (Archipelago.Instance.APSaveData.CardScoutMode == CardScoutMode.DontScout) return;
 
-        // Recheck not scouted AP checks every 5 seconds
+        // Recheck AP checks every 5 seconds
         if (rescoutTimer > 5.0)
         {
             rescoutTimer -= 5.0;
@@ -78,7 +78,7 @@ public static class ArtifactRewardRenderPatch
         
         if (Archipelago.Instance.APSaveData.CardScoutMode == CardScoutMode.DontScout) return;
         
-        // Recheck not scouted AP checks every 5 seconds
+        // Recheck AP checks every 5 seconds
         if (rescoutTimer > 5.0)
         {
             rescoutTimer -= 5.0;
@@ -86,14 +86,14 @@ public static class ArtifactRewardRenderPatch
             var checkArtifacts = __instance.artifacts
                 .Where(artifact => artifact is CheckLocationArtifact)
                 .Cast<CheckLocationArtifact>().ToList();
-            var locations = checkArtifacts.Select(artifact => artifact.locationName).ToArray();
+            var locations = checkArtifacts.SelectMany(artifact => artifact.locationName).ToArray();
 
             if (locations.Length > 0)
             {
                 Archipelago.Instance.ScoutLocationInfo(locations).ContinueWith(task =>
                 {
                     for (var i = 0; i < checkArtifacts.Count; i++)
-                        checkArtifacts[i].LoadInfo(task.Result[i]);
+                        checkArtifacts[i].LoadInfo(task.Result?.GetSlice(i).ToArray());
                 });
             }
         }

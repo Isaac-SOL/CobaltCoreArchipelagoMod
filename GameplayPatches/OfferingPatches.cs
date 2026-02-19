@@ -305,8 +305,8 @@ public class ArtifactOfferingPatch
                     .ToList();
                 var apArtifacts = locationsToScout
                     .Select(name =>
-                                name.Contains("Boss") ? new CheckLocationArtifactBoss { locationName = name }
-                                : new CheckLocationArtifact { locationName = name })
+                                name.Contains("Boss") ? new CheckLocationArtifactBoss { locationName = [name, null] }
+                                : new CheckLocationArtifact { locationName = [name, null] })
                     .ToList();
                 __result = apArtifacts.Cast<Artifact>().ToList();
 
@@ -315,7 +315,7 @@ public class ArtifactOfferingPatch
                 Archipelago.Instance.ScoutLocationInfo(locationsToScout.ToArray()).ContinueWith(task =>
                 {
                     for (var i = 0; i < apArtifacts.Count; i++)
-                        apArtifacts[i].LoadInfo(task.Result[i]);
+                        apArtifacts[i].LoadInfo(task.Result?.GetSlice(i).ToArray());
                 });
                 break;
         }
@@ -330,7 +330,7 @@ public class ArtifactOfferingPatch
     {
         Debug.Assert(Archipelago.Instance.APSaveData != null, "Archipelago.Instance.APSaveData != null");
         
-        if (!Archipelago.InstanceSlotData.ShuffleArtifacts) return;
+        if (Archipelago.InstanceSlotData.ShuffleArtifacts == ArtifactShuffleMode.Off) return;
 
         var targetCount = __result.Count;
         if (targetCount == 0) return;
@@ -393,11 +393,11 @@ public class ArtifactOfferingPatch
 
         var rng = rngOverride ?? s.rngArtifactOfferings;
         var availableDecks = s.characters.Select(c => c.deckType).ToList();
-        availableDecks.Add(Deck.tooth);  // Just a dummy deck, not present in ItemToDeck
+        availableDecks.Add(Deck.tooth);  // Just a dummy deck, not present in ItemToDeck. Could be whatever
         var effPools = limitPools ?? [ArtifactPool.Common];
-        var rarityName = effPools.Contains(ArtifactPool.Boss) ?   "Boss "
-            : effPools.Contains(ArtifactPool.Common) ? ""
-            :                                          "N/A ";
+        var rarityName = effPools.Contains(ArtifactPool.Boss) ? "Boss "
+            : effPools.Contains(ArtifactPool.Common) ?          ""
+            :                                                   "N/A ";
         var archipelagoArtifacts = new List<CheckLocationArtifact>();
         var pickedLocations = new List<string>();
         var apArtifactsAttempts = 0;
@@ -412,17 +412,43 @@ public class ArtifactOfferingPatch
                     .ToList();
             var locationChoices = Locations.AllMissingLocations
                 .Select(address => Locations.GetLocationNameFromId(address))
+                                                             // Note the absence of space before "Artifact"
                 .Where(name => deckNames.Any(deckName => name.StartsWith($"{deckName} {rarityName}Artifact"))
                                && !pickedLocations.Contains(name))
-                .ToList(); // Note the absence of space before "Artifact"
+                .ToList();
             if (locationChoices.Count <= 0) continue;
 
-            var location = NotSoRandomManager.RandomLocation(locationChoices, rng);
-            var newArtifact = rarityName == "Boss " ? new CheckLocationArtifactBoss() : new CheckLocationArtifact();
-            newArtifact.locationName = location;
+            // Find location(s) for the new artifact
+            string location;
+            string? secondLocation = null;
+            if (Archipelago.InstanceSlotData.ShuffleArtifacts == ArtifactShuffleMode.Simple)
+            {
+                // Simple artifacts: just pick one location
+                location = NotSoRandomManager.RandomLocation(locationChoices, rng);
+            }
+            else // ArtifactShuffleMode.Double
+            {
+                // Double artifacts: pick from odd location numbers or non-numbered locations
+                var oddLocationChoices = locationChoices
+                    .Where(name => !int.TryParse(name.Split(' ').Last(), out var nIdx) || nIdx % 2 == 1)
+                    .ToList();
+                location = NotSoRandomManager.RandomLocation(oddLocationChoices, rng);
+                // Then find out if we can attach a second location
+                var locationParts = location.Split(' ');
+                if (int.TryParse(locationParts.Last(), out var idx))
+                {
+                    var possibleSecondLocation = location[..^locationParts.Last().Length] + (idx + 1);
+                    if (locationChoices.Contains(possibleSecondLocation))
+                        secondLocation = possibleSecondLocation;
+                }
+            }
             
+            var newArtifact = rarityName == "Boss " ? new CheckLocationArtifactBoss() : new CheckLocationArtifact();
+            newArtifact.locationName = [location, secondLocation];
+
             archipelagoArtifacts.Add(newArtifact);
             pickedLocations.Add(location);
+            if (secondLocation is not null) pickedLocations.Add(secondLocation);
         }
         
         // Concatenate both picks and cull at random to keep normal offering count
@@ -436,17 +462,19 @@ public class ArtifactOfferingPatch
             .Where(artifact => artifact is CheckLocationArtifact)
             .Cast<CheckLocationArtifact>()
             .ToList();
-        var locations = checkArtifacts.Select(card => card.locationName).ToArray();
-        NotSoRandomManager.AddSeenLocations(locations);
+        // Only add the first location to the seen locations.
+        // In the case of double artifacts, the other location will never be picked by itself.
+        NotSoRandomManager.AddSeenLocations(checkArtifacts.Select(card => card.locationName[0]!));
         APSaveData.Save();
         
         // Scout proposed archipelago artifacts if the options allow for it
         if (Archipelago.Instance.APSaveData.CardScoutMode == CardScoutMode.DontScout) return;
         
+        var locations = checkArtifacts.SelectMany(card => card.locationName).ToArray();
         Archipelago.Instance.ScoutLocationInfo(locations).ContinueWith(task =>
         {
             for (var i = 0; i < checkArtifacts.Count; i++)
-                checkArtifacts[i].LoadInfo(task.Result[i]);
+                checkArtifacts[i].LoadInfo(task.Result?.GetSlice(i).ToArray());
         });
     }
 }
