@@ -139,28 +139,6 @@ public class UnlockOneMemoryPatch
     }
 }
 
-[HarmonyPatch(typeof(State), nameof(State.OnHasCard))]
-public class OnHasCardPatch
-{
-    static bool Prefix(Card card)
-    {
-        // Allow unlocking cards that aren't archipelago items
-        return !Archipelago.InstanceSlotData.ShuffleCards
-               || !Archipelago.CardToItem.ContainsKey(card.GetType());
-    }
-}
-
-[HarmonyPatch(typeof(State), nameof(State.OnHasArtifact))]
-public class OnHasArtifactPatch
-{
-    static bool Prefix(Artifact r)
-    {
-        // Allow unlocking artifacts that aren't archipelago items
-        return Archipelago.InstanceSlotData.ShuffleArtifacts == ArtifactShuffleMode.Off
-               || !Archipelago.ArtifactToItem.ContainsKey(r.GetType());
-    }
-}
-
 // Then we rewrite our own versions so we can actually unlock stuff ourselves
 internal static class UnlockReplacements
 {

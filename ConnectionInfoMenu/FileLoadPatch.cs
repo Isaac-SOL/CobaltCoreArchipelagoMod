@@ -101,6 +101,10 @@ public class NewGamePatch
             DB.story.MarkNodeSeen(state, node.Key);  // We view all story nodes but exclude some
         foreach (var kvp in DB.enemies)
             state.storyVars.RecordEnemyDefeated(kvp.Key);  // No idea but just in case
+        foreach (var releasedCard in DB.releasedCards)
+            state.storyVars.cardsOwned.Add(releasedCard.Key()); // Unlock the entire codex (cards)
+        foreach (var releasedArtifact in DB.releasedArtifacts)
+            state.storyVars.artifactsOwned.Add(releasedArtifact); // Unlock the entire codex (artifacts)
         // Start a loop and end it immediately
         state.PopulateRun(StarterShip.ships["artemis"], chars: startingChars);
         state.storyVars.ResetAfterRun();
