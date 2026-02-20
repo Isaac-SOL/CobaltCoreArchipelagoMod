@@ -14,12 +14,50 @@ public class Tracker : Route, OnInputPhase, OnMouseDown
     private double scroll;
     private double scrollTarget;
     private Dictionary<Deck, CharacterLocationsSummary> summaryCache;
+    private Dictionary<string, (string item, string player)> hintsCache = [];
 
+    private static IHintsHelper Hints => Archipelago.Instance.Session!.Hints;
+    
     internal int GetMaxScrollLength() => 150;
 
     public Tracker()
     {
+        Debug.Assert(Archipelago.Instance.Session != null, "Archipelago.Instance.Session != null");
         summaryCache = CharacterLocationsSummary.GetLocationsSummary();
+        Hints.GetHintsAsync().ContinueWith(task =>
+        {
+            if (task.Result is null) return;
+            var locations = Archipelago.Instance.Session.Locations;
+            var items = Archipelago.Instance.Session.Items;
+            var players = Archipelago.Instance.Session.Players;
+            lock (hintsCache)
+            {
+                task.Result.ToList().ForEach(hint =>
+                {
+                    if (hint.FindingPlayer != Archipelago.Instance.Session.ConnectionInfo.Slot) return;
+                    if (locations.AllLocationsChecked.Contains(hint.LocationId)) return;
+                    hintsCache[locations.GetLocationNameFromId(hint.LocationId)] = (
+                        items.GetItemName(hint.ItemId, players.GetPlayerInfo(hint.ReceivingPlayer).Game),
+                        players.GetPlayerName(hint.ReceivingPlayer)
+                    );
+                });
+            }
+        });
+    }
+
+    private IEnumerable<(string item, string player)> GetHints(Dictionary<string, bool> locationGroup)
+    {
+        lock (hintsCache)
+        {
+            return hintsCache
+                .Where(kvp => locationGroup.TryGetValue(kvp.Key, out var wasChecked) && !wasChecked)
+                .Select(kvp => kvp.Value);
+        }
+    }
+
+    private IEnumerable<Tooltip> GetHintTooltips(Dictionary<string, bool> locationGroup)
+    {
+        return GetHints(locationGroup).Select(pair => new TTText($"{pair.item} for {pair.player}"));
     }
 
     public override void Render(G g)
@@ -33,30 +71,43 @@ public class Tracker : Route, OnInputPhase, OnMouseDown
         }
         
         Draw.Text("Archipelago Tracker", 111, 15.0 + scroll, DB.stapler, Colors.textMain);
-        
-        var basicCommonArtifactCount = summaryCache[Deck.tooth].Artifacts.Common.Count(kvp => kvp.Value);
-        var basicBossArtifactCount = summaryCache[Deck.tooth].Artifacts.Boss.Count(kvp => kvp.Value);
-        var basicArtifactCount = basicCommonArtifactCount + basicBossArtifactCount;
-        
-        var basicCommonArtifactAll = summaryCache[Deck.tooth].Artifacts.Common.Count;
-        var basicBossArtifactAll = summaryCache[Deck.tooth].Artifacts.Boss.Count;
-        var basicArtifactAll = basicCommonArtifactAll + basicBossArtifactAll;
 
-        var basicArtifactsBox = g.Push(rect: new Rect(170, 42 + scroll, 100, 8),
-                                  key: new UIKey(ArchipelagoUK.codex_charArtifacts.ToUK(), 0));
-        Draw.Text(
-            $"Basic Artifacts: {basicArtifactCount}/{basicArtifactAll}",
-            basicArtifactsBox.rect.x, basicArtifactsBox.rect.y + 1,
-            color: basicArtifactCount < basicArtifactAll ? Colors.white : CompletedColor
-        );
-        if (basicArtifactsBox.IsHover())
+        if (Archipelago.InstanceSlotData.ShuffleArtifacts != ArtifactShuffleMode.Off)
         {
-            g.tooltips.AddText(basicArtifactsBox.rect.xy + new Vec(50, -2),
-                               $"<c=artifact>BASIC ARTIFACTS</c>\n" +
-                               $"Common: {basicCommonArtifactCount}/{basicCommonArtifactAll}\n" +
-                               $"Boss: {basicBossArtifactCount}/{basicBossArtifactAll}");
+            var basicCommonArtifactCount = summaryCache[Deck.tooth].Artifacts.Common.Count(kvp => kvp.Value);
+            var basicBossArtifactCount = summaryCache[Deck.tooth].Artifacts.Boss.Count(kvp => kvp.Value);
+            var basicArtifactCount = basicCommonArtifactCount + basicBossArtifactCount;
+        
+            var basicCommonArtifactAll = summaryCache[Deck.tooth].Artifacts.Common.Count;
+            var basicBossArtifactAll = summaryCache[Deck.tooth].Artifacts.Boss.Count;
+            var basicArtifactAll = basicCommonArtifactAll + basicBossArtifactAll;
+
+            var basicArtifactsBox = g.Push(rect: new Rect(170, 42 + scroll, 150, 8),
+                                           key: new UIKey(ArchipelagoUK.codex_charArtifacts.ToUK(), 0));
+            var hintCount = GetHints(summaryCache[Deck.tooth].AllArtifacts).Count();
+            Draw.Text(
+                $"Basic Artifacts: {basicArtifactCount}/{basicArtifactAll}"
+                + (hintCount > 0 ? $"     <c=card>({hintCount} hinted)</c>" : ""),
+                basicArtifactsBox.rect.x, basicArtifactsBox.rect.y + 1,
+                color: basicArtifactCount < basicArtifactAll ? Colors.white : CompletedColor
+            );
+            if (basicArtifactsBox.IsHover())
+            {
+                var tooltips = new List<Tooltip>
+                {
+                    new TTText("<c=artifact>BASIC ARTIFACTS</c>\n" +
+                               $"<c=card>Common: {basicCommonArtifactCount}/{basicCommonArtifactAll}\n</c>")
+                };
+                tooltips.AddRange(GetHintTooltips(summaryCache[Deck.tooth].Artifacts.Common));
+                tooltips.AddRange( new List<Tooltip>{
+                    new TTDivider(),
+                    new TTText($"<c=card>Boss: {basicBossArtifactCount}/{basicBossArtifactAll}\n</c>")
+                });
+                tooltips.AddRange(GetHintTooltips(summaryCache[Deck.tooth].Artifacts.Boss));
+                g.tooltips.Add(basicArtifactsBox.rect.xy + new Vec(-152, -2), tooltips);
+            }
+            g.Pop();
         }
-        g.Pop();
 
         var offset = scroll;
         var ukOffset = 1;
@@ -103,53 +154,98 @@ public class Tracker : Route, OnInputPhase, OnMouseDown
             var artifactAll = commonArtifactAll + bossArtifactAll;
             var memoryAll = summaryCache[deck].Memories.Count;
 
-            var cardsBox = g.Push(rect: new Rect(170, 71 + offset, 100, 8),
-                                  key: new UIKey(ArchipelagoUK.codex_charCards.ToUK(), ukOffset));
-            Draw.Text(
-                $"Cards: {cardCount}/{cardAll}",
-                cardsBox.rect.x, cardsBox.rect.y + 1,
-                color: cardCount < cardAll ? charColor : CompletedColor
-            );
-            if (cardsBox.IsHover())
-            {
-                g.tooltips.AddText(cardsBox.rect.xy + new Vec(50, -2),
-                                   $"<c=artifact>{Character.GetDisplayName(deck, g.state).ToUpper()} CARDS</c>\n" +
-                                   $"Common: {commonCardCount}/{commonCardAll}\n" +
-                                   $"Uncommon: {uncommonCardCount}/{uncommonCardAll}\n" +
-                                   $"Rare: {rareCardCount}/{rareCardAll}");
-            }
-            g.Pop();
+            var subOffset = 71;
 
-            var artifactsBox = g.Push(rect: new Rect(170, 81 + offset, 100, 8),
-                                      key: new UIKey(ArchipelagoUK.codex_charArtifacts.ToUK(), ukOffset));
-            Draw.Text(
-                $"Artifacts: {artifactCount}/{artifactAll}",
-                artifactsBox.rect.x, artifactsBox.rect.y + 1,
-                color: artifactCount < artifactAll ? charColor : CompletedColor
-            );
-            if (artifactsBox.IsHover())
+            if (Archipelago.InstanceSlotData.ShuffleCards)
             {
-                g.tooltips.AddText(artifactsBox.rect.xy + new Vec(50, -2),
-                                   $"<c=artifact>{Character.GetDisplayName(deck, g.state).ToUpper()} ARTIFACTS</c>\n" +
-                                   $"Common: {commonArtifactCount}/{commonArtifactAll}\n" +
-                                   $"Boss: {bossArtifactCount}/{bossArtifactAll}");
+                var cardsBox = g.Push(rect: new Rect(170, subOffset + offset, 150, 8),
+                                      key: new UIKey(ArchipelagoUK.codex_charCards.ToUK(), ukOffset));
+                var hintCount = GetHints(summaryCache[deck].AllCards).Count();
+                Draw.Text(
+                    $"Cards: {cardCount}/{cardAll}"
+                    + (hintCount > 0 ? $"     <c=card>({hintCount} hinted)</c>" : ""),
+                    cardsBox.rect.x, cardsBox.rect.y + 1,
+                    color: cardCount < cardAll ? charColor : CompletedColor
+                );
+                if (cardsBox.IsHover())
+                {
+                    var tooltips = new List<Tooltip>
+                    {
+                        new TTText($"<c=artifact>{Character.GetDisplayName(deck, g.state).ToUpper()} CARDS</c>\n" +
+                                   $"<c=card>Common: {commonCardCount}/{commonCardAll}\n</c>")
+                    };
+                    tooltips.AddRange(GetHintTooltips(summaryCache[deck].Cards.Common));
+                    tooltips.AddRange( new List<Tooltip>{
+                        new TTDivider(),
+                        new TTText($"<c=card>Uncommon: {uncommonCardCount}/{uncommonCardAll}\n</c>")
+                    });
+                    tooltips.AddRange(GetHintTooltips(summaryCache[deck].Cards.Uncommon));
+                    tooltips.AddRange( new List<Tooltip>{
+                        new TTDivider(),
+                        new TTText($"<c=card>Rare: {rareCardCount}/{rareCardAll}\n</c>")
+                    });
+                    tooltips.AddRange(GetHintTooltips(summaryCache[deck].Cards.Rare));
+                    g.tooltips.Add(cardsBox.rect.xy + new Vec(-152, -2), tooltips);
+                }
+                g.Pop();
+                subOffset += 10;
             }
-            g.Pop();
 
-            var memoriesBox = g.Push(rect: new Rect(170, 91 + offset, 100, 8),
-                                     key: new UIKey(ArchipelagoUK.codex_charMemories.ToUK(), ukOffset));
-            Draw.Text(
-                $"Memory unlocks: {memoryCount}/{memoryAll}",
-                memoriesBox.rect.x, memoriesBox.rect.y + 1,
-                color: memoryCount < memoryAll ? charColor : CompletedColor
-            );
-            if (memoriesBox.IsHover())
+            if (Archipelago.InstanceSlotData.ShuffleArtifacts != ArtifactShuffleMode.Off)
             {
-                g.tooltips.AddText(memoriesBox.rect.xy + new Vec(50, -2),
-                                   $"<c=artifact>{Character.GetDisplayName(deck, g.state).ToUpper()} MEMORIES</c>\n" +
-                                   $"All: {memoryCount}/{memoryAll}");
+                var artifactsBox = g.Push(rect: new Rect(170, subOffset + offset, 150, 8),
+                                          key: new UIKey(ArchipelagoUK.codex_charArtifacts.ToUK(), ukOffset));
+                var hintCount = GetHints(summaryCache[deck].AllArtifacts).Count();
+                Draw.Text(
+                    $"Artifacts: {artifactCount}/{artifactAll}"
+                    + (hintCount > 0 ? $"     <c=card>({hintCount} hinted)</c>" : ""),
+                    artifactsBox.rect.x, artifactsBox.rect.y + 1,
+                    color: artifactCount < artifactAll ? charColor : CompletedColor
+                );
+                if (artifactsBox.IsHover())
+                {
+                    var tooltips = new List<Tooltip>
+                    {
+                        new TTText($"<c=artifact>{Character.GetDisplayName(deck, g.state).ToUpper()} ARTIFACTS</c>\n" +
+                                   $"<c=card>Common: {commonArtifactCount}/{commonArtifactAll}\n</c>")
+                    };
+                    tooltips.AddRange(GetHintTooltips(summaryCache[deck].Artifacts.Common));
+                    tooltips.AddRange(new List<Tooltip>
+                    {
+                        new TTDivider(),
+                        new TTText($"<c=card>Boss: {bossArtifactCount}/{bossArtifactAll}\n</c>")
+                    });
+                    tooltips.AddRange(GetHintTooltips(summaryCache[deck].Artifacts.Boss));
+                    g.tooltips.Add(artifactsBox.rect.xy + new Vec(-152, -2), tooltips);
+                }
+                g.Pop();
+                subOffset += 10;
             }
-            g.Pop();
+
+            if (Archipelago.InstanceSlotData.ShuffleMemories)
+            {
+                var memoriesBox = g.Push(rect: new Rect(170, subOffset + offset, 150, 8),
+                                         key: new UIKey(ArchipelagoUK.codex_charMemories.ToUK(), ukOffset));
+                var hintCount = GetHints(summaryCache[deck].Memories).Count();
+                Draw.Text(
+                    $"Memory unlocks: {memoryCount}/{memoryAll}"
+                    + (hintCount > 0 ? $"     <c=card>({hintCount} hinted)</c>" : ""),
+                    memoriesBox.rect.x, memoriesBox.rect.y + 1,
+                    color: memoryCount < memoryAll ? charColor : CompletedColor
+                );
+                if (memoriesBox.IsHover())
+                {
+                    var tooltips = new List<Tooltip>
+                    {
+                        new TTText($"<c=artifact>{Character.GetDisplayName(deck, g.state).ToUpper()} MEMORIES</c>\n" +
+                                   $"All: {memoryCount}/{memoryAll}")
+                    };
+                    tooltips.AddRange(GetHintTooltips(summaryCache[deck].Memories));
+                    g.tooltips.Add(memoriesBox.rect.xy + new Vec(-152, -2), tooltips);
+                }
+                g.Pop();
+                subOffset += 10;
+            }
 
             offset += 45;
             ukOffset++;
@@ -185,7 +281,9 @@ public class Tracker : Route, OnInputPhase, OnMouseDown
 internal class CharacterLocationsSummary
 {
     internal (Dictionary<string, bool> Common, Dictionary<string, bool> Uncommon, Dictionary<string, bool> Rare) Cards;
+    internal Dictionary<string, bool> AllCards = [];
     internal (Dictionary<string, bool> Common, Dictionary<string, bool> Boss) Artifacts;
+    internal Dictionary<string, bool> AllArtifacts = [];
     internal Dictionary<string, bool> Memories = [];
 
     private static ILocationCheckHelper Locations => Archipelago.Instance.Session!.Locations;
@@ -207,8 +305,7 @@ internal class CharacterLocationsSummary
             summary[deck] = new CharacterLocationsSummary
             {
                 Cards = ([], [], []),
-                Artifacts = ([], []),
-                Memories = []
+                Artifacts = ([], [])
             };
             
             var deckLocations = allLocations.Where(l => l.Contains(charName)).ToList();
@@ -229,6 +326,12 @@ internal class CharacterLocationsSummary
                 else if (location.StartsWith("Fix"))
                     summary[deck].Memories[location] = deckCheckedLocations.Contains(location);
             });
+            
+            summary[deck].Cards.Common.ToList().ForEach(kvp => summary[deck].AllCards[kvp.Key] = kvp.Value);
+            summary[deck].Cards.Uncommon.ToList().ForEach(kvp => summary[deck].AllCards[kvp.Key] = kvp.Value);
+            summary[deck].Cards.Rare.ToList().ForEach(kvp => summary[deck].AllCards[kvp.Key] = kvp.Value);
+            summary[deck].Artifacts.Common.ToList().ForEach(kvp => summary[deck].AllArtifacts[kvp.Key] = kvp.Value);
+            summary[deck].Artifacts.Boss.ToList().ForEach(kvp => summary[deck].AllArtifacts[kvp.Key] = kvp.Value);
         }
 
         return summary;
