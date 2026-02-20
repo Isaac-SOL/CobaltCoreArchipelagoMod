@@ -23,7 +23,13 @@ internal enum ArchipelagoUK
     connection_back,
     connection_finalizeConnection,
     connection_seePassword,
-    mainMenu_commandLine
+    
+    mainMenu_commandLine,
+    
+    codex_apTracker,
+    codex_charCards,
+    codex_charArtifacts,
+    codex_charMemories
 }
 
 internal static class ArchipelagoUKExtensions

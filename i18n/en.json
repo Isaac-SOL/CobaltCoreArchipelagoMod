@@ -71,6 +71,9 @@
         "shipUnlock": "You haven't unlocked this ship yet!",
         "charUnlock": "You haven't unlocked this character yet!"
     },
+    "codex": {
+        "trackerName": "<c=boldPink>ARCHIPELAGO TRACKER</c>"
+    },
     "cardBrowse": {
         "bootOptionUnlockedCardName": "Pick an <c=boldPink>unlocked</c> card",
         "bootOptionUnlockedCardDesc": "unlocked cards",
