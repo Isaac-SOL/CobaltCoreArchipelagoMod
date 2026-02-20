@@ -86,6 +86,10 @@
     "cardReward": {
         "apCardsTip": "<c=boldPink>Archipelago cards</c> that you don't pick will not reappear\nfor a while, but you can find them again at Cleo's shop."
     },
+    "artifactReward": {
+        "oneItemCharName": "{0} Item",
+        "twoItemsCharNames": "{0} & {1} Items"
+    },
     "vault": {
         "goalTotalMemories": "Memories found:\n{0} / {1}",
         "goalPerCharacterMemories": "Memories required:\n{0} per character\n\nCharacters completed:\n{1} / {2}"

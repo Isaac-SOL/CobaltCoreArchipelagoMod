@@ -193,7 +193,9 @@ public static class ArtifactRewardRenderPatch
                     if (charsToRemove1 > 0) effSlotName1 = effSlotName1.Remove(effSlotName1.Length - charsToRemove1) + "...";
                     if (charsToRemove2 > 0) effSlotName2 = effSlotName2.Remove(effSlotName2.Length - charsToRemove2) + "...";
                 }
-                return effSlotName1 + " & " + effSlotName2 + " Items";
+                return string.Format(
+                    ModEntry.Instance.Localizations.Localize(["artifactReward", "twoItemsCharNames"]),
+                    effSlotName1, effSlotName2);
             }
             else
             {
@@ -201,7 +203,9 @@ public static class ArtifactRewardRenderPatch
                 var effPlayerName = apArtifact.locationSlotName[0]!;
                 if (charsToRemove > 0)
                     effPlayerName = effPlayerName.Remove(Math.Max(effPlayerName.Length - charsToRemove, 0)) + "...";
-                return effPlayerName + " Item";
+                return string.Format(
+                    ModEntry.Instance.Localizations.Localize(["artifactReward", "oneItemCharName"]),
+                    effPlayerName);
             }
         }
 
