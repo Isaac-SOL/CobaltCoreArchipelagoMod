@@ -545,7 +545,19 @@ public class Archipelago
         if (APSaveData.LocationsChecked.Contains(name))
             return;
         CheckLocationsForced(Session.Locations.GetLocationIdFromName("Cobalt Core", name));
-        APSaveData.AddCheckedLocation(name);
+        APSaveData.AddCheckedLocations(name);
+    }
+
+    public void CheckLocations(params string[] names)
+    {
+        Debug.Assert(Session != null, nameof(Session) + " != null");
+        Debug.Assert(APSaveData != null, nameof(APSaveData) + " != null");
+        var filteredNames = names.Except(APSaveData.LocationsChecked).ToArray();
+        var addresses = filteredNames
+            .Select(n => Session.Locations.GetLocationIdFromName("Cobalt Core", n))
+            .ToArray();
+        CheckLocationsForced(addresses);
+        APSaveData.AddCheckedLocations(filteredNames);
     }
 
     private void OnItemReceived(ReceivedItemsHelper helper)
@@ -741,6 +753,7 @@ public struct SlotDataHelper
     public int CheckCardDifficulty { get; private set; }
     public bool RarerChecksLater { get; private set; }
     public RewardsTweakMode RewardsTweak { get; private set; }
+    public int AutoReleaseCharacters { get; private set; }
     public CardRewardsMode ImmediateCardRewards { get; private set; }
     public CardRewardAttribute ImmediateCardAttribute { get; private set; }
     public CardRewardsMode ImmediateArtifactRewards { get; private set; }
@@ -789,6 +802,7 @@ public struct SlotDataHelper
             res.RarerChecksLater = Convert.ToBoolean(slotData["rarer_checks_later"]);
             res.AddCharacterMemories = Convert.ToBoolean(slotData["add_character_memories"]);
             res.RewardsTweak = (RewardsTweakMode)Convert.ToInt32(slotData["rewards_tweak"]);
+            res.AutoReleaseCharacters = Convert.ToInt32(slotData["auto_release_characters"]);
             res.ImmediateCardRewards = (CardRewardsMode)Convert.ToInt32(slotData["immediate_card_rewards"]);
             var attributes = (JArray)slotData["immediate_card_attributes"];
             foreach (var attribute in attributes)

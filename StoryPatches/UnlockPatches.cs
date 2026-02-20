@@ -121,11 +121,17 @@ public class UnlockOneMemoryPatch
         if (Archipelago.InstanceSlotData.ShuffleMemories)
         {
             // If memories are shuffled, we send the corresponding location
-            var location = Archipelago.Instance.APSaveData.GetNextFixTimelineLocationName(deck);
-            if (location is not null)
-                Archipelago.Instance.CheckLocation(location);
-            else
-                ModEntry.Instance.Logger.LogError("Could not find location to check on memory unlock with deck {deck}", deck);
+            var locationInfo = Archipelago.Instance.APSaveData.GetNextFixTimelineLocationName(deck);
+            if (locationInfo is not null)
+            {
+                Archipelago.Instance.CheckLocation(locationInfo.Value.location);
+                if (Archipelago.InstanceSlotData.AutoReleaseCharacters > 0
+                    && locationInfo.Value.memoryIdx == Archipelago.InstanceSlotData.AutoReleaseCharacters)
+                {
+                    ReleaseCharacter(deck);
+                }
+            }
+            else ModEntry.Instance.Logger.LogError("Could not find location to check on memory unlock with deck {deck}", deck);
         }
         else
         {
@@ -134,8 +140,26 @@ public class UnlockOneMemoryPatch
             var s = MG.inst.g.state; // This is our only way to access state here
             var count = __instance.memoryUnlockLevel.TryGetValue(deck, out var currCount) ? currCount + 1 : 1;
             UnlockReplacements.SetMemoryCount(s, deck, count);
+            if (Archipelago.InstanceSlotData.AutoReleaseCharacters > 0
+                && count == Archipelago.InstanceSlotData.AutoReleaseCharacters)
+            {
+                ReleaseCharacter(deck);
+            }
         }
         return false;
+    }
+
+    internal static void ReleaseCharacter(Deck deck)
+    {
+        Debug.Assert(Archipelago.Instance.Session != null, "Archipelago.Instance.Session != null");
+        if (Archipelago.DeckToItem.TryGetValue(deck, out var charName))
+        {
+            Archipelago.Instance.CheckLocations(
+                Archipelago.Instance.Session.Locations.AllMissingLocations
+                    .Select(l => Archipelago.Instance.Session.Locations.GetLocationNameFromId(l))
+                    .Where(s => s.Contains(charName))
+                    .ToArray());
+        }
     }
 }
 

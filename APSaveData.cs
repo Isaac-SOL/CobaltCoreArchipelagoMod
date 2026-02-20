@@ -176,9 +176,11 @@ public class APSaveData
         Save();
     }
 
-    internal bool AddCheckedLocation(string name)
+    internal bool AddCheckedLocations(params string[] name)
     {
-        if (LocationsChecked.Add(name))
+        var added = name.Except(LocationsChecked).Any();
+        LocationsChecked.UnionWith(name);
+        if (added)
         {
             Save();
             return true;
@@ -198,7 +200,7 @@ public class APSaveData
     internal bool HasChar(Deck deck) => HasItem(Archipelago.ItemToDeck.FirstOrNull(kvp => kvp.Value == deck)?.Key ?? "");
     internal bool HasShip(string shipkey) => HasItem(Archipelago.ItemToStartingShip.FirstOrNull(kvp => kvp.Value == shipkey)?.Key ?? "");
 
-    internal string? GetNextFixTimelineLocationName(Deck deck)
+    internal (string location, int memoryIdx)? GetNextFixTimelineLocationName(Deck deck)
     {
         // Look among locations checked to see which is the next location
         var name = Archipelago.ItemToDeck.First(kvp => kvp.Value == deck).Key;
@@ -206,7 +208,7 @@ public class APSaveData
         {
             var locationName = $"Fix {name}'s Timeline {i}";
             if (!LocationsChecked.Contains(locationName))
-                return locationName;
+                return (locationName, i);
         }
         return null;
     }
