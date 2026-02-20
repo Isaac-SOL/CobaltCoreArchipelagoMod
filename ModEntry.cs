@@ -140,6 +140,8 @@ internal class ModEntry : SimpleMod
         
         BGRunWin.charFullBodySprites.Add(Deck.colorless, RegisterSprite(package, "assets/cat_end.png").Sprite);
 
+        ArtifactRenderPatch.LockedSpr = RegisterSprite(package, "assets/Artifact/locked.png").Sprite;
+
         /*
          * All the IRegisterable types placed into the static lists at the start of the class are initialized here.
          * This snippet invokes all of them, allowing them to register themselves with the package and helper.
