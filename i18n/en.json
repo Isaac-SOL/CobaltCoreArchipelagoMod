@@ -74,6 +74,9 @@
     "codex": {
         "trackerName": "<c=boldPink>ARCHIPELAGO TRACKER</c>"
     },
+    "miscTooltips": {
+        "charMemories": "<c=card>Memories: {0}/3</c>"
+    },
     "cardBrowse": {
         "bootOptionUnlockedCardName": "Pick an <c=boldPink>unlocked</c> card",
         "bootOptionUnlockedCardDesc": "unlocked cards",

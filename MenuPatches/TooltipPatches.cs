@@ -16,7 +16,8 @@ public class CharTooltipPatch
         {
             if (!key.Contains(deck.Key())) continue;
             var state = MG.inst.g.state;
-            __result += $"\n<c=card>Memories: {Archipelago.Instance.APSaveData.GetFixTimelineAmount(deck, state)}/3</c>";
+            __result += "\n" + string.Format(ModEntry.Instance.Localizations.Localize(["miscTooltips", "charMemories"]),
+                                             Archipelago.Instance.APSaveData.GetFixTimelineAmount(deck, state));
         }
     }
 }
