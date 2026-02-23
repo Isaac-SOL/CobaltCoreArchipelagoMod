@@ -29,7 +29,8 @@ internal enum ArchipelagoUK
     codex_apTracker,
     codex_charCards,
     codex_charArtifacts,
-    codex_charMemories
+    codex_charMemories,
+    codex_refresh
 }
 
 internal static class ArchipelagoUKExtensions

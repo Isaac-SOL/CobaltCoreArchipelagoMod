@@ -13,8 +13,9 @@ public class Tracker : Route, OnInputPhase, OnMouseDown
     
     private double scroll;
     private double scrollTarget;
-    private Dictionary<Deck, CharacterLocationsSummary> summaryCache;
+    private Dictionary<Deck, CharacterLocationsSummary> summaryCache = [];
     private Dictionary<string, (string item, string player)> hintsCache = [];
+    private bool awaitingHost = false;
 
     private static IHintsHelper Hints => Archipelago.Instance.Session!.Hints;
     
@@ -22,8 +23,30 @@ public class Tracker : Route, OnInputPhase, OnMouseDown
 
     public Tracker()
     {
+        LoadData();
+    }
+
+    private IEnumerable<(string item, string player)> GetHints(Dictionary<string, bool> locationGroup)
+    {
+        lock (hintsCache)
+        {
+            return hintsCache
+                .Where(kvp => locationGroup.TryGetValue(kvp.Key, out var wasChecked) && !wasChecked)
+                .Select(kvp => kvp.Value);
+        }
+    }
+
+    private IEnumerable<Tooltip> GetHintTooltips(Dictionary<string, bool> locationGroup)
+    {
+        return GetHints(locationGroup).Select(pair => new TTText($"{pair.item} for {pair.player}"));
+    }
+
+    private void LoadData()
+    {
         Debug.Assert(Archipelago.Instance.Session != null, "Archipelago.Instance.Session != null");
+        if (awaitingHost) return;
         summaryCache = CharacterLocationsSummary.GetLocationsSummary();
+        awaitingHost = true;
         Hints.GetHintsAsync().ContinueWith(task =>
         {
             if (task.Result is null) return;
@@ -46,22 +69,8 @@ public class Tracker : Route, OnInputPhase, OnMouseDown
                     );
                 });
             }
+            awaitingHost = false;
         });
-    }
-
-    private IEnumerable<(string item, string player)> GetHints(Dictionary<string, bool> locationGroup)
-    {
-        lock (hintsCache)
-        {
-            return hintsCache
-                .Where(kvp => locationGroup.TryGetValue(kvp.Key, out var wasChecked) && !wasChecked)
-                .Select(kvp => kvp.Value);
-        }
-    }
-
-    private IEnumerable<Tooltip> GetHintTooltips(Dictionary<string, bool> locationGroup)
-    {
-        return GetHints(locationGroup).Select(pair => new TTText($"{pair.item} for {pair.player}"));
     }
 
     public override void Render(G g)
@@ -264,12 +273,23 @@ public class Tracker : Route, OnInputPhase, OnMouseDown
             platformButtonHint: Btn.B
         );
 
+        SharedArt.ButtonText(
+            g,
+            new Vec(413.0, 200.0),
+            ArchipelagoUK.codex_refresh.ToUK(),
+            "REFRESH",
+            onMouseDown: this,
+            platformButtonHint: Btn.X
+        );
+
     }
 
     public void OnInputPhase(G g, Box b)
     {
         if (Input.GetGpDown(Btn.B) || Input.GetKeyDown(Keys.Escape))
             g.CloseRoute(this);
+        else if (Input.GetGpDown(Btn.X))
+            LoadData();
     }
 
     public void OnMouseDown(G g, Box b)
@@ -278,6 +298,11 @@ public class Tracker : Route, OnInputPhase, OnMouseDown
         {
             Audio.Play(FSPRO.Event.Click);
             g.CloseRoute(this);
+        }
+        if (b.key == ArchipelagoUK.codex_refresh.ToUK())
+        {
+            Audio.Play(FSPRO.Event.Click);
+            LoadData();
         }
     }
 }
