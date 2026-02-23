@@ -432,14 +432,24 @@ public class ArtifactOfferingPatch
                 var oddLocationChoices = locationChoices
                     .Where(name => !int.TryParse(name.Split(' ').Last(), out var nIdx) || nIdx % 2 == 1)
                     .ToList();
-                location = NotSoRandomManager.RandomLocation(oddLocationChoices, rng);
-                // Then find out if we can attach a second location
-                var locationParts = location.Split(' ');
-                if (int.TryParse(locationParts.Last(), out var idx))
+                if (oddLocationChoices.Count <= 0)
                 {
-                    var possibleSecondLocation = location[..^locationParts.Last().Length] + (idx + 1);
-                    if (locationChoices.Contains(possibleSecondLocation))
-                        secondLocation = possibleSecondLocation;
+                    // There are no odd locations, but there are still even locations.
+                    // This can happen if the server messes with our locations. Fallback to normal behaviour
+                    location = NotSoRandomManager.RandomLocation(locationChoices, rng);
+                }
+                else
+                {
+                    // There is at least one odd location. Attempt a double artifact
+                    location = NotSoRandomManager.RandomLocation(oddLocationChoices, rng);
+                    // Then find out if we can attach a second location
+                    var locationParts = location.Split(' ');
+                    if (int.TryParse(locationParts.Last(), out var idx))
+                    {
+                        var possibleSecondLocation = location[..^locationParts.Last().Length] + (idx + 1);
+                        if (locationChoices.Contains(possibleSecondLocation))
+                            secondLocation = possibleSecondLocation;
+                    }
                 }
             }
             
