@@ -767,9 +767,12 @@ public struct SlotDataHelper
         var res = new SlotDataHelper();
         try
         {
-            if (Convert.ToString(slotData["version_tag"]) != "1.1.5")
+            var expected_tag = "1.1.5";
+            var host_tag = Convert.ToString(slotData["version_tag"]);
+            if (host_tag != expected_tag)
             {
-                throw new SlotDataVersionInvalidException("This version of the mod requires APWorld version tag 1.1.5");
+                throw new SlotDataVersionInvalidException($"This version of the mod requires APWorld version tag {expected_tag} " +
+                                                          $"(Host version tag is {host_tag})");
             }
             
             var startingCharacters = (JArray)slotData["starting_characters"];
