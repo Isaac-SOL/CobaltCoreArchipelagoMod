@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
@@ -64,12 +65,13 @@ public class RunWinWhoPatch
     public static void GetChoicesPostfix(List<Choice> __result, State s)
     {
         // Show current memory counts for each character
+        Debug.Assert(Archipelago.Instance.APSaveData != null, "Archipelago.Instance.APSaveData != null");
         var decksToAdd = new List<Deck>();
         foreach (var choice in __result)
         {
             var deck = choice.actions.Count > 0 ? (choice.actions[0] as ARunWinCharChoice)?.deck : null;
             if (deck is null) continue;
-            choice.label += $" ({s.persistentStoryVars.memoryUnlockLevel.GetValueOrDefault(deck.Value, 0)}/3)";
+            choice.label += $" ({Archipelago.Instance.APSaveData.GetFixTimelineAmount(deck.Value, s)}/3)";
             decksToAdd.Add(deck.Value);
         }
         

@@ -212,6 +212,22 @@ public class APSaveData
         }
         return null;
     }
+
+    internal int GetFixTimelineAmount(Deck deck, State state)
+    {
+        Debug.Assert(Archipelago.Instance.APSaveData != null, "Archipelago.Instance.APSaveData != null");
+        var amount = 0;
+        if (Archipelago.InstanceSlotData.ShuffleMemories)
+        {
+            var memInfo = Archipelago.Instance.APSaveData.GetNextFixTimelineLocationName(deck);
+            amount = memInfo is not null ? memInfo.Value.memoryIdx - 1 : 3;
+        }
+        else
+        {
+            amount = state.persistentStoryVars.memoryUnlockLevel.GetValueOrDefault(deck, 0);
+        }
+        return amount;
+    }
 }
 
 internal enum CardScoutMode
