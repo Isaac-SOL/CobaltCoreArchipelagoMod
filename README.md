@@ -4,7 +4,7 @@
 
 A Cobalt Core mod for [the Archipelago multi-game randomizer system](https://archipelago.gg/).
 
-- Version: 1.1.4
+- Version: 1.1.5
 - Archipelago version: 0.6.6
 - Cobalt Core version: 1.2.9
 - Nickel Version: 1.20.3+
@@ -160,8 +160,6 @@ an undertaking I will probably not do it myself.
 
 - Overhaul of item placement and overall progression, to emphasize making decisions
 while not locking players into long, mostly useless runs
-- In-game tracker: A way to know how many cards and artifacts are left to be
-found on each character
 - Actual dialogue for the additional Books and CAT memories.
 - Additional in-combat dialogue between characters when getting new items from other players,
 or unlocking items for other players. Lots of dialogue if possible!
