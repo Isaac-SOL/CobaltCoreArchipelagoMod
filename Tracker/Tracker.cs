@@ -25,6 +25,9 @@ public class Tracker : Route, OnInputPhase, OnMouseDown
     {
         LoadData();
     }
+    
+    private static string Localize(params string[] key) =>
+        ModEntry.Instance.Localizations.Localize(new List<string> { "codex", "tracker" }.Concat(key).ToArray());
 
     private IEnumerable<(string item, string player)> GetHints(Dictionary<string, bool> locationGroup)
     {
@@ -38,7 +41,8 @@ public class Tracker : Route, OnInputPhase, OnMouseDown
 
     private IEnumerable<Tooltip> GetHintTooltips(Dictionary<string, bool> locationGroup)
     {
-        return GetHints(locationGroup).Select(pair => new TTText($"{pair.item} for {pair.player}"));
+        return GetHints(locationGroup)
+            .Select(pair => new TTText(string.Format(Localize("itemHint"), pair.item, pair.player)));
     }
 
     private void LoadData()
@@ -83,7 +87,7 @@ public class Tracker : Route, OnInputPhase, OnMouseDown
             scrollTarget = Mutil.Clamp(scrollTarget, 20.0 - GetMaxScrollLength(), 120.0 - GetMaxScrollLength());
         }
         
-        Draw.Text("Archipelago Tracker", 111, 15.0 + scroll, DB.stapler, Colors.textMain);
+        Draw.Text(Localize("name"), 111, 15.0 + scroll, DB.stapler, Colors.textMain);
 
         if (Archipelago.InstanceSlotData.ShuffleArtifacts != ArtifactShuffleMode.Off)
         {
@@ -99,8 +103,8 @@ public class Tracker : Route, OnInputPhase, OnMouseDown
                                            key: new UIKey(ArchipelagoUK.codex_charArtifacts.ToUK(), 0));
             var hintCount = GetHints(summaryCache[Deck.tooth].AllArtifacts).Count();
             Draw.Text(
-                $"Basic Artifacts: {basicArtifactCount}/{basicArtifactAll}"
-                + (hintCount > 0 ? $"     <c=card>({hintCount} hinted)</c>" : ""),
+                string.Format(Localize("artifact", "basic", "totalCount"), basicArtifactCount, basicArtifactAll)
+                + (hintCount > 0 ? string.Format(Localize("hintedCount"), hintCount) : ""),
                 basicArtifactsBox.rect.x, basicArtifactsBox.rect.y + 1,
                 color: basicArtifactCount < basicArtifactAll ? Colors.white : CompletedColor
             );
@@ -108,13 +112,16 @@ public class Tracker : Route, OnInputPhase, OnMouseDown
             {
                 var tooltips = new List<Tooltip>
                 {
-                    new TTText("<c=artifact>BASIC ARTIFACTS</c>\n" +
-                               $"<c=card>Common: {basicCommonArtifactCount}/{basicCommonArtifactAll}\n</c>")
+                    new TTText(Localize("artifact", "basic", "title") + "\n" +
+                               string.Format(Localize("artifact", "commonCount"),
+                                             basicCommonArtifactCount, basicCommonArtifactAll) + "\n")
                 };
                 tooltips.AddRange(GetHintTooltips(summaryCache[Deck.tooth].Artifacts.Common));
-                tooltips.AddRange( new List<Tooltip>{
+                tooltips.AddRange(new List<Tooltip>
+                {
                     new TTDivider(),
-                    new TTText($"<c=card>Boss: {basicBossArtifactCount}/{basicBossArtifactAll}\n</c>")
+                    new TTText(string.Format(Localize("artifact", "bossCount"),
+                                             basicBossArtifactCount, basicBossArtifactAll) + "\n")
                 });
                 tooltips.AddRange(GetHintTooltips(summaryCache[Deck.tooth].Artifacts.Boss));
                 g.tooltips.Add(basicArtifactsBox.rect.xy + new Vec(-152, -2), tooltips);
@@ -175,8 +182,8 @@ public class Tracker : Route, OnInputPhase, OnMouseDown
                                       key: new UIKey(ArchipelagoUK.codex_charCards.ToUK(), ukOffset));
                 var hintCount = GetHints(summaryCache[deck].AllCards).Count();
                 Draw.Text(
-                    $"Cards: {cardCount}/{cardAll}"
-                    + (hintCount > 0 ? $"     <c=card>({hintCount} hinted)</c>" : ""),
+                    string.Format(Localize("card", "totalCount"), cardCount, cardAll)
+                    + (hintCount > 0 ? string.Format(Localize("hintedCount"), hintCount) : ""),
                     cardsBox.rect.x, cardsBox.rect.y + 1,
                     color: cardCount < cardAll ? charColor : CompletedColor
                 );
@@ -184,18 +191,24 @@ public class Tracker : Route, OnInputPhase, OnMouseDown
                 {
                     var tooltips = new List<Tooltip>
                     {
-                        new TTText($"<c=artifact>{Character.GetDisplayName(deck, g.state).ToUpper()} CARDS</c>\n" +
-                                   $"<c=card>Common: {commonCardCount}/{commonCardAll}\n</c>")
+                        new TTText(string.Format(Localize("card", "title"),
+                                                 Character.GetDisplayName(deck, g.state).ToUpper()) + "\n" +
+                                   string.Format(Localize("card", "commonCount"),
+                                                 commonCardCount, commonCardAll) + "\n")
                     };
                     tooltips.AddRange(GetHintTooltips(summaryCache[deck].Cards.Common));
-                    tooltips.AddRange( new List<Tooltip>{
+                    tooltips.AddRange(new List<Tooltip>
+                    {
                         new TTDivider(),
-                        new TTText($"<c=card>Uncommon: {uncommonCardCount}/{uncommonCardAll}\n</c>")
+                        new TTText(string.Format(Localize("card", "uncommonCount"),
+                                                 uncommonCardCount, uncommonCardAll) + "\n")
                     });
                     tooltips.AddRange(GetHintTooltips(summaryCache[deck].Cards.Uncommon));
-                    tooltips.AddRange( new List<Tooltip>{
+                    tooltips.AddRange(new List<Tooltip>
+                    {
                         new TTDivider(),
-                        new TTText($"<c=card>Rare: {rareCardCount}/{rareCardAll}\n</c>")
+                        new TTText(string.Format(Localize("card", "rareCount"),
+                                                 rareCardCount, rareCardAll) + "\n")
                     });
                     tooltips.AddRange(GetHintTooltips(summaryCache[deck].Cards.Rare));
                     g.tooltips.Add(cardsBox.rect.xy + new Vec(-152, -2), tooltips);
@@ -210,8 +223,8 @@ public class Tracker : Route, OnInputPhase, OnMouseDown
                                           key: new UIKey(ArchipelagoUK.codex_charArtifacts.ToUK(), ukOffset));
                 var hintCount = GetHints(summaryCache[deck].AllArtifacts).Count();
                 Draw.Text(
-                    $"Artifacts: {artifactCount}/{artifactAll}"
-                    + (hintCount > 0 ? $"     <c=card>({hintCount} hinted)</c>" : ""),
+                    string.Format(Localize("artifact", "char", "totalCount"), artifactCount, artifactAll)
+                    + (hintCount > 0 ? string.Format(Localize("hintedCount"), hintCount) : ""),
                     artifactsBox.rect.x, artifactsBox.rect.y + 1,
                     color: artifactCount < artifactAll ? charColor : CompletedColor
                 );
@@ -219,14 +232,17 @@ public class Tracker : Route, OnInputPhase, OnMouseDown
                 {
                     var tooltips = new List<Tooltip>
                     {
-                        new TTText($"<c=artifact>{Character.GetDisplayName(deck, g.state).ToUpper()} ARTIFACTS</c>\n" +
-                                   $"<c=card>Common: {commonArtifactCount}/{commonArtifactAll}\n</c>")
+                        new TTText(string.Format(Localize("artifact", "char", "title"),
+                                                 Character.GetDisplayName(deck, g.state).ToUpper()) + "\n" +
+                                   string.Format(Localize("artifact", "commonCount"),
+                                                 commonArtifactCount, commonArtifactAll) + "\n")
                     };
                     tooltips.AddRange(GetHintTooltips(summaryCache[deck].Artifacts.Common));
                     tooltips.AddRange(new List<Tooltip>
                     {
                         new TTDivider(),
-                        new TTText($"<c=card>Boss: {bossArtifactCount}/{bossArtifactAll}\n</c>")
+                        new TTText(string.Format(Localize("artifact", "bossCount"),
+                                                 bossArtifactCount, bossArtifactAll) + "\n")
                     });
                     tooltips.AddRange(GetHintTooltips(summaryCache[deck].Artifacts.Boss));
                     g.tooltips.Add(artifactsBox.rect.xy + new Vec(-152, -2), tooltips);
@@ -241,8 +257,8 @@ public class Tracker : Route, OnInputPhase, OnMouseDown
                                          key: new UIKey(ArchipelagoUK.codex_charMemories.ToUK(), ukOffset));
                 var hintCount = GetHints(summaryCache[deck].Memories).Count();
                 Draw.Text(
-                    $"Memory unlocks: {memoryCount}/{memoryAll}"
-                    + (hintCount > 0 ? $"     <c=card>({hintCount} hinted)</c>" : ""),
+                    string.Format(Localize("memory", "totalCount"), memoryCount, memoryAll)
+                    + (hintCount > 0 ? string.Format(Localize("hintedCount"), hintCount) : ""),
                     memoriesBox.rect.x, memoriesBox.rect.y + 1,
                     color: memoryCount < memoryAll ? charColor : CompletedColor
                 );
@@ -250,8 +266,10 @@ public class Tracker : Route, OnInputPhase, OnMouseDown
                 {
                     var tooltips = new List<Tooltip>
                     {
-                        new TTText($"<c=artifact>{Character.GetDisplayName(deck, g.state).ToUpper()} MEMORIES</c>\n" +
-                                   $"All: {memoryCount}/{memoryAll}")
+                        new TTText(string.Format(Localize("memory", "title"),
+                                                 Character.GetDisplayName(deck, g.state).ToUpper()) + "\n" +
+                                   string.Format(Localize("memory", "allCount"),
+                                                 memoryCount, memoryAll))
                     };
                     tooltips.AddRange(GetHintTooltips(summaryCache[deck].Memories));
                     g.tooltips.Add(memoriesBox.rect.xy + new Vec(-152, -2), tooltips);
@@ -277,7 +295,7 @@ public class Tracker : Route, OnInputPhase, OnMouseDown
             g,
             new Vec(413.0, 200.0),
             ArchipelagoUK.codex_refresh.ToUK(),
-            "REFRESH",
+            Localize("refresh"),
             onMouseDown: this,
             platformButtonHint: Btn.X
         );

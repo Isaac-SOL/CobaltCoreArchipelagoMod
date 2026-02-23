@@ -72,7 +72,37 @@
         "charUnlock": "You haven't unlocked this character yet!"
     },
     "codex": {
-        "trackerName": "<c=boldPink>ARCHIPELAGO TRACKER</c>"
+        "trackerName": "<c=boldPink>ARCHIPELAGO TRACKER</c>",
+        "tracker": {
+            "name": "ARCHIPELAGO TRACKER",
+            "itemHint": "{0} for {1}",
+            "hintedCount": "     <c=card>({0} hinted)</c>",
+            "refresh": "REFRESH",
+            "artifact": {
+                "basic": {
+                    "title": "<c=artifact>BASIC ARTIFACTS</c>",
+                    "totalCount": "Basic Artifacts: {0}/{1}"
+                },
+                "char": {
+                    "title": "<c=artifact>{0} ARTIFACTS</c>",
+                    "totalCount": "Artifacts: {0}/{1}"
+                },
+                "commonCount": "<c=card>Common: {0}/{1}</c>",
+                "bossCount": "<c=card>Boss: {0}/{1}</c>"
+            },
+            "card": {
+                "title": "<c=artifact>{0} CARDS</c>",
+                "totalCount": "Cards: {0}/{1}",
+                "commonCount": "<c=card>Common: {0}/{1}</c>",
+                "uncommonCount": "<c=card>Uncommon: {0}/{1}</c>",
+                "rareCount": "<c=card>Rare: {0}/{1}</c>"
+            },
+            "memory": {
+                "title": "<c=artifact>{0} MEMORIES</c>",
+                "totalCount": "Memory unlocks: {0}/{1}",
+                "allCount": "All: {0}/{1}"
+            }
+        }
     },
     "miscTooltips": {
         "charMemories": "<c=card>Memories: {0}/3</c>"
