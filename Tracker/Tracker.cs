@@ -36,9 +36,13 @@ public class Tracker : Route, OnInputPhase, OnMouseDown
                 {
                     if (hint.FindingPlayer != Archipelago.Instance.Session.ConnectionInfo.Slot) return;
                     if (locations.AllLocationsChecked.Contains(hint.LocationId)) return;
+                    var itemName = items.GetItemName(hint.ItemId, players.GetPlayerInfo(hint.ReceivingPlayer).Game);
+                    var itemColor = APColors.FromFlags(hint.ItemFlags);
+                    var playerName = players.GetPlayerName(hint.ReceivingPlayer);
+                    var playerColor = APColors.FromPlayerName(playerName);
                     hintsCache[locations.GetLocationNameFromId(hint.LocationId)] = (
-                        items.GetItemName(hint.ItemId, players.GetPlayerInfo(hint.ReceivingPlayer).Game),
-                        players.GetPlayerName(hint.ReceivingPlayer)
+                        $"<c={itemColor}>{itemName}</c>",
+                        $"<c={playerColor}>{playerName}</c>"
                     );
                 });
             }

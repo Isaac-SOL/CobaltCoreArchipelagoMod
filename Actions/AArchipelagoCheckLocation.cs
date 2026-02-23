@@ -64,9 +64,7 @@ public class AArchipelagoCheckLocation : CardAction
         if (receiverName != null)
         {
             Debug.Assert(Archipelago.Instance.APSaveData != null, "Archipelago.Instance.APSaveData != null");
-            var receiverColor = receiverName == Archipelago.Instance.APSaveData.Slot
-                ? APColors.Self
-                : APColors.OtherPlayer;
+            var receiverColor = APColors.FromPlayerName(receiverName);
             tooltips.Add(new TTText(string.Format(Localize("descReceiver"), $"<c={receiverColor}>{receiverName}</c>")));
         }
         

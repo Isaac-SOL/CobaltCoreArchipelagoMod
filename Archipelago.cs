@@ -672,12 +672,17 @@ public static class APColors
     internal const string Useful = "6A5ACD";
     internal const string Progression = "DDA0DD";
     internal const string Trap = "FF0000";
-
-    internal static string GetColor(this ItemInfo item) =>
-        (item.Flags & ItemFlags.Advancement) != 0 ? Progression :
-        (item.Flags & ItemFlags.Trap) != 0 ? Trap :
-        (item.Flags & ItemFlags.NeverExclude) != 0 ? Useful :
+    
+    internal static string FromFlags(ItemFlags flags) =>
+        (flags & ItemFlags.Advancement) != 0 ? Progression :
+        (flags & ItemFlags.Trap) != 0 ? Trap :
+        (flags & ItemFlags.NeverExclude) != 0 ? Useful :
         Filler;
+
+    internal static string FromPlayerName(string playerName) =>
+        playerName == Archipelago.Instance.APSaveData!.Slot ? Self : OtherPlayer;
+
+    internal static string GetColor(this ItemInfo item) => FromFlags(item.Flags);
 }
 
 public enum ArchipelagoErrorCode
