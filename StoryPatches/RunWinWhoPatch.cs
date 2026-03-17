@@ -32,10 +32,35 @@ public class RunWinWhoPatch
     
     // Allow CAT and Books to appear on the final choices thrice like other characters
     // (But only if we have AddCharacterMemories)
+    // Also change which characters can be displayed if we ShuffleMemories
     public static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions, ILGenerator generator)
     {
         List<CodeInstruction> storedInstructions = new(instructions);
         var codeMatcher = new CodeMatcher(storedInstructions, generator);
+        // Nested type of the class containing the lambda function implementation
+        var lambdaClass = typeof(RunWinHelpers)
+            .GetNestedTypes(AccessTools.all)
+            .First(t => t
+                       .GetMethods(AccessTools.all)
+                       .Any(m => m.Name.StartsWith($"<{nameof(RunWinHelpers.GetChoices)}>") &&
+                                 m.ReturnType == typeof(Choice)));
+        // Name of the state field in that class that's been passed in the closure
+        var stateName = lambdaClass.GetFields(AccessTools.all)
+            .First(f => f.Name.StartsWith('s') && f.FieldType == typeof(State)).Name;
+        // Change memory amount being checked
+        codeMatcher.MatchStartForward(
+                CodeMatch.WithOpcodes([OpCodes.Ldarg_0]),
+                CodeMatch.WithOpcodes([OpCodes.Ldfld]),
+                CodeMatch.WithOpcodes([OpCodes.Ldfld]),
+                CodeMatch.WithOpcodes([OpCodes.Ldfld])
+            ).ThrowIfInvalid("Could not find memory amount check in instructions")
+            .RemoveInstructions(6)
+            .InsertAndAdvance(
+                CodeInstruction.LoadLocal(0),
+                CodeInstruction.LoadArgument(0), // We need to load "this" to access the nested field
+                CodeInstruction.LoadField(lambdaClass, stateName),
+                CodeInstruction.Call((Deck deck, State s) => GetMemoryCountForChoiceDisplay(deck, s))
+            );
         // Remove switch on CAT and Books
         codeMatcher.MatchStartForward(
                 CodeMatch.WithOpcodes([OpCodes.Ldloc_0]),
@@ -71,9 +96,7 @@ public class RunWinWhoPatch
         {
             var deck = choice.actions.Count > 0 ? (choice.actions[0] as ARunWinCharChoice)?.deck : null;
             if (deck is null) continue;
-            var amountFound = Archipelago.InstanceSlotData.ShuffleMemories
-                ? Archipelago.Instance.APSaveData.GetFixTimelineAmountIfShuffled(deck.Value)
-                : Archipelago.Instance.APSaveData.GetFixTimelineAmountIfNotShuffled(deck.Value, s);
+            var amountFound = GetMemoryCountForChoiceDisplay(deck.Value, s);
             choice.label += $" ({amountFound}/3)";
             decksToAdd.Add(deck.Value);
         }
@@ -93,5 +116,13 @@ public class RunWinWhoPatch
                 .Cast<CardAction>()
                 .ToList()
         });
+    }
+
+    public static int GetMemoryCountForChoiceDisplay(Deck deck, State s)
+    {
+        Debug.Assert(Archipelago.Instance.APSaveData != null, "Archipelago.Instance.APSaveData != null");
+        return Archipelago.InstanceSlotData.ShuffleMemories
+            ? Archipelago.Instance.APSaveData.GetFixTimelineAmountIfShuffled(deck)
+            : Archipelago.Instance.APSaveData.GetFixTimelineAmountIfNotShuffled(deck, s);
     }
 }
