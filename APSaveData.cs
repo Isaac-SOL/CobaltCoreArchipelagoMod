@@ -200,33 +200,33 @@ public class APSaveData
     internal bool HasChar(Deck deck) => HasItem(Archipelago.ItemToDeck.FirstOrNull(kvp => kvp.Value == deck)?.Key ?? "");
     internal bool HasShip(string shipkey) => HasItem(Archipelago.ItemToStartingShip.FirstOrNull(kvp => kvp.Value == shipkey)?.Key ?? "");
 
-    internal (string location, int memoryIdx)? GetNextFixTimelineLocationName(Deck deck)
+    internal int GetFixTimelineAmountIfShuffled(Deck deck)
     {
-        // Look among locations checked to see which is the next location
-        var name = Archipelago.ItemToDeck.First(kvp => kvp.Value == deck).Key;
+        if (!Archipelago.InstanceSlotData.ShuffleMemories)
+            ModEntry.Instance.Logger.LogWarning("Called GetFixTimelineCount, but ShuffleMemories is false. Possible bug?");
+        var deckName = Archipelago.DeckToItem[deck];
+        // Look among locations checked to see which is the last
         for (var i = 1; i <= 3; i++)
         {
-            var locationName = $"Fix {name}'s Timeline {i}";
+            var locationName = $"Fix {deckName}'s Timeline {i}";
             if (!LocationsChecked.Contains(locationName))
-                return (locationName, i);
+                return i - 1;
         }
-        return null;
+        return 3;
     }
 
-    internal int GetFixTimelineAmount(Deck deck, State state)
+    internal int GetFixTimelineAmountIfNotShuffled(Deck deck, State state)
     {
-        Debug.Assert(Archipelago.Instance.APSaveData != null, "Archipelago.Instance.APSaveData != null");
-        var amount = 0;
-        if (Archipelago.InstanceSlotData.ShuffleMemories)
-        {
-            var memInfo = Archipelago.Instance.APSaveData.GetNextFixTimelineLocationName(deck);
-            amount = memInfo is not null ? memInfo.Value.memoryIdx - 1 : 3;
-        }
-        else
-        {
-            amount = state.persistentStoryVars.memoryUnlockLevel.GetValueOrDefault(deck, 0);
-        }
-        return amount;
+        return state.persistentStoryVars.memoryUnlockLevel.GetValueOrDefault(deck, 0);
+    }
+
+    internal (string location, int memoryIdx)? GetNextFixTimelineLocationNameIfShuffled(Deck deck)
+    {
+        var deckName = Archipelago.DeckToItem[deck];
+        var currAmount = GetFixTimelineAmountIfShuffled(deck);
+        if (currAmount >= 3) return null;
+        var nextAmount = currAmount + 1;
+        return ($"Fix {deckName}'s Timeline {nextAmount}", nextAmount);
     }
 }
 

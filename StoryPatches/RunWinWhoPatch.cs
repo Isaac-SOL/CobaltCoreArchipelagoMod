@@ -71,7 +71,10 @@ public class RunWinWhoPatch
         {
             var deck = choice.actions.Count > 0 ? (choice.actions[0] as ARunWinCharChoice)?.deck : null;
             if (deck is null) continue;
-            choice.label += $" ({Archipelago.Instance.APSaveData.GetFixTimelineAmount(deck.Value, s)}/3)";
+            var amountFound = Archipelago.InstanceSlotData.ShuffleMemories
+                ? Archipelago.Instance.APSaveData.GetFixTimelineAmountIfShuffled(deck.Value)
+                : Archipelago.Instance.APSaveData.GetFixTimelineAmountIfNotShuffled(deck.Value, s);
+            choice.label += $" ({amountFound}/3)";
             decksToAdd.Add(deck.Value);
         }
         

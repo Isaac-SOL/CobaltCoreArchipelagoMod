@@ -98,14 +98,15 @@
                 "rareCount": "<c=card>Rare: {0}/{1}</c>"
             },
             "memory": {
-                "title": "<c=artifact>{0} MEMORIES</c>",
-                "totalCount": "Memory unlocks: {0}/{1}",
+                "title": "<c=artifact>FIX {0}'S TIMELINE</c>",
+                "totalCount": "Timeline fixes: {0}/{1}",
                 "allCount": "All: {0}/{1}"
             }
         }
     },
     "miscTooltips": {
-        "charMemories": "<c=card>Memories: {0}/3</c>"
+        "charMemories": "<c=card>Memories Found: {0}/3</c>",
+        "timelineFixed": "<c=card>Timeline Fixed: {0}/3</c>"
     },
     "cardBrowse": {
         "bootOptionUnlockedCardName": "Pick an <c=boldPink>unlocked</c> card",

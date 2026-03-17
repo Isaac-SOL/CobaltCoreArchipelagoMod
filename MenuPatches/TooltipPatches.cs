@@ -16,8 +16,18 @@ public class CharTooltipPatch
         {
             if (!key.Contains(deck.Key())) continue;
             var state = MG.inst.g.state;
-            __result += "\n" + string.Format(ModEntry.Instance.Localizations.Localize(["miscTooltips", "charMemories"]),
-                                             Archipelago.Instance.APSaveData.GetFixTimelineAmount(deck, state));
+            if (Archipelago.InstanceSlotData.ShuffleMemories)
+            {
+                __result += "\n" + string.Format(
+                    ModEntry.Instance.Localizations.Localize(["miscTooltips", "timelineFixed"]),
+                    Archipelago.Instance.APSaveData.GetFixTimelineAmountIfShuffled(deck));
+            }
+            else
+            {
+                __result += "\n" + string.Format(
+                    ModEntry.Instance.Localizations.Localize(["miscTooltips", "charMemories"]),
+                    Archipelago.Instance.APSaveData.GetFixTimelineAmountIfNotShuffled(deck, state));
+            }
         }
     }
 }

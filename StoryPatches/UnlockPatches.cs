@@ -121,7 +121,7 @@ public class UnlockOneMemoryPatch
         if (Archipelago.InstanceSlotData.ShuffleMemories)
         {
             // If memories are shuffled, we send the corresponding location
-            var locationInfo = Archipelago.Instance.APSaveData.GetNextFixTimelineLocationName(deck);
+            var locationInfo = Archipelago.Instance.APSaveData.GetNextFixTimelineLocationNameIfShuffled(deck);
             if (locationInfo is not null)
             {
                 Archipelago.Instance.CheckLocation(locationInfo.Value.location);
