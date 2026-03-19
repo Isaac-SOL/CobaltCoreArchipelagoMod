@@ -144,8 +144,9 @@ public class APSaveData
     internal void SyncWithHost()
     {
         Debug.Assert(Archipelago.Instance.Session != null, "Archipelago.Instance.Session != null");
+        
+        // Sync items host -> client
         var hostItems = new Dictionary<string, int>();
-
         while (APItems.PeekItem() is { } itemInfo)
         {
             var itemName = itemInfo.ItemName;
@@ -159,12 +160,23 @@ public class APSaveData
             }
             APItems.DequeueItem();
         }
-
+        ModEntry.Instance.Logger.LogDebug("Host Items: {hostItems}", hostItems);
+        
+        // We don't sync items client -> host, because it shouldn't be possible to receive items while disconnected
+        
+        // Sync locations client -> host
         var hostLocationsChecked = Archipelago.Instance.Session.Locations.AllLocationsChecked;
-        var locationsToSync = LocationsChecked.Select(name => Archipelago.Instance.Session.Locations
-                                                          .GetLocationIdFromName("Cobalt Core", name))
-            .Where(address => !hostLocationsChecked.Contains(address));
+        var locationsToSync = LocationsChecked
+            .Select(name => Archipelago.Instance.Session.Locations.GetLocationIdFromName("Cobalt Core", name))
+            .Except(hostLocationsChecked);
+        ModEntry.Instance.Logger.LogDebug("Client Locations to Send: {locationsToSync}", locationsToSync);
         Archipelago.Instance.CheckLocationsForced(locationsToSync.ToArray());
+        
+        // Sync locations host -> client (in case of when using a new save for example)
+        var locationsToReceive = hostLocationsChecked
+            .Select(id => Archipelago.Instance.Session.Locations.GetLocationNameFromId(id, "Cobalt Core"));
+        ModEntry.Instance.Logger.LogDebug("Host Locations before Sync: {hostLocationsChecked}", hostLocationsChecked);
+        LocationsChecked.UnionWith(locationsToReceive);
         
         Save();
     }
