@@ -7,12 +7,11 @@ namespace CobaltCoreArchipelago.MenuPatches;
 [HarmonyPatch(typeof(Card), nameof(Card.Render))]
 public static class CardRenderPatch
 {
-    public static void Postfix(Card __instance, G g, Vec? posOverride, bool isInCombatHand)
+    public static void Postfix(Card __instance, G g, Vec? posOverride)
     {
         Debug.Assert(Archipelago.Instance.APSaveData != null, "Archipelago.Instance.APSaveData != null");
         if (!Archipelago.InstanceSlotData.ShuffleCards) return;
         if (Archipelago.Instance.APSaveData.HasCardOrNotAP(__instance.GetType())) return;
-        if (isInCombatHand) return;
         var pos = posOverride ?? __instance.pos;
         var rect = (__instance.GetScreenRect()
                     + pos
