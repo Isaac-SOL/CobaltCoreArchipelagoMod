@@ -9,7 +9,7 @@ namespace CobaltCoreArchipelago;
 
 public class Tracker : Route, OnInputPhase, OnMouseDown
 {
-    private const uint OutOfLogicColor = 0xFF884444, CompletedColor = 0xFF555555;
+    private const uint OutOfLogicColor = 0xFF555555, CompletedColor = 0xFF555555;
     
     private double scroll;
     private double scrollTarget;
