@@ -489,6 +489,7 @@ public class Archipelago
         APSaveData.SyncWithHost();  // Consumes items queue
         
         Session.Items.ItemReceived += OnItemReceived;
+        Session.Locations.CheckedLocationsUpdated += OnCheckedLocationsUpdated; // e.g. when send_location is used
         Session.MessageLog.OnMessageReceived += OnMessageReceived;
 
         DeathLinkService = Session.CreateDeathLinkService();
@@ -574,6 +575,13 @@ public class Archipelago
                 helper.DequeueItem();
             }
         }
+    }
+
+    private void OnCheckedLocationsUpdated(IReadOnlyCollection<long> checkedLocations)
+    {
+        Debug.Assert(Session != null, nameof(Session) + " != null");
+        Debug.Assert(APSaveData != null, nameof(APSaveData) + " != null");
+        APSaveData.LocationsChecked.UnionWith(checkedLocations.Select(l => Session.Locations.GetLocationNameFromId(l)));
     }
 
     private void OnMessageReceived(LogMessage message)
