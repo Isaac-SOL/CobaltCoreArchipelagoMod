@@ -102,7 +102,7 @@ public class CheckLocationCard : Card, IRegisterable
         string? description = null;
         if (Archipelago.Instance.APSaveData.LocationsChecked.Contains(locationName))
         {
-            // Location was already checked
+            // Location was already checked (this is relevant even if we don't scout)
             description = Localize("descNothing");
         }
         else if (locationSlotName is null || locationItemName is null)
@@ -110,49 +110,46 @@ public class CheckLocationCard : Card, IRegisterable
             // Location was not scouted
             description = Localize("descNotFound");
         }
+        else if (IsLocal())
+        {
+            // Location was scouted, not already checked, item is local
+            description = Localize(WillAddCardToDeck(state)
+                                       ? "descSelfAddCard"
+                                       : WillAddArtifact(state)
+                                           ? "descSelfAddArtifact"
+                                           : "descSelf");
+            description = string.Format(description, locationItemName);
+        }
         else
         {
-            // Location was scouted and not already checked
-            if (IsLocal())
-            {
-                description = Localize(WillAddCardToDeck(state)
-                                           ? "descSelfAddCard"
-                                           : WillAddArtifact(state)
-                                               ? "descSelfAddArtifact"
-                                               : "descSelf");
-                description = string.Format(description, locationItemName);
-            }
-            else
-            {
-                // Truncate the text to fit in the card
-                var varTextLength = locationItemName.Length + locationSlotName.Length;
-                var charsToRemove = varTextLength - 28;
-                var effItemName = locationItemName;
-                if (charsToRemove > 0)
-                    effItemName = effItemName.Remove(Math.Max(effItemName.Length - charsToRemove, 0)) + "...";
+            // Location was scouted, not already checked, item is from another game
+            // Truncate the text to fit in the card
+            var varTextLength = locationItemName.Length + locationSlotName.Length;
+            var charsToRemove = varTextLength - 28;
+            var effItemName = locationItemName;
+            if (charsToRemove > 0)
+                effItemName = effItemName.Remove(Math.Max(effItemName.Length - charsToRemove, 0)) + "...";
 
-                description = Localize("descBase");
-                description = string.Format(description,
-                                            $"<c={locationItemColor}>{effItemName}</c>",
-                                            $"<c={APColors.OtherPlayer}>{locationSlotName}</c>");
-            }
+            description = Localize("descBase");
+            description = string.Format(description,
+                                        $"<c={locationItemColor}>{effItemName}</c>",
+                                        $"<c={APColors.OtherPlayer}>{locationSlotName}</c>");
         }
 
         if (Difficulty < 0)
         {
-            description += Localize("descDraw");
-            description = string.Format(description, GetDraw(state));
+            description += string.Format(Localize("descDraw"), GetDraw(state));
         }
         
         switch (upgrade)
         {
             case Upgrade.A:
-                description += Localize(IsShieldTemp(state) ? "descContTempShield" : "descContShield");
-                description = string.Format(description, GetShield(state));
+                description += string.Format(
+                    Localize(IsShieldTemp(state) ? "descContTempShield" : "descContShield"),
+                    GetShield(state));
                 break;
             case Upgrade.B:
-                description += Localize("descContAttack");
-                description = string.Format(description, GetAttack(state), GetAttackTimes(state));
+                description += string.Format(Localize("descContAttack"), GetAttack(state), GetAttackTimes(state));
                 break;
         }
         
