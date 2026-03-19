@@ -4,7 +4,7 @@
 
 A Cobalt Core mod for [the Archipelago multi-game randomizer system](https://archipelago.gg/).
 
-- Version: 1.1.5
+- Version: 1.1.6
 - Archipelago version: 0.6.6
 - Cobalt Core version: 1.2.9
 - Nickel Version: 1.20.3+
@@ -169,9 +169,6 @@ with the multiworld.
 
 ## Known issues
 
-- There is currently (1.1.5) a crash happening sometimes if there are items or
-player names containing curly braces `{}` in the multiworld. This will be fixed
-in 1.2.0.
 - Using Nickel's import function to import a save from the vanilla game will
 immediately throw you onto the main menu without connecting to a host. This is not
 supported and will probably crash quickly, but it's fine as long as you close
