@@ -170,7 +170,7 @@ public class MainMenuPatch
             foreach (var messageParts in lastMessages)
             {
                 var alpha = (double)(MaxMessages - i) / MaxMessages;
-                alpha = Math.Pow(alpha, 0.65);
+                alpha = Math.Pow(alpha, commandLineSelected ? 0.4 : 0.65);
                 var fadedParts = messageParts.Select(part => (part.message, part.color.fadeAlpha(alpha))).ToArray();
                 var sb = new StringBuilder();
                 foreach (var part in fadedParts)
