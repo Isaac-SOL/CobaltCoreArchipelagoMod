@@ -160,28 +160,31 @@ public class CheckLocationArtifact : Artifact, IRegisterable
         };
     }
 
-    internal void SetTextInfo(string itemName, string slotName, string itemColor, int pos = 0)
-    {
-        locationItemName[pos] = itemName;
-        locationSlotName[pos] = slotName;
-        locationItemColor[pos] = itemColor;
-        if (IsLocal(pos))
-        {
-            if (Archipelago.ItemToCard.ContainsKey(locationItemName[pos]!))
-                givenCard[pos] = locationItemName[pos];
-            else if (Archipelago.ItemToArtifact.ContainsKey(locationItemName[pos]!))
-                givenArtifact[pos] = locationItemName[pos];
-        }
-    }
-
     internal void LoadInfo(ScoutedItemInfo?[]? infos)
     {
         if (infos is null)
-            SetTextInfo("[]", "[]", APColors.Trap);
-        else
-            for (var i = 0; i < infos.Length; i++)
-                if (infos[i] is { } info)
-                    SetTextInfo(info.ItemName, info.Player.Name, info.GetColor(), pos: i);
+        {
+            locationItemName[0] = "[]";
+            locationSlotName[0] = "[]";
+            locationItemColor[0] = APColors.Trap;
+            return;
+        }
+
+        for (var i = 0; i < infos.Length; i++)
+        {
+            if (infos[i] is not { } info) continue;
+            
+            locationItemName[i] = info.ItemName;
+            locationSlotName[i] = info.Player.Name;
+            locationItemColor[i] = info.GetColor();
+            if (IsLocal(i) || info.ItemGame == "Cobalt Core")
+            {
+                if (Archipelago.ItemToCard.ContainsKey(locationItemName[i]!))
+                    givenCard[i] = locationItemName[i];
+                else if (Archipelago.ItemToArtifact.ContainsKey(locationItemName[i]!))
+                    givenArtifact[i] = locationItemName[i];
+            }
+        }
     }
 }
 

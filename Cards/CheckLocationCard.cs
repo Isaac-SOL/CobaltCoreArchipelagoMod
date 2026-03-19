@@ -19,6 +19,7 @@ public class CheckLocationCard : Card, IRegisterable
     // Note : fields MUST be public to be transferred when the card is upgraded or saved for example
     public string locationName = "";
     public string? locationSlotName;
+    public string? locationGameName;
     public string? locationItemName;
     public string? locationItemColor;
     
@@ -54,7 +55,7 @@ public class CheckLocationCard : Card, IRegisterable
             checkAction.itemName = locationItemName;
             checkAction.receiverName = locationSlotName;
             checkAction.itemColor = locationItemColor;
-            if (IsLocal())
+            if (IsLocal() || locationGameName == "Cobalt Core")
             {
                 if (Archipelago.ItemToCard.ContainsKey(locationItemName))
                     checkAction.givenCard = locationItemName;
@@ -247,19 +248,22 @@ public class CheckLocationCard : Card, IRegisterable
         };
     }
 
-    internal void SetTextInfo(string itemName, string slotName, string itemColor)
-    {
-        locationItemName = itemName;
-        locationSlotName = slotName;
-        locationItemColor = itemColor;
-    }
-
     internal void LoadInfo(ScoutedItemInfo? info)
     {
         if (info is null)
-            SetTextInfo("[]", "[]", APColors.Trap);
+        {
+            locationItemName = "[]";
+            locationSlotName = "[]";
+            locationItemColor = APColors.Trap;
+        }
         else
-            SetTextInfo(info.ItemName, info.Player.Name, info.GetColor());
+        {
+            string itemColor = info.GetColor();
+            locationItemName = info.ItemName;
+            locationSlotName = info.Player.Name;
+            locationGameName = info.ItemGame;
+            locationItemColor = itemColor;
+        }
     }
 }
 
