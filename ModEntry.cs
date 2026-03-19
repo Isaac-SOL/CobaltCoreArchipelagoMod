@@ -79,7 +79,6 @@ internal class ModEntry : SimpleMod
         CombatQol = helper.ModRegistry.GetApi<ICombatQolApi>("TheJazMaster.CombatQoL");
         Harmony = new Harmony("SaltyIsaac.CobaltCoreArchipelago");
         Harmony.PatchAll(Assembly.GetExecutingAssembly());
-        RunWinWhoPatch.ApplyPatch(Harmony);
         Archipelago = new Archipelago();
         
         // Fill out static data

@@ -1,105 +1,39 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using System.Reflection;
-using System.Reflection.Emit;
 using HarmonyLib;
 using Microsoft.Extensions.Logging;
-using Nickel;
 
 namespace CobaltCoreArchipelago.StoryPatches;
 
+[HarmonyPatch(typeof(RunWinHelpers), nameof(RunWinHelpers.GetChoices))]
+[HarmonyPriority(Priority.Low)]
 public class RunWinWhoPatch
 {
-    // Here we are editing the lambda inside RunWinHelpers.GetChoices so it's a bit trickier
-    public static void ApplyPatch(Harmony harmony)
+    public static void Postfix(ref List<Choice> __result, State s)
     {
-        harmony.Patch(
-            original: typeof(RunWinHelpers)
-                .GetNestedTypes(AccessTools.all)
-                .SelectMany(t => t.GetMethods(AccessTools.all))
-                // Get a lambda defined in GetChoices returning a Choice
-                .First(m => m.Name.StartsWith($"<{nameof(RunWinHelpers.GetChoices)}>") && m.ReturnType == typeof(Choice)),
-            transpiler: new HarmonyMethod(typeof(RunWinWhoPatch).GetMethod(nameof(Transpiler)))
-        );
-
-        harmony.Patch(
-            original: typeof(RunWinHelpers).GetMethod(nameof(RunWinHelpers.GetChoices)),
-            postfix: new HarmonyMethod(typeof(RunWinWhoPatch).GetMethod(nameof(GetChoicesPostfix)))
-        );
-    }
-    
-    // Allow CAT and Books to appear on the final choices thrice like other characters
-    // (But only if we have AddCharacterMemories)
-    // Also change which characters can be displayed if we ShuffleMemories
-    public static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions, ILGenerator generator)
-    {
-        List<CodeInstruction> storedInstructions = new(instructions);
-        var codeMatcher = new CodeMatcher(storedInstructions, generator);
-        // Nested type of the class containing the lambda function implementation
-        var lambdaClass = typeof(RunWinHelpers)
-            .GetNestedTypes(AccessTools.all)
-            .First(t => t
-                       .GetMethods(AccessTools.all)
-                       .Any(m => m.Name.StartsWith($"<{nameof(RunWinHelpers.GetChoices)}>") &&
-                                 m.ReturnType == typeof(Choice)));
-        // Name of the state field in that class that's been passed in the closure
-        var stateName = lambdaClass.GetFields(AccessTools.all)
-            .First(f => f.Name.StartsWith('s') && f.FieldType == typeof(State)).Name;
-        // Change memory amount being checked
-        codeMatcher.MatchStartForward(
-                CodeMatch.WithOpcodes([OpCodes.Ldarg_0]),
-                CodeMatch.WithOpcodes([OpCodes.Ldfld]),
-                CodeMatch.WithOpcodes([OpCodes.Ldfld]),
-                CodeMatch.WithOpcodes([OpCodes.Ldfld])
-            ).ThrowIfInvalid("Could not find memory amount check in instructions")
-            .RemoveInstructions(6)
-            .InsertAndAdvance(
-                CodeInstruction.LoadLocal(0),
-                CodeInstruction.LoadArgument(0), // We need to load "this" to access the nested field
-                CodeInstruction.LoadField(lambdaClass, stateName),
-                CodeInstruction.Call((Deck deck, State s) => GetMemoryCountForChoiceDisplay(deck, s))
-            );
-        // Remove switch on CAT and Books
-        codeMatcher.MatchStartForward(
-                CodeMatch.WithOpcodes([OpCodes.Ldloc_0]),
-                CodeMatch.WithOpcodes([OpCodes.Brtrue_S])
-            ).ThrowIfInvalid("Could not find switch in instructions")
-            .RemoveInstructions(17)
-            // Replace with our own check instead
-            // NOTE: The cursor is currently on the first instruction of the next section.
-            // Adding a label applies to that instruction, but inserting adds instructions BEFORE it.
-            .CreateLabel(out var nextLabel) // Create label to jump to next section
-            .InsertAndAdvance(
-                CodeInstruction.LoadLocal(0),
-                CodeInstruction.Call<Deck, bool>(deck => SkipCharChoice(deck)),
-                new CodeInstruction(OpCodes.Brfalse_S, nextLabel),  // If we don't skip, jump to next section
-                new CodeInstruction(OpCodes.Ldnull),
-                new CodeInstruction(OpCodes.Ret)                    // If we do skip, return null
-            );
-        return codeMatcher.Instructions();
-    }
-
-    // We skip if it's Books or CAT and we haven't added memories for them
-    public static bool SkipCharChoice(Deck deck)
-    {
-        return !Archipelago.InstanceSlotData.AddCharacterMemories && deck is Deck.colorless or Deck.shard;
-    }
-
-    public static void GetChoicesPostfix(List<Choice> __result, State s)
-    {
-        // Show current memory counts for each character
         Debug.Assert(Archipelago.Instance.APSaveData != null, "Archipelago.Instance.APSaveData != null");
-        var decksToAdd = new List<Deck>();
-        foreach (var choice in __result)
-        {
-            var deck = choice.actions.Count > 0 ? (choice.actions[0] as ARunWinCharChoice)?.deck : null;
-            if (deck is null) continue;
-            var amountFound = GetMemoryCountForChoiceDisplay(deck.Value, s);
-            choice.label += $" ({amountFound}/3)";
-            decksToAdd.Add(deck.Value);
-        }
+        var decksToAdd = s.characters
+            .Where(ch =>
+                       ch.deckType is { } deck
+                       && GetMemoryCountForChoiceDisplay(deck, s) < 3
+                       && (Archipelago.InstanceSlotData.AddCharacterMemories
+                           || deck is not (Deck.colorless or Deck.shard)))
+            .Select(ch => ch.deckType!.Value)
+            .ToList();
+        __result = decksToAdd
+            .Select(deck =>
+            {
+                var memCount = GetMemoryCountForChoiceDisplay(deck, s);
+                return new Choice
+                {
+                    label = $"<c={deck.Key()}>{Character.GetDisplayName(deck, s).ToUpperInvariant()}</c>."
+                            + $" ({memCount}/3)", // Show current memory counts for each character
+                    key = ".runWin_" + deck.Key(),
+                    actions = { new ARunWinCharChoice { deck = deck } }
+                };
+            })
+            .ToList();
         
         // Add the choice to get all memories
         if (!Archipelago.InstanceSlotData.UnlockMemoryForAllCharacters || decksToAdd.Count <= 1) return;
@@ -109,10 +43,7 @@ public class RunWinWhoPatch
             label = ModEntry.Instance.Localizations.Localize(["story", "memory", decksToAdd.Count == 2 ? "twoChoice" : "allChoice"]),
             key = ".runWin_AllOfThem",
             actions = decksToAdd
-                .Select(deck => new ARunWinCharChoice
-                {
-                    deck = deck
-                })
+                .Select(deck => new ARunWinCharChoice { deck = deck })
                 .Cast<CardAction>()
                 .ToList()
         });
@@ -121,8 +52,11 @@ public class RunWinWhoPatch
     public static int GetMemoryCountForChoiceDisplay(Deck deck, State s)
     {
         Debug.Assert(Archipelago.Instance.APSaveData != null, "Archipelago.Instance.APSaveData != null");
-        return Archipelago.InstanceSlotData.ShuffleMemories
+        var count = Archipelago.InstanceSlotData.ShuffleMemories
             ? Archipelago.Instance.APSaveData.GetFixTimelineAmountIfShuffled(deck)
             : Archipelago.Instance.APSaveData.GetFixTimelineAmountIfNotShuffled(deck, s);
+        ModEntry.Instance.Logger.LogInformation("RunWinWho memory count {char}: {n}",
+                                                Character.GetDisplayName(deck, s), count);
+        return count;
     }
 }
