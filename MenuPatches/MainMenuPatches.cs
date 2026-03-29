@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Reflection.Emit;
 using System.Text;
+using Archipelago.MultiClient.Net.Enums;
 using CobaltCoreArchipelago.Actions;
 using CobaltCoreArchipelago.ConnectionInfoMenu;
 using HarmonyLib;
@@ -18,7 +19,7 @@ namespace CobaltCoreArchipelago.MenuPatches;
 [HarmonyPatch(typeof(SharedArt), nameof(SharedArt.DrawCore))]
 internal class DrawCorePatch
 {
-    internal static Spr SmolCobaltSpr;
+    internal static Spr SmolCobaltSpr, PlayerArrow;
     
     private static readonly List<Color> CrystalColors = [
         new("F74861"),
@@ -62,23 +63,56 @@ internal class DrawCorePatch
         DisplayMiniCobalts(g, offset, true);
     }
 
-    static void DisplayMiniCobalts(G g, Vec offset, bool front)
+    static List<(Vec pos, double myTime)> MiniCobaltOffsets(G g, Vec offset)
     {
+        var offsets = new List<(Vec pos, double myTime)>();
         var cobaltX = offset.x + G.screenSize.x / 2.0;
         var cobaltY = offset.y + G.screenSize.y / 2.0 + Math.Sin(g.time * 2.0 - 1.0) * 4.0;
         for (int i = 0; i < 6; i++)
         {
             var myTime = ((g.time * 0.473) + i * Math.PI) / 3.0;
-            if (front != GoFront(myTime)) continue;
             var circleOffsetX = Math.Sin(myTime) * 64.0;
             var circleOffsetY = Math.Cos(myTime) * 32.0;
             circleOffsetX -= circleOffsetY / 1.7;
+            offsets.Add((new Vec(cobaltX + circleOffsetX, cobaltY + circleOffsetY), myTime));
+        }
+        return offsets;
+    }
+
+    static void DisplayMiniCobalts(G g, Vec offset, bool front)
+    {
+        var offsets = MiniCobaltOffsets(g, offset);
+        for (int i = 0; i < offsets.Count; i++)
+        {
+            var (pos, myTime) = offsets[i];
+            if (front != GoFront(myTime)) continue;
             Draw.Sprite(SmolCobaltSpr,
-                        cobaltX + circleOffsetX,
-                        cobaltY + circleOffsetY,
+                        pos.x, pos.y,
                         originRel: new Vec(0.5, 0.5),
                         color: CrystalColors[i]
             );
+        }
+        var players = Archipelago.Instance.mainMenuPlayers.Values.ToList();
+        var mousePos = Input.mousePositionPixels;
+        for (var i = 0; i < players.Count; i++)
+        {
+            var (pos, _) = offsets[i];
+            var dist = (pos - mousePos).len();
+            var alpha = Math.Clamp(1.0 - (dist / 50.0), 0.0, 1.0);
+            var color = players[i].status switch
+            {
+                ArchipelagoClientState.ClientUnknown => Colors.hurt,
+                ArchipelagoClientState.ClientGoal => Colors.artifact,
+                _ => Colors.heal
+            };
+            color = color.fadeAlpha(alpha);
+            Draw.Sprite(PlayerArrow,
+                        (int) pos.x - 1, (int) pos.y - 3,
+                        color: color);
+            Draw.Text(players[i].info.Name,
+                      pos.x + 10, pos.y - 5,
+                      color: color,
+                      outline: Colors.black);
         }
     }
 

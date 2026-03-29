@@ -133,6 +133,7 @@ internal class ModEntry : SimpleMod
         MainMenuPatch.TextBoxHoverSpr = RegisterSprite(package, "assets/UI/Textbox_mainMenu_hover.png").Sprite;
 
         DrawCorePatch.SmolCobaltSpr = RegisterSprite(package, "assets/UI/SmolCobalt.png").Sprite;
+        DrawCorePatch.PlayerArrow = RegisterSprite(package, "assets/UI/PlayerArrow.png").Sprite;
         MainMenuPatch.ArchipelagoTitleSpr = RegisterSprite(package, "assets/UI/ArchipelagoLogo.png").Sprite;
         MkSlotPatch.ArchipelagoSaveSpr = RegisterSprite(package, "assets/UI/ArchipelagoSave.png").Sprite;
         MkSlotPatch.NotArchipelagoSaveSpr = RegisterSprite(package, "assets/UI/NotArchipelagoSave2.png").Sprite;

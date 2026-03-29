@@ -388,6 +388,7 @@ public class Archipelago
     public List<(string message, Color color)[]> MessagePartsReceived { get; } = [];
     internal static readonly object messagesReceivedLock = new();
     private const int MaxMessages = 2000;
+    internal ConcurrentDictionary<string, (PlayerInfo info, ArchipelagoClientState status)> mainMenuPlayers = [];
 
     public Archipelago()
     {
@@ -496,6 +497,28 @@ public class Archipelago
         DeathLinkService.OnDeathLinkReceived += OnDeathLinkReceived;
         if (APSaveData.DeathLinkMode != DeathLinkMode.Off)
             DeathLinkService.EnableDeathLink();
+
+        // Track some players for display in the main menu
+        var me = Session.Players.ActivePlayer.Name;
+        var playerToTrack = Session.Players.AllPlayers
+            .Where(info => info.Name != me && info.Name != "Server")
+            .Shuffle()
+            .Take(6);
+        foreach (var player in playerToTrack)
+        {
+            mainMenuPlayers[player.Name] = (
+                Session.Players.GetPlayerInfo(player.Slot),
+                ArchipelagoClientState.ClientUnknown);
+            Session.DataStorage.TrackClientStatus(
+                state =>
+                {
+                    var infoAndStatus = mainMenuPlayers[player.Name];
+                    infoAndStatus.status = state;
+                    mainMenuPlayers[player.Name] = infoAndStatus;
+                    ModEntry.Instance.Logger.LogInformation("{playerName}: Status is now {status}", player.Name, state);
+                },
+                slot: player.Slot);
+        }
     }
 
     public void Disconnect()
