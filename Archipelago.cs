@@ -379,13 +379,14 @@ public class Archipelago
     public ILogger Logger => ModEntry.Instance.Logger;
     public bool Ready { get; private set; } = false;
     public DeathLinkService? DeathLinkService { get; set; }
+    public List<string> MessagesReceived { get; } = [];
+    public List<(string message, Color color)[]> MessagePartsReceived { get; } = [];
+    public List<MessageToAnnounce> MessagesToAnnounce { get; } = [];
 
-    private static ConcurrentBag<(string name, string sender)> receivedItemsToProcess = [];
+    private static ConcurrentBag<ItemInfo> receivedItemsToProcess = [];
     private static readonly object itemReceivedLock = new();
     private static DeathLink? lastDeathLink;
     private static readonly object deathLinkLock = new();
-    public List<string> MessagesReceived { get; } = [];
-    public List<(string message, Color color)[]> MessagePartsReceived { get; } = [];
     internal static readonly object messagesReceivedLock = new();
     private const int MaxMessages = 2000;
     internal ConcurrentDictionary<string, (PlayerInfo info, ArchipelagoClientState status)> mainMenuPlayers = [];
@@ -519,6 +520,9 @@ public class Archipelago
                 },
                 slot: player.Slot);
         }
+        
+        // Add overlay to display messages
+        RouteOverlay.MakeNew();
     }
 
     public void Disconnect()
@@ -541,6 +545,8 @@ public class Archipelago
         Session = null;
         SlotData = null;
         SlotDataHelper = null;
+        
+        RouteOverlay.Remove();
     }
 
     public (LoginResult, ArchipelagoErrorCode) Reconnect()
@@ -588,13 +594,11 @@ public class Archipelago
     {
         lock (itemReceivedLock)  // TODO is that lock redundant with the ConcurrentBag?
         {
-            while (helper.PeekItem() != null)
+            while (helper.PeekItem() is { } info)
             {
-                var name = helper.PeekItem().ItemName;
-                var sender = helper.PeekItem().Player.Name;
                 // We are currently on the websocket thread.
                 // To prevent concurrency issues we store received items in a thread-safe list to process on the main thread.
-                receivedItemsToProcess.Add((name, sender));
+                receivedItemsToProcess.Add(info);
                 helper.DequeueItem();
             }
         }
@@ -659,8 +663,13 @@ public class Archipelago
             ItemApplier.ApplyDeferredItems(state);
             while (receivedItemsToProcess.TryTake(out var item))
             {
-                Logger.LogInformation("Received {item} from {player}", item.name, item.sender);
-                ItemApplier.ApplyReceivedItem(item, state);
+                Logger.LogInformation("Received {item} from {player}", item.ItemName, item.Player.Name);
+                ItemApplier.ApplyReceivedItem((item.ItemName, item.Player.Name), state);
+                MessagesToAnnounce.Add(new MessageToAnnounce
+                {
+                    type = MessageToAnnounce.ItemReceived,
+                    item = item
+                });
             }
         }
 
@@ -668,7 +677,15 @@ public class Archipelago
         {
             if (lastDeathLink is not null && !state.IsOutsideRun() && state.ship.hull > 0)
             {
-                DeathLinkManager.ApplyDeathLink(g, lastDeathLink);
+                DeathLinkManager.ApplyDeathLink(g, lastDeathLink, out var kills);
+                if (!kills)
+                {
+                    MessagesToAnnounce.Add(new MessageToAnnounce
+                    {
+                        type = MessageToAnnounce.DeathlinkReceived,
+                        deathlink = lastDeathLink
+                    });
+                }
             }
 
             lastDeathLink = null;

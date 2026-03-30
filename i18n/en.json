@@ -189,6 +189,10 @@
             "descNotFound": "No underlying artifact! <c=attack>This should not happen!</c>"
         }
     },
+    "compShouts": {
+        "defaultItem": "Received {0} from {1}.",
+        "defaultDeathlink": "Received deathlink from {0} with cause: {1}."
+    },
     "story": {
         "memory": {
             "twoChoice": "<c=boldPink>Both of them!</c>",
