@@ -124,8 +124,11 @@
         "apCardsTip": "<c=boldPink>Archipelago cards</c> that you don't pick will not reappear\nfor a while, but you can find them again at Cleo's shop."
     },
     "artifactReward": {
+        "twoItemsNames": "{0} & {1}",
+        "sameItemsName": "{0} x2",
         "oneItemCharName": "{0} Item",
-        "twoItemsCharNames": "{0} & {1} Items"
+        "twoItemsCharNames": "{0} & {1} Items",
+        "twoItemsSameCharName": "{0} Items"
     },
     "vault": {
         "goalTotalMemories": "Memories found:\n{0} / {1}",
