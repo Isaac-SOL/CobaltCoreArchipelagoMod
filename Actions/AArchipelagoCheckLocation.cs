@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using CobaltCoreArchipelago.Cards;
+using CobaltCoreArchipelago.Features;
 using HarmonyLib;
 using Nickel;
 using TheJazMaster.CombatQoL;
@@ -19,6 +20,7 @@ public class AArchipelagoCheckLocation : CardAction
     public string? receiverName;
     public string? givenCard;
     public string? givenArtifact;
+    public string? givenCharacter;
 
     public AArchipelagoCheckLocation()
     {
@@ -82,6 +84,19 @@ public class AArchipelagoCheckLocation : CardAction
             tooltips.Add(new TTDivider());
             tooltips.AddRange(artifact.GetTooltips());
             tooltips.Add(new TTDivider());
+        }
+        
+        if (givenCharacter != null)
+        {
+            var deck = Archipelago.ItemToDeck[givenCharacter];
+            tooltips.Add(new TTCharacter
+            {
+                character = new Character
+                {
+                    type = deck.Key(),
+                    deckType = deck
+                }
+            });
         }
 
         return tooltips;

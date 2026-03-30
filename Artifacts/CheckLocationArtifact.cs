@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using Archipelago.MultiClient.Net.Models;
+using CobaltCoreArchipelago.Features;
 using HarmonyLib;
 using Nanoray.PluginManager;
 using Newtonsoft.Json;
@@ -25,6 +26,7 @@ public class CheckLocationArtifact : Artifact, IRegisterable
     public string?[] locationItemColor = [null, null];
     public string?[] givenCard = [null, null];
     public string?[] givenArtifact = [null, null];
+    public string?[] givenCharacter = [null, null];
     
     public static void Register(IPluginPackage<IModManifest> package, IModHelper helper)
     {
@@ -110,6 +112,19 @@ public class CheckLocationArtifact : Artifact, IRegisterable
             tooltips.Add(new TTDivider());
             tooltips.AddRange(artifact.GetTooltips());
         }
+        
+        if (givenCharacter[pos] != null)
+        {
+            var deck = Archipelago.ItemToDeck[givenCharacter[pos]!];
+            tooltips.Add(new TTCharacter
+            {
+                character = new Character
+                {
+                    type = deck.Key(),
+                    deckType = deck
+                }
+            });
+        }
             
         return tooltips;
     }
@@ -183,6 +198,8 @@ public class CheckLocationArtifact : Artifact, IRegisterable
                     givenCard[i] = locationItemName[i];
                 else if (Archipelago.ItemToArtifact.ContainsKey(locationItemName[i]!))
                     givenArtifact[i] = locationItemName[i];
+                else if (Archipelago.ItemToDeck.ContainsKey(locationItemName[i]!))
+                    givenCharacter[i] = locationItemName[i];
             }
         }
     }

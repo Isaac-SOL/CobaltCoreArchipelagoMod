@@ -61,6 +61,8 @@ public class CheckLocationCard : Card, IRegisterable
                     checkAction.givenCard = locationItemName;
                 else if (Archipelago.ItemToArtifact.ContainsKey(locationItemName))
                     checkAction.givenArtifact = locationItemName;
+                else if (Archipelago.ItemToDeck.ContainsKey(locationItemName))
+                    checkAction.givenCharacter = locationItemName;
             }
         }
         
