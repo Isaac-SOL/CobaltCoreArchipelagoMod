@@ -1,4 +1,8 @@
-﻿using HarmonyLib;
+﻿using System.Collections.Generic;
+using System.Reflection.Emit;
+using HarmonyLib;
+using Nanoray.Shrike;
+using Nanoray.Shrike.Harmony;
 
 namespace CobaltCoreArchipelago.Features;
 
@@ -8,13 +12,13 @@ internal class RouteOverlay
     
     internal static RouteOverlay MakeNew()
     {
-        StateRenderPostfix.overlay = new RouteOverlay();
-        return StateRenderPostfix.overlay;
+        GRenderPostfix.overlay = new RouteOverlay();
+        return GRenderPostfix.overlay;
     }
 
     internal static void Remove()
     {
-        StateRenderPostfix.overlay = null;
+        GRenderPostfix.overlay = null;
     }
     
     internal void Render(G g, State s)
@@ -78,13 +82,36 @@ internal class RouteOverlay
     }
 }
 
-[HarmonyPatch(typeof(State), nameof(State.Render))]
-public static class StateRenderPostfix
+[HarmonyPatch(typeof(G), nameof(G.Render))]
+public static class GRenderPostfix
 {
     internal static RouteOverlay? overlay;
     
-    public static void Postfix(State __instance, G g)
+    public static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions, ILGenerator generator)
     {
-        overlay?.Render(g, __instance);
+        List<CodeInstruction> storedInstructions = new(instructions);
+
+        // Using Shrike here because I don't know how to use indices with CodeMatcher
+        var seqMatched = new SequenceBlockMatcher<CodeInstruction>(storedInstructions)
+            // Match sequence where the function adds the tooltip by checking showUnlockInstructions
+            .Find(
+                ILMatches.Ldarg(0),
+                ILMatches.Call(nameof(G.Pop))
+            )
+            .Insert(
+                SequenceMatcherPastBoundsDirection.After,
+                SequenceMatcherInsertionResultingBounds.ExcludingInsertion,
+                CodeInstruction.LoadArgument(0), // this
+                CodeInstruction.LoadArgument(0),
+                CodeInstruction.LoadField(typeof(G), nameof(G.state)), // this.state
+                CodeInstruction.Call((G g, State s) => RenderOverlay(g, s))
+            );
+        
+        return seqMatched.AllElements();
+    }
+
+    public static void RenderOverlay(G g, State s)
+    {
+        overlay?.Render(g, s);
     }
 }

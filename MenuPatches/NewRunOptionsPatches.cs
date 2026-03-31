@@ -44,7 +44,6 @@ public class CharacterRenderPatch
     public static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions, ILGenerator generator)
     {
         List<CodeInstruction> storedInstructions = new(instructions);
-        var codeMatcher = new CodeMatcher(storedInstructions, generator);
 
         // Using Shrike here because I don't know how to use indices with CodeMatcher
         var seqMatched = new SequenceBlockMatcher<CodeInstruction>(storedInstructions)
