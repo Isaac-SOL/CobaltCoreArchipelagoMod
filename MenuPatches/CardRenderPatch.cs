@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using HarmonyLib;
 
@@ -32,10 +33,13 @@ public static class CardRenderPatch
 [HarmonyPatch(typeof(TTCard), nameof(TTCard.Render))]
 public static class TTCardRenderPatch
 {
+    public static List<Type> cardsInTooltip = [];
+    
     [HarmonyPriority(Priority.High)]
     public static void Prefix(TTCard __instance)
     {
         ModEntry.Instance.Helper.ModData.SetModData(__instance.card, "tooltipCard", true);
+        cardsInTooltip.Add(__instance.card.GetType());
     }
     
     [HarmonyPriority(Priority.Low)]
