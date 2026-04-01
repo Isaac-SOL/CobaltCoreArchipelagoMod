@@ -8,6 +8,7 @@ using CobaltCoreArchipelago.Artifacts;
 using CobaltCoreArchipelago.Cards;
 using CobaltCoreArchipelago.Features;
 using HarmonyLib;
+using JetBrains.Annotations;
 using Microsoft.Extensions.Logging;
 
 namespace CobaltCoreArchipelago.GameplayPatches;
@@ -251,8 +252,6 @@ public class CardOfferingPatch
 [HarmonyPatch(typeof(ArtifactReward), nameof(ArtifactReward.GetOffering))]
 public class ArtifactOfferingPatch
 {
-    internal static ArtifactOfferingAPData? nextOverridingData;
-    
     private static ILocationCheckHelper Locations
     {
         get
@@ -265,60 +264,11 @@ public class ArtifactOfferingPatch
     static void Postfix(
         ref List<Artifact> __result,
         State s,
-        int count,
         Deck? limitDeck = null,
         List<ArtifactPool>? limitPools = null,
         Rand? rngOverride = null)
     {
-        if (nextOverridingData is not null)
-        {
-            RandomAmongFixedReward(ref __result, s, count, nextOverridingData);
-            nextOverridingData = null;
-        }
-        else
-        {
-            RegularReward(ref __result, s, limitDeck, limitPools, rngOverride);
-        }
-    }
-
-    private static void RandomAmongFixedReward(
-        ref List<Artifact> __result,
-        State s,
-        int maxCount,
-        ArtifactOfferingAPData data)
-    {
-        switch (data.filterMode)
-        {
-            case ArtifactOfferingAPData.FilterMode.UnlockedArtifactsNotInDeck:
-                __result = CardBrowseListPatch.GetPickableUnlockedArtifactsList(s)
-                    .Shuffle(s.rngArtifactOfferings)
-                    .Take(maxCount)
-                    .ToList();
-                break;
-            
-            case ArtifactOfferingAPData.FilterMode.FoundMissingLocations:
-                Debug.Assert(Archipelago.Instance.APSaveData != null, "Archipelago.Instance.APSaveData != null");
-                
-                var locationsToScout = CardBrowseListPatch.GetPickableAPArtifactsList(s)
-                    .Shuffle(s.rngArtifactOfferings)
-                    .Take(maxCount)
-                    .ToList();
-                var apArtifacts = locationsToScout
-                    .Select(name =>
-                                name.Contains("Boss") ? new CheckLocationArtifactBoss { locationName = [name, null] }
-                                : new CheckLocationArtifact { locationName = [name, null] })
-                    .ToList();
-                __result = apArtifacts.Cast<Artifact>().ToList();
-
-                if (Archipelago.Instance.APSaveData.CardScoutMode == CardScoutMode.DontScout) break;
-                
-                Archipelago.Instance.ScoutLocationInfo(locationsToScout.ToArray()).ContinueWith(task =>
-                {
-                    for (var i = 0; i < apArtifacts.Count; i++)
-                        apArtifacts[i].LoadInfo(task.Result?.GetSlice(i).ToArray());
-                });
-                break;
-        }
+        RegularReward(ref __result, s, limitDeck, limitPools, rngOverride);
     }
 
     private static void RegularReward(

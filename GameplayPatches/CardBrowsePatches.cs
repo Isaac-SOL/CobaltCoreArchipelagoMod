@@ -102,7 +102,8 @@ public class CardBrowseListPatch
     
     internal static List<Artifact> GetPickableUnlockedArtifactsList(State s) => Archipelago.Instance.APSaveData!.FoundArtifacts
         .Select(artifactType => (artifactType.CreateInstance() as Artifact)!)
-        .Where(artifact => s.characters.Any(c => c.deckType!.Value == artifact.GetMeta().owner)
+        .Where(artifact => s.characters.Any(c => c.deckType!.Value == artifact.GetMeta().owner
+                                                 || artifact.GetMeta().owner == Deck.colorless)
                            && s.artifacts.All(ownedArtifact => ownedArtifact.GetType() != artifact.GetType())
                            && !ArtifactReward.GetBlockedArtifacts(s).Contains(artifact.GetType()))
         .ToList();

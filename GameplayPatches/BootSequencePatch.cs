@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using CobaltCoreArchipelago.Actions;
+using CobaltCoreArchipelago.Features;
 using HarmonyLib;
 
 namespace CobaltCoreArchipelago.GameplayPatches;
@@ -9,8 +10,6 @@ namespace CobaltCoreArchipelago.GameplayPatches;
 [HarmonyPatch(typeof(Events), nameof(Events.BootSequence))]
 public class BootSequencePatch
 {
-    private const int MaxArtifactChoices = 4;
-    
     public static void Postfix(List<Choice> __result, State s)
     {
         Debug.Assert(Archipelago.Instance.APSaveData != null, "Archipelago.Instance.APSaveData != null");
@@ -39,28 +38,24 @@ public class BootSequencePatch
             });
         }
 
-        var pickableArtifactsCount = Math.Min(CardBrowseListPatch.GetPickableUnlockedArtifactsList(s).Count, MaxArtifactChoices);
-        if (pickableArtifactsCount > 0 && false)
+        var pickableArtifactsCount = CardBrowseListPatch.GetPickableUnlockedArtifactsList(s).Count;
+        if (pickableArtifactsCount > 0)
         {
             possibleChoices.Add(new Choice
             {
-                label = string.Format(ModEntry.Instance.Localizations.Localize(["cardBrowse", "bootOptionUnlockedArtifactName"]), pickableArtifactsCount),
+                label = ModEntry.Instance.Localizations.Localize(["cardBrowse", "bootOptionUnlockedArtifactName"]),
                 key = ".zone_first",
                 actions =
                 [
-                    new AAPArtifactOffering
+                    new AAPArtifactSelect
                     {
-                        amount = MaxArtifactChoices,
-                        data = new ArtifactOfferingAPData
-                        {
-                            filterMode = ArtifactOfferingAPData.FilterMode.UnlockedArtifactsNotInDeck
-                        }
+                        mode = ArtifactPick.Mode.Unlocked,
+                        allowCancel = true
                     }
                 ]
             });
         }
         
-        if (possibleChoices.Count > 0)
-            __result.Add(possibleChoices.Random(s.rngCurrentEvent));
+        __result.AddRange(possibleChoices);
     }
 }

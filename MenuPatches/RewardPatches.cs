@@ -81,6 +81,13 @@ public static class ArtifactRewardRenderPatch
     {
         Debug.Assert(Archipelago.Instance.APSaveData != null, "Archipelago.Instance.APSaveData != null");
         
+        // Show tip about AP artifacts
+        if (__instance.artifacts.Any(artifact => artifact is CheckLocationArtifact))
+        {
+            Draw.Text(ModEntry.Instance.Localizations.Localize(["artifactReward", "apArtifactsTip"]),
+                      240, 245, align: TAlign.Center, color: Colors.textMain, outline: Colors.black);
+        }
+        
         if (Archipelago.Instance.APSaveData.CardScoutMode == CardScoutMode.DontScout) return;
         
         // Recheck AP checks every 5 seconds
