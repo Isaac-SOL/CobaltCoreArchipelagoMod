@@ -151,6 +151,8 @@ internal class ModEntry : SimpleMod
         
         // Add story memories immediately (we won't see them if charsWithLore is not patched anyway)
         AdditionalStoryNodes.Register(AdditionalStoryNodes.memoryNodes);
+        AdditionalStoryNodes.Register(AdditionalStoryNodes.eventNodes);
+        AdditionalStoryNodes.Register(AdditionalStoryNodes.eventChoices);
 
         ModSettings.RegisterModSettings(
             ModSettings.MakeList([

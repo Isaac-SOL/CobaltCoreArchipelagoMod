@@ -5,6 +5,7 @@ using System.Linq;
 using CobaltCoreArchipelago.Artifacts;
 using CobaltCoreArchipelago.MenuPatches;
 using daisyowl.text;
+using HarmonyLib;
 using Microsoft.Xna.Framework.Input;
 
 namespace CobaltCoreArchipelago.Features;
@@ -90,17 +91,17 @@ public class ArtifactPick : Route, OnInputPhase, OnMouseDown
         SharedArt.DrawEngineering(g);
         var screenVec = g.Push(onInputPhase: this).rect.xy;
         Draw.Text(
-            mode switch
+            string.Format(ModEntry.Instance.Localizations.Localize(mode switch
             {
-                Mode.Unlocked => "Pick an <c=boldPink>unlocked</c> artifact",
-                _ => "Pick a missed <c=boldPink>archipelago</c> artifact"
-            },
+                Mode.Unlocked => ["cardBrowse", "bootOptionUnlockedArtifactTitle"],
+                _ => ["cardBrowse", "eventMissedAPArtifactTitle"]
+            }), artifactsAvailable.Count),
             screenVec.x + 240.0, screenVec.y + _scroll + 24.0,
             color: Colors.textMain,
             align: TAlign.Center
         );
         Draw.Text(
-            "cardSelectText",
+            ModEntry.Instance.Localizations.Localize(["cardBrowse", "addArtifactActionDoing"]),
             screenVec.x + 240.0, screenVec.y + _scroll + 34.0,
             color: Colors.textBold,
             maxWidth: 300.0,
@@ -274,6 +275,18 @@ public class ArtifactPick : Route, OnInputPhase, OnMouseDown
             Audio.Play(FSPRO.Event.Click);
             g.CloseRoute(this, CBResult.Cancel);
             return;
+        }
+    }
+}
+
+[HarmonyPatch(typeof(Dialogue), nameof(Dialogue.TryCloseSubRoute))]
+public class DialogueCloseArtifactPickPatch
+{
+    public static void Prefix(Dialogue __instance, Route r, object? arg)
+    {
+        if (__instance.routeOverride == r && r is ArtifactPick && arg is CBResult.Cancel)
+        {
+            __instance.actionQueue.Clear();
         }
     }
 }

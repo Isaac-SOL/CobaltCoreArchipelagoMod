@@ -1,5 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
+using CobaltCoreArchipelago.GameplayPatches;
 
 namespace CobaltCoreArchipelago.StoryPatches;
 
@@ -26,6 +28,7 @@ internal class AdditionalStoryNodes
     internal static string AmCatDeck => Deck.colorless.Key();
     internal static string AmBooks => Deck.shard.Key();
     internal static string AmVoid => "void";
+    internal static string AmCleo => "nerd";
 
     internal static void Register(Dictionary<string, StoryNode> nodes)
     {
@@ -34,6 +37,68 @@ internal class AdditionalStoryNodes
             DB.story.all[kvp.Key] = kvp.Value;
         }
     }
+
+    internal static void Register(Dictionary<string, MethodInfo> choiceFuncs)
+    {
+        foreach (var kvp in choiceFuncs)
+        {
+            DB.eventChoiceFns[kvp.Key] = kvp.Value;
+        }
+    }
+
+    internal static readonly Dictionary<string, StoryNode> eventNodes = new()
+    {
+        {
+            "saltyisaac_archipelago_ShopMissedItem",
+            new StoryNode
+            {
+                type = NodeType.@event,
+                lookup = [ "saltyisaac_archipelago_shopMissedItem" ],
+                bg = "BGShop",
+                lines =
+                [
+                    new CustomSay
+                    {
+                        who = AmCleo,
+                        flipped = true,
+                        lineKey = ["story", "event", "ShopMissedItem"]
+                    }
+                ],
+                choiceFunc = "saltyisaac_archipelago_ShopPickMissedAPItem"
+            }
+        },
+        {
+            "saltyisaac_archipelago_BootSequenceUnlockedItem",
+            new StoryNode
+            {
+                type = NodeType.@event,
+                lookup = [ "saltyisaac_archipelago_bootSequenceUnlockedItem" ],
+                bg = "BGBootSequence",
+                lines =
+                [
+                    new CustomSay
+                    {
+                        who = AmCat,
+                        loopTag = "loading3",
+                        lineKey = ["story", "event", "BootSequenceUnlockedItem"]
+                    }
+                ],
+                choiceFunc = "saltyisaac_archipelago_BootSequencePickUnlockedItem"
+            }
+        }
+    };
+
+    internal static readonly Dictionary<string, MethodInfo> eventChoices = new()
+    {
+        {
+            "saltyisaac_archipelago_ShopPickMissedAPItem",
+            typeof(ShopPatch).GetMethod(nameof(ShopPatch.ShopPickMissedAPItem))!
+        },
+        {
+            "saltyisaac_archipelago_BootSequencePickUnlockedItem",
+            typeof(BootSequencePatch).GetMethod(nameof(BootSequencePatch.BootSequencePickUnlockedItem))!
+        }
+    };
     
     internal static readonly Dictionary<string, StoryNode> memoryNodes = new()
     {

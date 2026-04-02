@@ -13,12 +13,26 @@ public class BootSequencePatch
     public static void Postfix(List<Choice> __result, State s)
     {
         Debug.Assert(Archipelago.Instance.APSaveData != null, "Archipelago.Instance.APSaveData != null");
+        
+        if (CardBrowseListPatch.GetPickableUnlockedCardsList(s).Count
+            + CardBrowseListPatch.GetPickableUnlockedArtifactsList(s).Count > 0)
+        {
+            __result.Add(new Choice
+            {
+                label = ModEntry.Instance.Localizations.Localize(["cardBrowse", "bootOptionUnlockedItemName"]),
+                key = ".saltyisaac_archipelago_bootSequenceUnlockedItem"
+            });
+        }
+    }
 
-        List<Choice> possibleChoices = [];
+    public static List<Choice> BootSequencePickUnlockedItem(State s)
+    {
+        
+        List<Choice> choices = [];
 
         if (CardBrowseListPatch.GetPickableUnlockedCardsList(s).Count > 0)
         {
-            possibleChoices.Add(new Choice
+            choices.Add(new Choice
             {
                 label = ModEntry.Instance.Localizations.Localize(["cardBrowse", "bootOptionUnlockedCardName"]),
                 key = ".zone_first",
@@ -41,7 +55,7 @@ public class BootSequencePatch
         var pickableArtifactsCount = CardBrowseListPatch.GetPickableUnlockedArtifactsList(s).Count;
         if (pickableArtifactsCount > 0)
         {
-            possibleChoices.Add(new Choice
+            choices.Add(new Choice
             {
                 label = ModEntry.Instance.Localizations.Localize(["cardBrowse", "bootOptionUnlockedArtifactName"]),
                 key = ".zone_first",
@@ -56,6 +70,13 @@ public class BootSequencePatch
             });
         }
         
-        __result.AddRange(possibleChoices);
+        choices.Add(new Choice
+        {
+            label = Loc.T("ShopSkipConfirm_No", "On second thought..."),
+            key = "BootSequence"
+        });
+
+        return choices;
     }
+    
 }
