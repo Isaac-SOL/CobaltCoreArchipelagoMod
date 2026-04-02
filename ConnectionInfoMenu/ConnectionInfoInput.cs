@@ -242,10 +242,10 @@ public class ConnectionInfoInput : Route, OnInputPhase, OnMouseDown
         Archipelago.Instance.APSaveData.Port = port;
         Archipelago.Instance.APSaveData.Slot = ConnectionInfo[2];
         Archipelago.Instance.APSaveData.Password = ConnectionInfo[3].Length > 0 ? ConnectionInfo[3] : null;
-        var (loginResult, errorCode) = ModEntry.Instance.Archipelago.Reconnect();
+        var (loginResult, errorCode, errorMessage) = ModEntry.Instance.Archipelago.Reconnect();
         if (errorCode == ArchipelagoErrorCode.ConnectionIssue || !loginResult.Successful)
         {
-            errorText = Localize(["connectionMenu", "connectionIssue"]);
+            errorText = errorMessage ?? Localize(["connectionMenu", "connectionIssue"]);
             screenMode = ScreenMode.RetryConnection;
         }
         else if (errorCode == ArchipelagoErrorCode.RoomIdConflict)

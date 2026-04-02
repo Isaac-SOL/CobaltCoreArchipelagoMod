@@ -401,7 +401,7 @@ public class Archipelago
         APSaveData = APSaveData.LoadFromSlot(slot);
     }
 
-    public (LoginResult, ArchipelagoErrorCode) Connect()
+    public (LoginResult, ArchipelagoErrorCode, string? errorMessage) Connect()
     {
         Debug.Assert(APSaveData != null, nameof(APSaveData) + " != null");
         Debug.Assert(Session == null, nameof(Session) + " == null");
@@ -415,7 +415,7 @@ public class Archipelago
         if (!loginResult.Successful)
         {
             Logger.LogError("Failed to connect to Archipelago host");
-            return (loginResult, ArchipelagoErrorCode.ConnectionIssue);
+            return (loginResult, ArchipelagoErrorCode.ConnectionIssue, null);
         }
 
         var code = ArchipelagoErrorCode.Ok;
@@ -434,6 +434,7 @@ public class Archipelago
             code = ArchipelagoErrorCode.RoomIdConflict;
         }
 
+        string? errorMessage = null;
         try
         {
             CobaltCoreArchipelago.SlotDataHelper.FromSlotData(SlotData);
@@ -441,10 +442,14 @@ public class Archipelago
         catch (SlotDataInvalidException e)
         {
             Logger.LogError("Received slot data is invalid for this version:\n{error}", e);
+            if (e is SlotDataVersionInvalidException)
+            {
+                errorMessage = e.Message;
+            }
             code = ArchipelagoErrorCode.SlotDataInvalid;
         }
         
-        return (loginResult, code);
+        return (loginResult, code, errorMessage);
     }
 
     internal void ApplyArchipelagoConnection()
@@ -549,7 +554,7 @@ public class Archipelago
         RouteOverlay.Remove();
     }
 
-    public (LoginResult, ArchipelagoErrorCode) Reconnect()
+    public (LoginResult, ArchipelagoErrorCode, string?) Reconnect()
     {
         Disconnect();
         return Connect();
@@ -785,7 +790,7 @@ public enum ArtifactShuffleMode
 
 public class SlotDataInvalidException(string message) : Exception(message);
 
-public class SlotDataVersionInvalidException(string message) : Exception(message);
+public class SlotDataVersionInvalidException(string message) : SlotDataInvalidException(message);
 
 public struct SlotDataHelper
 {
@@ -824,7 +829,7 @@ public struct SlotDataHelper
             var host_tag = Convert.ToString(slotData["version_tag"]);
             if (host_tag != expected_tag)
             {
-                throw new SlotDataVersionInvalidException($"This version of the mod requires APWorld version tag {expected_tag} " +
+                throw new SlotDataVersionInvalidException($"This version of the mod requires APWorld version tag {expected_tag}.\n" +
                                                           $"(Host version tag is {host_tag})");
             }
             
@@ -879,7 +884,9 @@ public struct SlotDataHelper
         }
         catch (Exception e)
         {
-            Console.WriteLine(e);
+            ModEntry.Instance.Logger.LogError("{error}", e.Message);
+            if (e is SlotDataVersionInvalidException)
+                throw;
             throw new SlotDataInvalidException(e.Message);
         }
 
