@@ -130,7 +130,8 @@ public class DeathLinkBoros : Card, IRegisterable
         return new CardData
         {
             cost = 2,
-            description = description
+            description = description,
+            exhaust = value >= 10 || (value >= 5 && upgrade == Upgrade.B)
         };
     }
 }
