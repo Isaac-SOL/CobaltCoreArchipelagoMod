@@ -446,7 +446,7 @@ public class Archipelago
             Logger.LogError("Received slot data is invalid for this version:\n{error}", e);
             if (e is SlotDataVersionInvalidException)
             {
-                errorMessage = e.Message;
+                errorMessage = $"Error: {e.Message}";
             }
             code = ArchipelagoErrorCode.SlotDataInvalid;
         }

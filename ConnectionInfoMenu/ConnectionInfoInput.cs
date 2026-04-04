@@ -250,12 +250,12 @@ public class ConnectionInfoInput : Route, OnInputPhase, OnMouseDown
         }
         else if (errorCode == ArchipelagoErrorCode.RoomIdConflict)
         {
-            errorText = Localize(["connectionMenu", "roomIdConflict"]);
+            errorText = errorMessage ?? Localize(["connectionMenu", "roomIdConflict"]);
             screenMode = ScreenMode.RoomIdConflict;
         }
         else if (errorCode == ArchipelagoErrorCode.SlotDataInvalid)
         {
-            errorText = Localize(["connectionMenu", "slotDataInvalid"]);
+            errorText = errorMessage ?? Localize(["connectionMenu", "slotDataInvalid"]);
             screenMode = ScreenMode.RetryConnection;
         }
         connecting = false;
