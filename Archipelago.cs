@@ -870,7 +870,7 @@ public struct SlotDataHelper
         var res = new SlotDataHelper();
         try
         {
-            var expected_tag = "1.1.5";
+            var expected_tag = "1.2.0";
             var host_tag = Convert.ToString(slotData["version_tag"]);
             if (host_tag != expected_tag)
             {
