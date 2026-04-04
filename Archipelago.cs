@@ -11,6 +11,7 @@ using Archipelago.MultiClient.Net.Enums;
 using Archipelago.MultiClient.Net.Helpers;
 using Archipelago.MultiClient.Net.MessageLog.Messages;
 using Archipelago.MultiClient.Net.Models;
+using CobaltCoreArchipelago.Cards;
 using CobaltCoreArchipelago.Features;
 using CobaltCoreArchipelago.GameplayPatches;
 using CobaltCoreArchipelago.MenuPatches;
@@ -390,6 +391,7 @@ public class Archipelago
     internal static readonly object messagesReceivedLock = new();
     private const int MaxMessages = 2000;
     internal ConcurrentDictionary<string, (PlayerInfo info, ArchipelagoClientState status)> mainMenuPlayers = [];
+    private static ConcurrentBag<(string name, ItemFlags flags)> playersFoundItemToNotify = [];
 
     public Archipelago()
     {
@@ -491,6 +493,8 @@ public class Archipelago
             Vault.charsWithLore.Add(Deck.shard);
             Vault.charsWithLore.Add(Deck.colorless);
         }
+        // Setup Archiprism
+        Archiprism.totalPlayers = Session.Players.AllPlayers.Count(info => info.Name != "Server");
 
         Ready = true;
         APSaveData.SyncWithHost();  // Consumes items queue
@@ -503,6 +507,8 @@ public class Archipelago
         DeathLinkService.OnDeathLinkReceived += OnDeathLinkReceived;
         if (APSaveData.DeathLinkMode != DeathLinkMode.Off)
             DeathLinkService.EnableDeathLink();
+
+        Session.Socket.PacketReceived += OnPacketReceived;
 
         // Track some players for display in the main menu
         var me = Session.Players.ActivePlayer.Name;
@@ -658,6 +664,20 @@ public class Archipelago
         }
     }
 
+    private void OnPacketReceived(ArchipelagoPacketBase packet)
+    {
+        Debug.Assert(Session != null, nameof(Session) + " != null");
+        if (packet.PacketType != ArchipelagoPacketType.PrintJSON) return;
+        var json = packet.ToJObject();
+        if (json["type"]?.ToString() != "ItemSend") return;
+        if (json["item"]?["player"]?.ToObject<int>() is not { } player) return;
+        if (json["item"]?["flags"]?.ToObject<ItemFlags>() is not { } flags) return;
+        lock (playersFoundItemToNotify)
+        {
+            playersFoundItemToNotify.Add((Session.Players.GetPlayerName(player), flags));
+        }
+    }
+
     internal void SafeUpdate(G g)
     {
         Debug.Assert(APSaveData != null, nameof(APSaveData) + " != null");
@@ -694,6 +714,31 @@ public class Archipelago
             }
 
             lastDeathLink = null;
+        }
+
+        // Notify archiprisms of items found
+        lock (playersFoundItemToNotify)
+        {
+            if (!playersFoundItemToNotify.IsEmpty)
+            {
+                if (g.state.IsOutsideRun()) return;
+                var fullDeck = new List<Card>(g.state.deck);
+                if (g.state.route is Combat combat)
+                {
+                    fullDeck.AddRange(combat.hand);
+                    fullDeck.AddRange(combat.discard);
+                    fullDeck.AddRange(combat.exhausted);
+                }
+                foreach (var card in fullDeck)
+                {
+                    if (card is not Archiprism archiprism) continue;
+                    foreach (var (name, flags) in playersFoundItemToNotify)
+                    {
+                        archiprism.PlayerFoundItem(name, flags);
+                    }
+                }
+            }
+            playersFoundItemToNotify.Clear();
         }
     }
 

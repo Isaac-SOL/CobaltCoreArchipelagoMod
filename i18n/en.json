@@ -180,6 +180,12 @@
             "descB": "<c=status>Overdrive {0}</c>.",
             "descRamp": "\n+1 for every {1} <c=redd>deathlink</c>.\n<c=action>({0}/{1})</c>",
             "descRampOne": "\n+1 for every <c=redd>deathlink</c>."
+        },
+        "Archiprism": {
+            "name": "Archiprism",
+            "desc": "Attack for 1 dmg per player who has found an item since last use",
+            "descA": "Attack for 3 dmg per player who has found a <c=DDA0DD>progression item</c> since last use",
+            "descB": "Attack for 5 dmg per player who has found a <c=redd>trap</c> since last use"
         }
     },
     "artifact": {
