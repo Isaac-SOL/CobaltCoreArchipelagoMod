@@ -16,10 +16,6 @@
 		-->
 	</PropertyGroup>
 	<ItemGroup>
-		<PackageReference Include="ILRepack" Version="2.0.44">
-		  <PrivateAssets>all</PrivateAssets>
-		  <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-		</PackageReference>
 		<PackageReference Include="Newtonsoft.Json" Version="13.0.3" IncludeAssets="all" />
 		<PackageReference Include="Archipelago.MultiClient.Net" Version="6.7.1" />
 		<PackageReference Include="Nickel.ModBuildConfig" Version="2.0.2" />
