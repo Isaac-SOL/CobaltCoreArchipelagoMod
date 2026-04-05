@@ -477,7 +477,7 @@ public class Archipelago
             }
         }
         // Patch starting ships
-        if (SlotDataHelper.Value.ShuffleShipParts)
+        if (SlotDataHelper.Value.ShuffleShipParts == FrequencyShuffleMode.AtStart)
         {
             foreach (var shipName in StarterShip.ships.Keys)
             {
@@ -832,6 +832,22 @@ public enum ArtifactShuffleMode
     Double = 2
 }
 
+public enum FrequencyShuffleMode
+{
+    Off = 0,
+    AtStart = 1,
+    EveryRun = 2
+}
+
+public enum ModifierShuffleMode
+{
+    Off = 0,
+    Immediate = 1,
+    Unlockable = 2,
+    ImmediateAndUnlockable = 3,
+    AllAtStart = 4
+}
+
 
 public class SlotDataInvalidException(string message) : Exception(message);
 
@@ -841,7 +857,8 @@ public struct SlotDataHelper
 {
     public List<Deck> StartingCharacters { get; private set; }
     public string StartingShip { get; private set; }
-    public bool ShuffleShipParts { get; private set; }
+    public FrequencyShuffleMode ShuffleShipParts { get; private set; }
+    public FrequencyShuffleMode RandomizeStartingCards { get; private set; }
     public List<Type> StartingCards { get; private set; }
     public Dictionary<Deck, List<Type>> DeckStartingCards { get; private set; }
     public WinCondition WinCondition { get; private set; }
@@ -853,13 +870,17 @@ public struct SlotDataHelper
     public bool DoFutureMemory { get; private set; }
     public bool ShuffleCards { get; private set; }
     public ArtifactShuffleMode ShuffleArtifacts { get; private set; }
+    public ModifierShuffleMode ModifiersMode { get; private set; }
+    public HashSet<string> ModifiersBlacklist { get; private set; }
     public int CheckCardDifficulty { get; private set; }
-    public bool RarerChecksLater { get; private set; }
     public RewardsTweakMode RewardsTweak { get; private set; }
     public int AutoReleaseCharacters { get; private set; }
+    public bool SwapCharacterNode { get; private set; }
+    public bool PickMissedItemsFromEveryRun { get; private set; }
     public CardRewardsMode ImmediateCardRewards { get; private set; }
     public CardRewardAttribute ImmediateCardAttribute { get; private set; }
     public CardRewardsMode ImmediateArtifactRewards { get; private set; }
+    public HashSet<string> ImmediateRewardsBlacklist { get; private set; }
     public uint FixedRandSeed { get; private set; }
 
     public bool HasImmediateCardAttribute(CardRewardAttribute attribute)
@@ -882,7 +903,8 @@ public struct SlotDataHelper
             res.StartingCharacters = [];
             res.StartingCharacters.AddRange(startingCharacters.Select(s => Archipelago.ItemToDeck[s.ToString()]));
             res.StartingShip = Archipelago.ItemToStartingShip[(string)slotData["starting_ship"]];
-            res.ShuffleShipParts = Convert.ToBoolean(slotData["shuffle_ship_parts"]);
+            res.ShuffleShipParts = (FrequencyShuffleMode)Convert.ToInt32(slotData["shuffle_ship_parts"]);
+            res.RandomizeStartingCards = (FrequencyShuffleMode)Convert.ToInt32(slotData["randomize_starting_cards"]);
             var startingCards = (JArray)slotData["starting_cards"];
             res.StartingCards = [];
             res.StartingCards.AddRange(startingCards.Select(s => Archipelago.ItemToCard[s.ToString()]));
@@ -896,19 +918,28 @@ public struct SlotDataHelper
                 var deck = ((CardMeta)Attribute.GetCustomAttribute(card, typeof(CardMeta))!).deck;
                 res.DeckStartingCards[deck].Add(card);
             }
+            
             res.WinCondition = (WinCondition)Convert.ToInt32(slotData["win_condition"]);
             res.WinReqTotal = Convert.ToInt32(slotData["memories_required_total"]);
             res.WinReqPerChar = Convert.ToInt32(slotData["memories_required_per_character"]);
             res.ShuffleMemories = Convert.ToBoolean(slotData["shuffle_memories"]);
             res.UnlockMemoryForAllCharacters = Convert.ToBoolean(slotData["unlock_memory_for_all_characters"]);
             res.DoFutureMemory = Convert.ToBoolean(slotData["do_future_memory"]);
+            
             res.ShuffleCards = Convert.ToBoolean(slotData["shuffle_cards"]);
             res.ShuffleArtifacts = (ArtifactShuffleMode)Convert.ToInt32(slotData["shuffle_artifacts"]);
+            res.ModifiersMode = (ModifierShuffleMode)Convert.ToInt32(slotData["modifiers_mode"]);
+            res.ModifiersBlacklist = ((JArray)slotData["modifiers_blacklist"])
+                .Select(j => j.ToString()).ToHashSet();
+            
             res.CheckCardDifficulty = Convert.ToInt32(slotData["check_card_difficulty"]);
-            res.RarerChecksLater = Convert.ToBoolean(slotData["rarer_checks_later"]);
             res.AddCharacterMemories = Convert.ToBoolean(slotData["add_character_memories"]);
+            
             res.RewardsTweak = (RewardsTweakMode)Convert.ToInt32(slotData["rewards_tweak"]);
             res.AutoReleaseCharacters = Convert.ToInt32(slotData["auto_release_characters"]);
+            res.SwapCharacterNode = Convert.ToBoolean(slotData["swap_character_node"]);
+            res.PickMissedItemsFromEveryRun = Convert.ToBoolean(slotData["pick_missed_items_from_every_run"]);
+            
             res.ImmediateCardRewards = (CardRewardsMode)Convert.ToInt32(slotData["immediate_card_rewards"]);
             var attributes = (JArray)slotData["immediate_card_attributes"];
             foreach (var attribute in attributes)
@@ -925,6 +956,8 @@ public struct SlotDataHelper
                 };
             }
             res.ImmediateArtifactRewards = (CardRewardsMode)Convert.ToInt32(slotData["immediate_artifact_rewards"]);
+            res.ImmediateRewardsBlacklist = ((JArray)slotData["immediate_rewards_blacklist"])
+                .Select(j => j.ToString()).ToHashSet();
             res.FixedRandSeed = Convert.ToUInt32(slotData["fixed_client_seed"]);
         }
         catch (Exception e)

@@ -232,14 +232,6 @@ public class CardOfferingPatch
     private static Rarity GetRandomAPCheckRarity(State s, BattleType battleType)
     {
         var roll = s.rngCardOfferings.Next();
-        var power = s.map switch
-        {
-            MapFirst => 2.0,
-            MapLawless => 1.0,
-            _ => 0.5
-        };
-        if (Archipelago.InstanceSlotData.RarerChecksLater)
-            roll = Math.Pow(roll, power);
         return battleType switch
         {
             BattleType.Elite => Mutil.Roll(roll, (0.35, Rarity.common), (0.45, Rarity.uncommon), (0.2, Rarity.rare)),
