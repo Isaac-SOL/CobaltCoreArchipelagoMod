@@ -76,7 +76,8 @@ internal class RouteOverlay
                 textColor: Colors.textBold,
                 borderColor: DB.decks[Deck.colorless].color,
                 maxWidth: 200.0,
-                showStem: g.metaRoute is null && (s.routeOverride is null || s.routeOverride.GetShowCockpit())
+                showStem: g.metaRoute is null && ((s.routeOverride is null && s.route.GetShowCockpit())
+                                                  || (s.routeOverride is not null && s.routeOverride.GetShowCockpit()))
             );
         }
     }

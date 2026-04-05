@@ -50,6 +50,10 @@ public class APSaveData
     internal HashSet<string> RecentlySeenLocations { get; set; }
     [JsonProperty]
     internal HashSet<string> AllSeenLocations { get; set; }
+    [JsonProperty]
+    internal Rand ShipShuffleRand { get; set; }
+    [JsonProperty]
+    internal Rand StartingCardsRand { get; set; }
     
     // Mod settings
     [JsonProperty]
@@ -103,6 +107,8 @@ public class APSaveData
         LocationsChecked = [];
         RecentlySeenLocations = [];
         AllSeenLocations = [];
+        ShipShuffleRand = new Rand();
+        StartingCardsRand = new Rand();
     }
 
     internal static void LoadAllSaves()

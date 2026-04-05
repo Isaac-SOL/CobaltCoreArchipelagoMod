@@ -90,7 +90,7 @@ public static class ItemApplier
                         CardRewardsMode.IfLocalAndHasDeck => local && hasDeck,
                         CardRewardsMode.Always => true,
                         _ => false
-                    })
+                    } && !Archipelago.InstanceSlotData.ImmediateRewardsBlacklist.Contains(item.name))
                 {
                     if (combat is not null && !combat.EitherShipIsDead(state))
                     {
@@ -124,7 +124,8 @@ public static class ItemApplier
                         CardRewardsMode.IfLocalAndHasDeck => local && hasDeck,
                         CardRewardsMode.Always => true,
                         _ => false
-                    } && !ArtifactReward.GetBlockedArtifacts(state).Contains(artifact))
+                    } && !Archipelago.InstanceSlotData.ImmediateRewardsBlacklist.Contains(item.name)
+                      && !ArtifactReward.GetBlockedArtifacts(state).Contains(artifact))
                 {
                     if (combat is not null && !combat.EitherShipIsDead(state))
                     {

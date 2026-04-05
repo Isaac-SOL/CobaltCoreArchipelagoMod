@@ -467,6 +467,13 @@ public class Archipelago
             (ModEntry.Instance.Localizations.Localize(["mainMenu", "welcomeMessage"]), Colors.white)
         ]);
         
+        // Save rand seeds if new save
+        if (APSaveData.ShipShuffleRand.seed == 1U
+            || SlotDataHelper.Value.ShuffleShipParts == FrequencyShuffleMode.AtStart)
+            APSaveData.ShipShuffleRand.seed = SlotDataHelper.Value.FixedRandSeed;
+        if (APSaveData.StartingCardsRand.seed == 1U)
+            APSaveData.StartingCardsRand.seed = SlotDataHelper.Value.FixedRandSeed;
+        
         // Patch starting decks
         foreach (var deck in ItemToDeck.Values)
         {
@@ -477,12 +484,12 @@ public class Archipelago
             }
         }
         // Patch starting ships
-        if (SlotDataHelper.Value.ShuffleShipParts == FrequencyShuffleMode.AtStart)
+        if (SlotDataHelper.Value.ShuffleShipParts != FrequencyShuffleMode.Off)
         {
             foreach (var shipName in StarterShip.ships.Keys)
             {
                 var shuffledParts = ModEntry.BaseShips[shipName].ship.parts
-                    .Shuffle(new Rand(SlotDataHelper.Value.FixedRandSeed));
+                    .Shuffle(APSaveData.ShipShuffleRand);
                 StarterShip.ships[shipName].ship.parts = Mutil.DeepCopy(new List<Part>(shuffledParts));
             }
         }
@@ -534,6 +541,8 @@ public class Archipelago
         
         // Add overlay to display messages
         RouteOverlay.MakeNew();
+        
+        APSaveData.Save();
     }
 
     public void Disconnect()
