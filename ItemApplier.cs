@@ -142,42 +142,51 @@ public static class ItemApplier
             // Also unlock artifacts in current deck if applicable
             UnlockReplacements.UnlockCodexArtifact(state, artifact);
         }
-        else if (item.name == "1 Energy")
+        else QueueFillerAction(combat, item.name switch
         {
-            var action = new AEnergy
+            "1 Energy" => new AEnergy
             {
                 changeAmount = 1
-            };
-            if (combat is not null) combat.Queue(action);
-            else NextCombatManager.Queue(action);
-        }
-        else if (item.name == "3 Temp Shield")
-        {
-            var action = new AStatus
+            },
+            
+            "3 Temp Shield" => new AStatus
             {
                 status = Status.tempShield,
                 statusAmount = 3,
                 targetPlayer = true,
                 mode = AStatusMode.Add
-            };
-            if (combat is not null) combat.Queue(action);
-            else NextCombatManager.Queue(action);
-        }
-        else if (item.name == "Missing Trap!")
-        {
-            var action = new AStatus
+            },
+            
+            "Missing Trap!" => new AStatus
             {
                 status = DeathLinkManager.GetAssignableStatuses(state).Random(state.rngActions),
                 statusAmount = 1,
                 targetPlayer = true
-            };
-            if (combat is not null) combat.Queue(action);
-            else NextCombatManager.Queue(action);
-        }
+            },
+            
+            "Shuffle Trap" => new AShuffleShip
+            {
+                targetPlayer = true
+            },
+            
+            "Canister Trap" => new AAddCard
+            {
+                card = new GenesisCanister(),
+                destination = CardDestination.Hand
+            },
+            
+            _ => new CardAction()
+        });
         
         // If we have CombatQoL installed, any state update can be undone in combat unless we explicitly prevent it
         combat?.Queue(new AInvalidateUndos());
         Archipelago.Instance.APSaveData.AddAppliedItem(item.name);
+    }
+
+    private static void QueueFillerAction(Combat? combat, CardAction action)
+    {
+        if (combat is not null) combat.Queue(action);
+        else NextCombatManager.Queue(action);
     }
 
     internal static void ApplyDeferredItems(State state)
