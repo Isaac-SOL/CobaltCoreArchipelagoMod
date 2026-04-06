@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using CobaltCoreArchipelago.Actions;
@@ -178,7 +179,7 @@ public static class ItemApplier
             
             "Scaffold Trap" => new AInsertPart
             {
-                x = state.rngActions.NextInt() % (state.ship.parts.Count - 1) + 1,
+                x = (int)(state.rngActions.NextUint() % (state.ship.parts.Count - 1) + 1),
                 part = new Part
                 {
                     type = PType.empty,

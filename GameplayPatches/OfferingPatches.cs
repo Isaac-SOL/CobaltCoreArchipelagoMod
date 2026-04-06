@@ -126,7 +126,7 @@ public class CardOfferingPatch
             };
 
             Card card;
-            if (rarity == Rarity.rare && s.rngCardOfferings.NextInt() % 100 > DeathLinkBorosRarity())
+            if (rarity == Rarity.rare && s.rngCardOfferings.NextUint() % 100 > DeathLinkBorosRarity())
             {
                 // Sometimes replace rare cards with a DeathLinkBoros
                 card = new DeathLinkBoros();
