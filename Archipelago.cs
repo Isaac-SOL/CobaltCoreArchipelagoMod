@@ -468,31 +468,22 @@ public class Archipelago
         ]);
         
         // Save rand seeds if new save
-        if (APSaveData.ShipShuffleRand.seed == 1U
-            || SlotDataHelper.Value.ShuffleShipParts == FrequencyShuffleMode.AtStart)
-            APSaveData.ShipShuffleRand.seed = SlotDataHelper.Value.FixedRandSeed;
-        if (APSaveData.StartingCardsRand.seed == 1U)
+        if (APSaveData.PrevStartingCardsSeed == 0U)
+        {
             APSaveData.StartingCardsRand.seed = SlotDataHelper.Value.FixedRandSeed;
+            APSaveData.PrevStartingCardsSeed = SlotDataHelper.Value.FixedRandSeed;
+        }
+        if (APSaveData.PrevStartingCardsSeed == 0U)
+        {
+            APSaveData.ShipShuffleRand.seed = SlotDataHelper.Value.FixedRandSeed;
+            APSaveData.PrevShipShuffleSeed = SlotDataHelper.Value.FixedRandSeed;
+        }
         
         // Patch starting decks
-        foreach (var deck in ItemToDeck.Values)
-        {
-            StarterDeck.starterSets[deck].cards = [];
-            foreach (var card in SlotDataHelper.Value.DeckStartingCards[deck])
-            {
-                StarterDeck.starterSets[deck].cards.Add((Card)card.CreateInstance());
-            }
-        }
+        EndRunShufflePatch.ShuffleStarterSets();
         // Patch starting ships
         if (SlotDataHelper.Value.ShuffleShipParts != FrequencyShuffleMode.Off)
-        {
-            foreach (var shipName in StarterShip.ships.Keys)
-            {
-                var shuffledParts = ModEntry.BaseShips[shipName].ship.parts
-                    .Shuffle(APSaveData.ShipShuffleRand);
-                StarterShip.ships[shipName].ship.parts = Mutil.DeepCopy(new List<Part>(shuffledParts));
-            }
-        }
+            EndRunShufflePatch.ShuffleStartingShips();
         // Patch memories
         Vault.charsWithLore = Mutil.DeepCopy(ModEntry.BaseCharsWithLore);
         if (SlotDataHelper.Value.AddCharacterMemories)
@@ -612,7 +603,7 @@ public class Archipelago
 
     private void OnItemReceived(ReceivedItemsHelper helper)
     {
-        lock (itemReceivedLock)  // TODO is that lock redundant with the ConcurrentBag?
+        lock (itemReceivedLock)
         {
             while (helper.PeekItem() is { } info)
             {

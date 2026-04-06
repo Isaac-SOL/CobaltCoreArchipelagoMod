@@ -50,10 +50,14 @@ public class APSaveData
     internal HashSet<string> RecentlySeenLocations { get; set; }
     [JsonProperty]
     internal HashSet<string> AllSeenLocations { get; set; }
-    [JsonProperty]
+    [JsonIgnore]
     internal Rand ShipShuffleRand { get; set; }
     [JsonProperty]
+    internal uint PrevShipShuffleSeed { get; set; }
+    [JsonIgnore]
     internal Rand StartingCardsRand { get; set; }
+    [JsonProperty]
+    internal uint PrevStartingCardsSeed { get; set; }
     
     // Mod settings
     [JsonProperty]
