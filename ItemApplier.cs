@@ -176,6 +176,16 @@ public static class ItemApplier
                 destination = CardDestination.Hand
             },
             
+            "Scaffold Trap" => new AInsertPart
+            {
+                x = state.rngActions.NextInt() % (state.ship.parts.Count - 1) + 1,
+                part = new Part
+                {
+                    type = PType.empty,
+                    skin = state.ship.key == "boat" ? "scaffolding_boat" : "scaffolding"
+                }
+            },
+            
             _ => new CardAction()
         });
         
