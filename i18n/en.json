@@ -210,11 +210,43 @@
     "story": {
         "event": {
             "BootSequenceUnlockedItem": "ERROR: [ItemType] EXPECTED! >>>\nMANUAL INPUT NEEDED:",
-            "ShopMissedItem": "Which item do you want?"
+            "ShopMissedItem": "Which item do you want?",
+            
+            "MapSwapCharacter": {
+                "tooltip": "A collection of otherworldly crystals.\nIt may hide some familiar faces...",
+                
+                "CAT1": "Are these... our friends? Stuck in other worlds?",
+                "CAT2": "We might be able to get one out...",
+                "CAT3": "But we don't have room for more in here. One of you will have to go into cryo-stasis again.",
+                "DizzyPre": "I do some of my best thinking while asleep.",
+                "RiggsPre": "Can I bring my boba?",
+                "PeriPre": "I wouldn't mind a nap.",
+                "IsaacPre": "Aw, man.",
+                "DrakePre": "Heh. You won't survive without me.",
+                "MaxPre": "Bummer...",
+                "BooksPre": "Cool!",
+                "CAT4": "Alright, who's it gonna be?",
+
+                "choice2": "Who are we swapping them with?",
+                
+                "DizzyPost": "I'm ready!",
+                "RiggsPost": "It's me!",
+                "PeriPost": "Let's go get 'em.",
+                "IsaacPost": "Huh. Hello!",
+                "DrakePost": "WAUGH! Don't startle me like that!",
+                "MaxPost": "Huh. Alright. Hey guys.",
+                "BooksPost": "Hello!!!",
+                "CATPost": "Wait, this doesn't make any sense. Is this a time loop thing?",
+                
+                "CATRefuse": "They'll be fine.",
+                
+                "optionLabelNoSwapOut": "Nice!"
+            }
         },
         "memory": {
             "twoChoice": "<c=boldPink>Both of them!</c>",
             "allChoice": "<c=boldPink>All of them!</c>",
+            
             "AllThreeEndTalk": {
                 "Void1": "Then so it shall be."
             },

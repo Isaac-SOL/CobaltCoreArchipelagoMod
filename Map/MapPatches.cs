@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using HarmonyLib;
 using Microsoft.Extensions.Logging;
@@ -13,14 +14,20 @@ public class MapPatches
         (4, 2), (5, 2), (3, 2), (4, 1), (4, 3)
     ];
     
-    public static void Postfix(MapBase __instance, Rand rng)
+    public static void Postfix(MapBase __instance, State s, Rand rng)
     {
+        if (!Archipelago.InstanceSlotData.SwapCharacterNode) return;
+        Debug.Assert(Archipelago.Instance.APSaveData != null, "Archipelago.Instance.APSaveData != null");
+        // Don't add the node if we have no additional unlocked characters
+        if (!Archipelago.Instance.APSaveData.FoundChars.Any(d => s.characters.All(c => c.deckType != d)))
+            return;
+        
         // First, we try to add a new node in an unoccupied space
         foreach (var pos in positions)
         {
             var (valid, prev, next) = IsPositionValid(__instance, pos);
             if (!valid) continue;
-            ModEntry.Instance.Logger.LogInformation("Swap Character Node: Empty valid position found at {pos}", pos);
+            ModEntry.Instance.Logger.LogInformation("Swap Character Node: Valid empty position found at {pos}", pos);
             ModEntry.Instance.Logger.LogInformation("Prev: [{prev}], next: [{next}]", prev.Select(VtT), next.Select(VtT));
             
             // Add the node to the map
@@ -47,7 +54,7 @@ public class MapPatches
         foreach (var pos in positions)
         {
             if (!__instance.markers.TryGetValue(TtV(pos), out var oldMarker)) continue;
-            ModEntry.Instance.Logger.LogInformation("Swap Character Node: Valid remplacement position found at {pos}", pos);
+            ModEntry.Instance.Logger.LogInformation("Swap Character Node: Valid replacement position found at {pos}", pos);
             ModEntry.Instance.Logger.LogInformation("Borrowing next paths: [{paths}]", oldMarker.paths);
             
             var paths = oldMarker.paths;
