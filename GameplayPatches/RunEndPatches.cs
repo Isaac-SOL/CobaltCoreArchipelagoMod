@@ -74,10 +74,15 @@ public static class EndRunShufflePatch
         {
             foreach (var deck in Archipelago.ItemToDeck.Values)
             {
-                StarterDeck.starterSets[deck].cards = [];
+                if (deck == Deck.colorless) continue;
+                var set = StarterDeck.starterSets[deck];
+                var soloSet = SoloStarterDeck.soloStarterSets[deck];
+                set.cards = [];
+                soloSet.cards.RemoveAll(c => !IsBasic(c));
                 foreach (var card in Archipelago.InstanceSlotData.DeckStartingCards[deck])
                 {
-                    StarterDeck.starterSets[deck].cards.Add((Card)card.CreateInstance());
+                    set.cards.Add((Card)card.CreateInstance());
+                    soloSet.cards.InsertRange(0, [(Card)card.CreateInstance(), (Card)card.CreateInstance()]);
                 }
             }
             return;
@@ -93,6 +98,8 @@ public static class EndRunShufflePatch
         foreach (var deck in Archipelago.ItemToDeck.Values)
         {
             if (deck == Deck.colorless) continue;
+            var set = StarterDeck.starterSets[deck];
+            var soloSet = SoloStarterDeck.soloStarterSets[deck];
             var possibleCards = unlockedCards
                 .Where(c => c.GetMeta().deck == deck)
                 .ToList();
@@ -108,8 +115,20 @@ public static class EndRunShufflePatch
                 : possibleCards;
             effSecondCards.Remove(offC);
             var secC = effSecondCards.Random(rand)!;
-            StarterDeck.starterSets[deck].cards = [offC, secC];
+            set.cards = [offC, secC];
+            var savedBasics = soloSet.cards.Where(IsBasic).ToList();
+            soloSet.cards.Clear();
+            soloSet.cards.AddRange([offC, secC]);
+            soloSet.cards.AddRange(possibleCards
+                                          .Where(c => c != offC && c != secC)
+                                          .Shuffle()
+                                          .Concat([offC, secC]) // Fallback if no more cards
+                                          .Take(2));
+            soloSet.cards.AddRange(savedBasics);
         }
         APSaveData.Save();
     }
+
+    private static bool IsBasic(Card c) =>
+        c is CannonColorless or DodgeColorless or BasicShieldColorless or DroneshiftColorless;
 }
