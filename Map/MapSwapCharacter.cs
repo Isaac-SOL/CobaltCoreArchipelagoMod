@@ -1,8 +1,10 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using CobaltCoreArchipelago.Actions;
 using CobaltCoreArchipelago.StoryPatches;
+using HarmonyLib;
 
 namespace CobaltCoreArchipelago.Map;
 
@@ -43,8 +45,16 @@ public class MapSwapCharacter : MapNodeContents
             {
                 label = $"Add <c={d.Key()}>{Character.GetDisplayName(d, s).ToUpperInvariant()}</c> to the crew."
                         + $" ({RunWinWhoPatch.GetMemoryCountForChoiceDisplay(d, s)}/3 mems)",
-                key = "saltyisaac_archipelago_SwapCharacter_Choice2",
-                actions = [ new ASwapCharacterInChoice { deck = d } ]
+                key = s.characters.Count == 3
+                    ? "saltyisaac_archipelago_SwapCharacter_Choice2"     // If we need to swap out
+                    : $"saltyisaac_archipelago_SwapCharacter_{d.Key()}", // If we don't
+                actions = s.characters.Count == 3
+                    ? [new ASwapCharacterInChoice { deck = d }] : // If we need to swap out
+                    [   // If we don't
+                        new AAddCharacter { deck = d },
+                        new AUpgradePartialCrewArtifact(),
+                        new CrystalizeFriendBgPoof()
+                    ]
             })
             .Append(new Choice
             {
@@ -56,13 +66,19 @@ public class MapSwapCharacter : MapNodeContents
 
     public static List<Choice> ChooseCharToSwapOut(State s)
     {
+        // Fallback in case we have reached this node with less than 3 characters (this shouldn't happen)
         if (s.characters.Count < 3)
             return
             [
                 new Choice
                 {
                     label = Localize("optionLabelNoSwapOut"),
-                    actions = [ new AAddCharacter { deck = swapIn }, new CrystalizeFriendBgPoof() ]
+                    actions =
+                    [
+                        new AAddCharacter { deck = swapIn },
+                        new AUpgradePartialCrewArtifact(),
+                        new CrystalizeFriendBgPoof()
+                    ]
                 }
             ];
 
@@ -96,5 +112,32 @@ internal class ASwapCharacterInChoice : CardAction
     public override void Begin(G g, State s, Combat c)
     {
         MapSwapCharacter.swapIn = deck;
+    }
+}
+
+internal class AUpgradePartialCrewArtifact : CardAction
+{
+    private static List<Type> partialCrewArtifacts =
+    [
+        AccessTools.GetTypesFromAssembly(
+                AccessTools.AllAssemblies()
+                    .First(a => (a.GetName().Name ?? a.GetName().FullName) == "CustomRunOptions"))
+            .First(type => type.Name == "PartialCrewRuns" && type.Namespace == "Shockah.CustomRunOptions")
+            .GetNestedType("UnmannedRunArtifact", AccessTools.all)!,
+        typeof(DailyJustOneCharacter),
+        AccessTools.GetTypesFromAssembly(
+                AccessTools.AllAssemblies()
+                    .First(a => (a.GetName().Name ?? a.GetName().FullName) == "CustomRunOptions"))
+            .First(type => type.Name == "PartialCrewRuns" && type.Namespace == "Shockah.CustomRunOptions")
+            .GetNestedType("DuoRunArtifact", AccessTools.all)!
+    ];
+    
+    public override void Begin(G g, State s, Combat c)
+    {
+        var crewCount = s.characters.Count;
+        s.artifacts.RemoveAll(a => partialCrewArtifacts.Contains(a.GetType()));
+        // We don't use a proper AAddArtifact to avoid triggering OnReceiveArtifact
+        if (crewCount < 3)
+            s.AddNonCharacterArtifact((Artifact)partialCrewArtifacts[crewCount].CreateInstance());
     }
 }
