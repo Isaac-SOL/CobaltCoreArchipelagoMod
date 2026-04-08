@@ -38,6 +38,10 @@ public static class EndRunShufflePatch
 
     static void Postfix()
     {
+        Debug.Assert(Archipelago.Instance.APSaveData != null, "Archipelago.Instance.APSaveData != null");
+        Archipelago.Instance.APSaveData.ThisRunSeenLocations.Clear();
+        APSaveData.Save();
+        
         if (Archipelago.InstanceSlotData.RandomizeStartingCards == FrequencyShuffleMode.EveryRun)
             ShuffleStarterSets();
         if (Archipelago.InstanceSlotData.ShuffleShipParts == FrequencyShuffleMode.EveryRun)

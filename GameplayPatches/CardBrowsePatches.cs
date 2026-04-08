@@ -108,7 +108,12 @@ public class CardBrowseListPatch
                            && !ArtifactReward.GetBlockedArtifacts(s).Contains(artifact.GetType()))
         .ToList();
 
-    internal static List<string> GetPickableAPLocationsList(State s) => Archipelago.Instance.APSaveData!.AllSeenLocations
+    internal static IEnumerable<string> SeenLocationsFromSlotData() =>
+        Archipelago.InstanceSlotData.PickMissedItemsFromEveryRun
+            ? Archipelago.Instance.APSaveData!.AllSeenLocations
+            : Archipelago.Instance.APSaveData!.ThisRunSeenLocations;
+
+    internal static List<string> GetPickableAPLocationsList(State s) => SeenLocationsFromSlotData()
         .Intersect(Archipelago.Instance.Session!.Locations.AllMissingLocations
                        .Select(l => Archipelago.Instance.Session.Locations.GetLocationNameFromId(l)))
         .Where(name => s.characters

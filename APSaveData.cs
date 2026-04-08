@@ -24,6 +24,7 @@ public class APSaveData
     }
     [JsonIgnore]
     private static Dictionary<int, APSaveData>? _allApSaveStorage;
+    internal static IModStorage ModStorage => ModEntry.Instance.Helper.Storage;
     
     // General AP info
     [JsonProperty]
@@ -50,6 +51,8 @@ public class APSaveData
     internal HashSet<string> RecentlySeenLocations { get; set; }
     [JsonProperty]
     internal HashSet<string> AllSeenLocations { get; set; }
+    [JsonProperty]
+    internal HashSet<string> ThisRunSeenLocations { get; set; }
     [JsonIgnore]
     internal Rand ShipShuffleRand { get; set; }
     [JsonProperty]
@@ -70,8 +73,6 @@ public class APSaveData
     internal CardScoutMode CardScoutMode { get; set; } = CardScoutMode.ScoutOnly;
     [JsonProperty]
     internal bool MessagesInMenu { get; set; } = true;
-    
-    internal static IModStorage ModStorage => ModEntry.Instance.Helper.Storage;
 
     [JsonIgnore]
     internal IEnumerable<string> AppliedInventoryPositive => AppliedInventory
@@ -111,14 +112,17 @@ public class APSaveData
         LocationsChecked = [];
         RecentlySeenLocations = [];
         AllSeenLocations = [];
+        ThisRunSeenLocations = [];
         ShipShuffleRand = new Rand();
         StartingCardsRand = new Rand();
     }
 
     internal static void LoadAllSaves()
     {
-        ModEntry.Instance.Logger.LogInformation(ModStorage.GetMainStorageFile("json").FullName);
-        if (!ModStorage.TryLoadJson(ModStorage.GetMainStorageFile("json"), out _allApSaveStorage) || _allApSaveStorage is null)
+        ModEntry.Instance.Logger.LogInformation("Storage File: {modStorage}",
+                                                ModStorage.GetMainStorageFile("json").FullName);
+        if (!ModStorage.TryLoadJson(ModStorage.GetMainStorageFile("json"), out _allApSaveStorage)
+            || _allApSaveStorage is null)
         {
             ModEntry.Instance.Logger.LogWarning("Couldn't load mod storage json, creating new one");
             _allApSaveStorage = new Dictionary<int, APSaveData>();
