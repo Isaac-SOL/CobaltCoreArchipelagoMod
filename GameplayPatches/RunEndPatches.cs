@@ -10,7 +10,8 @@ namespace CobaltCoreArchipelago.GameplayPatches;
 [HarmonyPatch(typeof(State), nameof(State.EndRun))]
 public static class EndRunShufflePatch
 {
-    public static readonly HashSet<Type> OffensiveCards = [
+    public static readonly HashSet<Type> OffensiveCards =
+    [
         // Dizzy
         typeof(BlockShot), typeof(Deflection), typeof(AcidCannon), typeof(CorrosionBeam),
         // Riggs
@@ -28,7 +29,9 @@ public static class EndRunShufflePatch
         // Books
         typeof(Glimmershot), typeof(MageHand), typeof(MiningDrillCard), typeof(BloodstoneBolt)
     ];
-    public static readonly HashSet<Type> GeneratorCards = [
+    
+    public static readonly HashSet<Type> GeneratorCards =
+    [
         // Drake
         typeof(EMPSlug), typeof(HESlug), typeof(Firewall), typeof(SearCard), typeof(ThermalBattery),
         // Books

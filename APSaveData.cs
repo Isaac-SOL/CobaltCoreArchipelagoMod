@@ -61,6 +61,10 @@ public class APSaveData
     internal Rand StartingCardsRand { get; set; }
     [JsonProperty]
     internal uint PrevStartingCardsSeed { get; set; }
+    [JsonProperty]
+    internal Rand ModifiersPickRand { get; set; }
+    [JsonProperty]
+    internal HashSet<string> LastRunModifiers { get; set; }
     
     // Mod settings
     [JsonProperty]
@@ -94,6 +98,10 @@ public class APSaveData
     internal IEnumerable<Type> FoundArtifacts => AppliedInventoryPositive
         .Intersect(Archipelago.ItemToArtifact.Keys)
         .Select(s => Archipelago.ItemToArtifact[s]);
+    [JsonIgnore]
+    internal IEnumerable<Type> FoundModifiers => AppliedInventoryPositive
+        .Intersect(Archipelago.ItemToModifier.Keys)
+        .Select(s => Archipelago.ItemToModifier[s]);
 
     [JsonConstructor]
     private APSaveData(): this(0, "archipelago.gg", 38281, "CAT1")
@@ -115,6 +123,8 @@ public class APSaveData
         ThisRunSeenLocations = [];
         ShipShuffleRand = new Rand();
         StartingCardsRand = new Rand();
+        ModifiersPickRand = new Rand();
+        LastRunModifiers = [];
     }
 
     internal static void LoadAllSaves()
@@ -223,6 +233,8 @@ public class APSaveData
                                             && HasItem(value);
     internal bool HasArtifactOrNotAP(Type type) => !Archipelago.ArtifactToItem.TryGetValue(type, out var value)
                                                    || HasItem(value);
+    internal bool HasModifier(Type type) => Archipelago.ModifierToItem.TryGetValue(type, out var value)
+                                            && HasItem(value);
     internal bool HasChar(Deck deck) => HasItem(Archipelago.ItemToDeck.FirstOrNull(kvp => kvp.Value == deck)?.Key ?? "");
     internal bool HasShip(string shipkey) => HasItem(Archipelago.ItemToStartingShip.FirstOrNull(kvp => kvp.Value == shipkey)?.Key ?? "");
 

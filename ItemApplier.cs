@@ -15,6 +15,12 @@ public static class ItemApplier
     private static List<(string name, string sender)> DeferredUnappliedItems { get; set; } = [];
     
     internal static bool CanApplyItems => Archipelago.Instance.Ready;
+
+    public static readonly HashSet<Type> StartOnlyModifiers =
+    [
+        typeof(DailyBossArtifactTreat), typeof(DailyOneHit), typeof(DailyDraftPick), typeof(DailyThinDeck),
+        typeof(DailyUpgradesOnlyA), typeof(DailyUpgradesOnlyB)
+    ];
     
     internal static void ApplyReceivedItem((string name, string sender) item, State? state = null)
     {
@@ -143,6 +149,24 @@ public static class ItemApplier
             }
             // Also unlock artifacts in current deck if applicable
             UnlockReplacements.UnlockCodexArtifact(state, artifact);
+        }
+        else if (Archipelago.ItemToModifier.TryGetValue(item.name, out var modifier))
+        {
+            if (state.storyVars.hasStartedGame)
+            {
+                if (slotData.ModifiersMode is not (ModifierShuffleMode.Immediate
+                                                   or ModifierShuffleMode.ImmediateAndUnlockable))
+                    return;
+                if (Archipelago.InstanceSlotData.ImmediateRewardsBlacklist.Contains(item.name)) return;
+                if (StartOnlyModifiers.Contains(modifier)) return;
+                if (state.artifacts.Any(a => DailyDescriptor.AreDailyModifierArtifactsMutuallyExclusive(modifier.Name, a.Key())))
+                    return;
+                var newArtifact = (Artifact)modifier.CreateInstance();
+                if (combat is not null && !combat.EitherShipIsDead(state))
+                    combat.Queue(new AAddArtifact { artifact = newArtifact });
+                else
+                    state.SendArtifactToChar(newArtifact);
+            }
         }
         else QueueFillerAction(combat, item.name switch
         {

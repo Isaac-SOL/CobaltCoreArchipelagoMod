@@ -371,6 +371,32 @@ public class Archipelago
     public static readonly Dictionary<Type, string> ArtifactToItem = ItemToArtifact
         .Select(pair => (pair.Value, pair.Key))
         .ToDictionary();
+
+    public static readonly Dictionary<string, Type> ItemToModifier = new()
+    {
+        { "Binary Bosses",   typeof(DailyBossBinaryStar) },
+        { "Boss Advantage",  typeof(DailyBossArtifactTreat) },
+        { "Core Corruption", typeof(DailyCorrupted) },
+        { "Enemy Shuffler",  typeof(DailyEnemyShuffler) },
+        { "Jupiter Toys",    typeof(DailyJupiterToys) },
+        { "No Skips",        typeof(DailyThickDeck) },
+        { "Scaffolds",       typeof(DailyScaffold) },
+        { "Shuffler",        typeof(DailyShuffler) },
+        // Hull
+        { "One Hit Wonder",   typeof(DailyOneHit) },
+        { "Supernova",        typeof(DailySolarFlare) },
+        { "Sword and Shield", typeof(DailyHealthEmUp) },
+        // Starter Deck
+        { "Draft Mode", typeof(DailyDraftPick) },
+        { "Thin Deck",  typeof(DailyThinDeck) },
+        // Upgrades
+        { "Only A Upgrades", typeof(DailyUpgradesOnlyA) },
+        { "Only B Upgrades", typeof(DailyUpgradesOnlyB) }
+    };
+    
+    public static readonly Dictionary<Type, string> ModifierToItem = ItemToModifier
+        .Select(pair => (pair.Value, pair.Key))
+        .ToDictionary();
     
     public APSaveData? APSaveData { get; set; }
     public ArchipelagoSession? Session { get; set; }
@@ -478,6 +504,8 @@ public class Archipelago
             APSaveData.ShipShuffleRand.seed = SlotDataHelper.Value.FixedRandSeed;
             APSaveData.PrevShipShuffleSeed = SlotDataHelper.Value.FixedRandSeed;
         }
+        if (APSaveData.ModifiersPickRand.seed == 0U)
+            APSaveData.ModifiersPickRand.seed = SlotDataHelper.Value.FixedRandSeed;
         
         // Patch starting decks
         EndRunShufflePatch.ShuffleStarterSets();
