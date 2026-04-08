@@ -8,7 +8,7 @@ namespace CobaltCoreArchipelago.CustomRunOptionsPatches;
 
 // Prevent the "Custom" button from showing
 [HarmonyPatch]
-public class NewRunOptionsPatches
+public class NewRunOptionsCustomPatch
 {
     public static IEnumerable<MethodBase> TargetMethods()
     {
@@ -21,4 +21,16 @@ public class NewRunOptionsPatches
     }
 
     public static bool Prefix() => false;
+}
+
+// Unmanned runs are essentially CAT runs wrt AP, so we don't allow them
+[HarmonyPatch(typeof(RunConfig), nameof(RunConfig.IsValid))]
+[HarmonyPriority(Priority.VeryLow)]
+public class RunConfigUnmannedInvalidPatch
+{
+    public static void Postfix(RunConfig __instance, ref bool __result)
+    {
+        if (__instance.selectedChars.Count == 0)
+            __result = false;
+    }
 }
