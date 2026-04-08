@@ -167,6 +167,7 @@
             "descSelf": "Unlock <c=card>{0}</c>.",
             "descSelfAddCard": "Unlock <c=card>{0}</c> and add it to your hand.",
             "descSelfAddArtifact": "Unlock and get <c=artifact>{0}</c>.",
+            "descSelfAddModifier": "Unlock and activate <c=artifact>{0}</c>.",
             "descContShield": "\nShield <c=healthBarShield>{0}</c>.",
             "descContTempShield": "\nTmp shield <c=healthBarTempShield>{0}</c>.",
             "descContAttack": "\nAttack <c=attack>{0}</c>x{1}.",
@@ -195,7 +196,8 @@
             "descBase": "Send <c=card>{0}</c> to <c=attack>{1}</c>.",
             "descSelf": "Unlock <c=card>{0}</c>.",
             "descSelfAddCard": "Unlock <c=card>{0}</c> and add it to your deck.",
-            "descSelfAddArtifact": "Unlock and get <c=artifact>{0}</c>."
+            "descSelfAddArtifact": "Unlock and install <c=artifact>{0}</c>.",
+            "descSelfAddModifier": "Unlock and activate <c=artifact>{0}</c>."
         },
         "LockedArtifact": {
             "name": "LOCKED ARTIFACT",

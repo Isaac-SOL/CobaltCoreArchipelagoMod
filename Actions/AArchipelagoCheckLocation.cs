@@ -20,6 +20,7 @@ public class AArchipelagoCheckLocation : CardAction
     public string? receiverName;
     public string? givenCard;
     public string? givenArtifact;
+    public string? givenModifier;
     public string? givenCharacter;
 
     public AArchipelagoCheckLocation()
@@ -81,6 +82,14 @@ public class AArchipelagoCheckLocation : CardAction
         if (givenArtifact != null)
         {
             var artifact = (Artifact) Archipelago.ItemToArtifact[givenArtifact].CreateInstance();
+            tooltips.Add(new TTDivider());
+            tooltips.AddRange(artifact.GetTooltips());
+            tooltips.Add(new TTDivider());
+        }
+
+        if (givenModifier != null)
+        {
+            var artifact = (Artifact) Archipelago.ItemToModifier[givenModifier].CreateInstance();
             tooltips.Add(new TTDivider());
             tooltips.AddRange(artifact.GetTooltips());
             tooltips.Add(new TTDivider());
