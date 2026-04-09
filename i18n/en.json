@@ -9,6 +9,14 @@
         "port": "PORT:",
         "slotName": "SLOT NAME:",
         "password": "PASSWORD:",
+        "tooltip": {
+            "host": "The URL or IP of the server hosting this Archipelago room",
+            "port": "The port of the server you are connecting to",
+            "slotName": "Your player name in this Archipelago room, as configured in the YAML",
+            "password": "The password of the Archipelago room, leave blank if none was set",
+            "paste": "Paste clipboard contents",
+            "seePassword": "Show/hide password"
+        },
         "connect": "CONNECT",
         "invalidPort": "Invalid port number",
         "connectionIssue": "Failed to connect to Archipelago host.\nMake sure the address, port, slot name and password are correct.",

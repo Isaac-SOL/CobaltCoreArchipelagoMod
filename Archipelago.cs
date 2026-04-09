@@ -524,6 +524,7 @@ public class Archipelago
 
         Ready = true;
         APSaveData.SyncWithHost();  // Consumes items queue
+        // At this point, state is null, so the items will be applied next frame
         
         Session.Items.ItemReceived += OnItemReceived;
         Session.Locations.CheckedLocationsUpdated += OnCheckedLocationsUpdated; // e.g. when send_location is used

@@ -69,18 +69,29 @@ public class ConnectionInfoInput : Route, OnInputPhase, OnMouseDown
             : Localize(["connectionMenu", "newSave"]);
         Draw.Text(summary, box.rect.x + 1.0, box.rect.y, color: Color.Lerp(Colors.redd, Colors.white, 0.3));
 
+        var pasteTooltip = Localize(["connectionMenu", "tooltip", "paste"]);
+        var spoilerTooltip = Localize(["connectionMenu", "tooltip", "seePassword"]);
+        
         // Text fields and their names
         var line = 0;
-        foreach (var (sectionName, uk, paste_uk) in ((string, UK, UK)[])[
-                     (Localize(["connectionMenu", "host"]), ArchipelagoUK.connection_host.ToUK(), ArchipelagoUK.connection_paste_host.ToUK()),
-                     (Localize(["connectionMenu", "port"]), ArchipelagoUK.connection_port.ToUK(), ArchipelagoUK.connection_paste_port.ToUK()),
-                     (Localize(["connectionMenu", "slotName"]), ArchipelagoUK.connection_slot.ToUK(), ArchipelagoUK.connection_paste_slot.ToUK()),
-                     (Localize(["connectionMenu", "password"]), ArchipelagoUK.connection_password.ToUK(), ArchipelagoUK.connection_paste_password.ToUK())
+        foreach (var (key, uk, paste_uk) in ((string, UK, UK)[])[
+                     ("host", ArchipelagoUK.connection_host.ToUK(), ArchipelagoUK.connection_paste_host.ToUK()),
+                     ("port", ArchipelagoUK.connection_port.ToUK(), ArchipelagoUK.connection_paste_port.ToUK()),
+                     ("slotName", ArchipelagoUK.connection_slot.ToUK(), ArchipelagoUK.connection_paste_slot.ToUK()),
+                     ("password", ArchipelagoUK.connection_password.ToUK(), ArchipelagoUK.connection_paste_password.ToUK())
                  ])
         {
             var offsetY = 24 * (line + 1);
+            
             // Name of the field
-            Draw.Text(sectionName, box.rect.x + 98.0, box.rect.y + offsetY, font: DB.thicket, color: Colors.textBold, align: TAlign.Right);
+            Draw.Text(
+                Localize(["connectionMenu", key]),
+                box.rect.x + 98.0, box.rect.y + offsetY,
+                font: DB.thicket,
+                color: Colors.textBold,
+                align: TAlign.Right
+            );
+            
             // Clickable field with background
             var immButton = SharedArt.ButtonSprite(
                 g,
@@ -90,10 +101,10 @@ public class ConnectionInfoInput : Route, OnInputPhase, OnMouseDown
                 boxColor: Colors.buttonBoxNormal,
                 onMouseDown: this
             );
-            // Get text data from storage
-            var textToDraw = ConnectionInfo[line];
+            if (immButton.isHover) g.tooltips.Add(immButton.v, new TTText(Localize(["connectionMenu", "tooltip", key])));
+            
             // Paste button
-            SharedArt.ButtonSprite(
+            var pasteButton = SharedArt.ButtonSprite(
                 g,
                 new Rect(336.0, offsetY - 4.0, 18.0, 18.0),
                 paste_uk,
@@ -101,6 +112,10 @@ public class ConnectionInfoInput : Route, OnInputPhase, OnMouseDown
                 boxColor: Colors.buttonBoxNormal,
                 onMouseDown: this
             );
+            if (pasteButton.isHover) g.tooltips.Add(pasteButton.v, new TTText(pasteTooltip));
+            
+            // Get text data from storage
+            var textToDraw = ConnectionInfo[line];
             // Password view button
             if (uk == ArchipelagoUK.connection_password.ToUK())
             {
@@ -118,13 +133,14 @@ public class ConnectionInfoInput : Route, OnInputPhase, OnMouseDown
                     textToDraw = new string('*', textToDraw.Length);
                 }
                 // Draw eyeball button
-                SharedArt.ButtonSprite(
+                var spoilerButton = SharedArt.ButtonSprite(
                     g,
                     new Rect(354.0, offsetY - 4.0, 18.0, 18.0),
                     ArchipelagoUK.connection_seePassword.ToUK(),
                     baseSpr, downSpr,
                     onMouseDown: this
                 );
+                if (spoilerButton.isHover) g.tooltips.Add(spoilerButton.v, new TTText(spoilerTooltip));
             }
 
             // Add blinking cursor if selected
@@ -135,6 +151,7 @@ public class ConnectionInfoInput : Route, OnInputPhase, OnMouseDown
                 if (offsetTime - Math.Floor(offsetTime) < 0.5) textToDraw += "<c=boldPink>|</c>";
                 Draw.Sprite(LeftArrowSpr, immButton.v.x + 226.0, immButton.v.y + 4.0, color: Colors.boldPink);
             }
+            
             // Draw editable text
             Draw.Text(textToDraw, immButton.v.x + 5.0, immButton.v.y + 8.0,
                       color: immButton.isHover ? Colors.textChoiceHoverActive : Colors.textChoice);
