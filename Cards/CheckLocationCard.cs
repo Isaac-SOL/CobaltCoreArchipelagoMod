@@ -189,7 +189,13 @@ public class CheckLocationCard : Card, IRegisterable
         };
     }
 
-    private int GetShield(State _) => Difficulty <= 2 ? 2 : 3;
+    private int GetShield(State _) => Difficulty switch
+        {
+            <= 0 => 1,
+            <= 1 => 2,
+            <= 2 => 3,
+            _ => 4
+        };
 
     private bool IsShieldTemp(State _) => Difficulty <= 3;
     
