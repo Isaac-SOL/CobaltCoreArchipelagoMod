@@ -73,7 +73,8 @@ public static class EndRunShufflePatch
         Debug.Assert(Archipelago.Instance.APSaveData != null, "Archipelago.Instance.APSaveData != null");
 
         // If not every run, we just pick from the random starting cards
-        if (Archipelago.InstanceSlotData.ShuffleShipParts != FrequencyShuffleMode.EveryRun)
+        if (Archipelago.InstanceSlotData.ShuffleShipParts != FrequencyShuffleMode.EveryRun
+            || !Archipelago.Instance.APSaveData.FoundCards.Any()) // Shuffle every run, fallback on first connection
         {
             foreach (var deck in Archipelago.ItemToDeck.Values)
             {
