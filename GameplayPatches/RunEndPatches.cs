@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using HarmonyLib;
+using Microsoft.Extensions.Logging;
 
 namespace CobaltCoreArchipelago.GameplayPatches;
 
@@ -60,6 +61,7 @@ public static class EndRunShufflePatch
             Archipelago.Instance.APSaveData.PrevShipShuffleSeed = rand.seed;
         else
             rand.seed = Archipelago.Instance.APSaveData.PrevShipShuffleSeed;
+        ModEntry.Instance.Logger.LogInformation("Shuffling ships with seed: {shipSeed}", rand.seed);
         foreach (var shipName in StarterShip.ships.Keys)
         {
             var shuffledParts = ModEntry.BaseShips[shipName].ship.parts.Shuffle(rand);
@@ -95,6 +97,7 @@ public static class EndRunShufflePatch
         // If every run, we use the randomizer
         var rand = Archipelago.Instance.APSaveData.ShipShuffleRand;
         Archipelago.Instance.APSaveData.PrevStartingCardsSeed = rand.seed;
+        ModEntry.Instance.Logger.LogInformation("Shuffling starting cards with seed: {cardSeed}", rand.seed);
         var unlockedCards = Archipelago.Instance.APSaveData.FoundCards
             .Select(t => t.CreateInstance())
             .Cast<Card>()

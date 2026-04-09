@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using HarmonyLib;
+using Microsoft.Extensions.Logging;
 
 namespace CobaltCoreArchipelago.GameplayPatches;
 
@@ -35,6 +36,8 @@ public class RunStartPatches
         Debug.Assert(Archipelago.Instance.APSaveData != null, "Archipelago.Instance.APSaveData != null");
         var rand = Archipelago.Instance.APSaveData.ModifiersPickRand;
         
+        ModEntry.Instance.Logger.LogInformation("Picking modifiers with seed: {modSeed}", rand.seed);
+        
         var modifiersAmount = 1 + rand.NextInt() % 3;
         List<Type> picked = [];
         foreach (var modifier in Archipelago.Instance.APSaveData.FoundModifiers
@@ -45,6 +48,7 @@ public class RunStartPatches
             if (!picked.Any(alreadyPicked => DailyDescriptor.AreDailyModifierArtifactsMutuallyExclusive(modifier.Name, alreadyPicked.Name)))
             {
                 picked.Add(modifier);
+                ModEntry.Instance.Logger.LogInformation("Adding modifier: {modifier}", modifier);
             }
         }
         if (picked.Contains(typeof(DailyDraftPick)) && picked.Contains(typeof(DailyBossArtifactTreat)))

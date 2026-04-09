@@ -164,13 +164,17 @@ public class CardOfferingPatch
         while (__result.Count > targetCount)
             __result.RemoveAt(s.rngCardOfferings.NextInt() % __result.Count);
         __result = __result.Shuffle(s.rngCardOfferings).ToList();
+
+        ModEntry.Instance.Logger.LogDebug(
+            "Card reward: {cardReward}",
+            __result.Select(card => card is CheckLocationCard apCard ? apCard.locationName : card.ToString())
+        );
         
         // Scout proposed archipelago cards if the options allow for it
         if (Archipelago.Instance.APSaveData.CardScoutMode == CardScoutMode.DontScout) return;
         
         var checkCards = __result
-            .Where(card => card is CheckLocationCard)
-            .Cast<CheckLocationCard>()
+            .OfType<CheckLocationCard>()
             .ToList();
         var locations = checkCards.Select(card => card.locationName).ToArray();
         NotSoRandomManager.AddSeenLocations(locations);
@@ -223,8 +227,12 @@ public class CardOfferingPatch
             if (discount != 0)
                 card.discount = discount;
 
+            ModEntry.Instance.Logger.LogDebug("Rolling new unlocked card: {unlockedCard}", card);
+
             return card;
         }
+
+        ModEntry.Instance.Logger.LogDebug("Rolling new unlocked card failed");
 
         return null;
     }
@@ -408,11 +416,17 @@ public class ArtifactOfferingPatch
         while (__result.Count > targetCount)
             __result.RemoveAt(s.rngCardOfferings.NextInt() % __result.Count);
         __result = __result.Shuffle(s.rngCardOfferings).ToList();
+
+        ModEntry.Instance.Logger.LogDebug(
+            "Artifact reward: {artifactReward}",
+            __result.Select(artifact => artifact is CheckLocationArtifact apArti
+                                ? $"[{apArti.locationName}]"
+                                : artifact.ToString())
+        );
         
         // Add seen locations to the NotSoRandomManager so that they won't be seen for a while
         var checkArtifacts = __result
-            .Where(artifact => artifact is CheckLocationArtifact)
-            .Cast<CheckLocationArtifact>()
+            .OfType<CheckLocationArtifact>()
             .ToList();
         // Only add the first location to the seen locations.
         // In the case of double artifacts, the other location will never be picked by itself.
