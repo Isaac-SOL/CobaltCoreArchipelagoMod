@@ -493,25 +493,18 @@ public class Archipelago
             (ModEntry.Instance.Localizations.Localize(["mainMenu", "welcomeMessage"]), Colors.white)
         ]);
         
-        // Save rand seeds if new save
-        if (APSaveData.PrevStartingCardsSeed == 0U)
-        {
-            APSaveData.StartingCardsRand.seed = SlotDataHelper.Value.FixedRandSeed;
-            APSaveData.PrevStartingCardsSeed = SlotDataHelper.Value.FixedRandSeed;
-        }
-        if (APSaveData.PrevStartingCardsSeed == 0U)
-        {
-            APSaveData.ShipShuffleRand.seed = SlotDataHelper.Value.FixedRandSeed;
-            APSaveData.PrevShipShuffleSeed = SlotDataHelper.Value.FixedRandSeed;
-        }
-        if (APSaveData.ModifiersPickRand.seed == 0U)
-            APSaveData.ModifiersPickRand.seed = SlotDataHelper.Value.FixedRandSeed;
+        // New save: initialization shuffles
+        if (APSaveData.NextCardRando.Count == 0)
+            EndRunShufflePatch.ShuffleStarterSetsInSaveFromSlotData();
+        if (APSaveData.NextShipRando.Count == 0)
+            EndRunShufflePatch.ShuffleStartingShipsInSave(new Rand(SlotDataHelper.Value.FixedRandSeed));
         
-        // Patch starting decks
-        EndRunShufflePatch.ShuffleStarterSets();
-        // Patch starting ships
+        // Loading/reloading existing runs: patch starting decks and ships
+        if (SlotDataHelper.Value.RandomizeStartingCards != FrequencyShuffleMode.Off)
+            EndRunShufflePatch.ApplyShuffledStarterSets();
         if (SlotDataHelper.Value.ShuffleShipParts != FrequencyShuffleMode.Off)
-            EndRunShufflePatch.ShuffleStartingShips();
+            EndRunShufflePatch.ApplyShuffledStartingShips();
+        
         // Patch memories
         Vault.charsWithLore = Mutil.DeepCopy(ModEntry.BaseCharsWithLore);
         if (SlotDataHelper.Value.AddCharacterMemories)

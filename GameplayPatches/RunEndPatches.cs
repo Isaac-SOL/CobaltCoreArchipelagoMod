@@ -40,63 +40,74 @@ public static class EndRunShufflePatch
         typeof(ShardPack), typeof(MedusaField), typeof(PerfectSpecimen), typeof(QuantumQuarryCard)
     ];
 
-    static void Postfix()
+    static void Postfix(State __instance)
     {
         Debug.Assert(Archipelago.Instance.APSaveData != null, "Archipelago.Instance.APSaveData != null");
         Archipelago.Instance.APSaveData.ThisRunSeenLocations.Clear();
         APSaveData.Save();
         
         if (Archipelago.InstanceSlotData.RandomizeStartingCards == FrequencyShuffleMode.EveryRun)
-            ShuffleStarterSets();
+        {
+            ShuffleStarterSetsInSave(__instance.rngActions);
+            ApplyShuffledStarterSets();
+        }
         if (Archipelago.InstanceSlotData.ShuffleShipParts == FrequencyShuffleMode.EveryRun)
-            ShuffleStartingShips();
+        {
+            ShuffleStartingShipsInSave(__instance.rngActions);
+            ApplyShuffledStartingShips();
+        }
+        if (Archipelago.InstanceSlotData.ModifiersMode is not (ModifierShuffleMode.Immediate
+            or ModifierShuffleMode.Off))
+        {
+            PickNextModifiersInSave(__instance, __instance.rngActions);
+        }
     }
 
-    internal static void ShuffleStartingShips()
+    internal static void ShuffleStartingShipsInSave(Rand rand)
     {
         Debug.Assert(Archipelago.Instance.APSaveData != null, "Archipelago.Instance.APSaveData != null");
-        var rand = Archipelago.Instance.APSaveData.ShipShuffleRand;
-        // Make sure the seed does not change if not in EveryRun mode
-        if (Archipelago.InstanceSlotData.ShuffleShipParts == FrequencyShuffleMode.EveryRun)
-            Archipelago.Instance.APSaveData.PrevShipShuffleSeed = rand.seed;
-        else
-            rand.seed = Archipelago.Instance.APSaveData.PrevShipShuffleSeed;
-        ModEntry.Instance.Logger.LogInformation("Shuffling ships with seed: {shipSeed}", rand.seed);
+        ModEntry.Instance.Logger.LogInformation("Shuffling starting ships with seed: {shipSeed}", rand.seed);
         foreach (var shipName in StarterShip.ships.Keys)
         {
-            var shuffledParts = ModEntry.BaseShips[shipName].ship.parts.Shuffle(rand);
-            StarterShip.ships[shipName].ship.parts = Mutil.DeepCopy(new List<Part>(shuffledParts));
+            var baseParts = ModEntry.BaseShips[shipName].ship.parts;
+            var shuffledOrder = Enumerable.Range(0, baseParts.Count).Shuffle(rand).ToList();
+            Archipelago.Instance.APSaveData.NextShipRando[shipName] = shuffledOrder;
         }
         APSaveData.Save();
     }
 
-    internal static void ShuffleStarterSets()
+    internal static void ApplyShuffledStartingShips()
     {
         Debug.Assert(Archipelago.Instance.APSaveData != null, "Archipelago.Instance.APSaveData != null");
-
-        // If not every run, we just pick from the random starting cards
-        if (Archipelago.InstanceSlotData.ShuffleShipParts != FrequencyShuffleMode.EveryRun
-            || !Archipelago.Instance.APSaveData.FoundCards.Any()) // Shuffle every run, fallback on first connection
+        ModEntry.Instance.Logger.LogInformation("Applying shuffled ships");
+        foreach (var shipName in StarterShip.ships.Keys)
         {
-            foreach (var deck in Archipelago.ItemToDeck.Values)
-            {
-                if (deck == Deck.colorless) continue;
-                var set = StarterDeck.starterSets[deck];
-                var soloSet = SoloStarterDeck.soloStarterSets[deck];
-                set.cards = [];
-                soloSet.cards.RemoveAll(c => !IsBasic(c));
-                foreach (var card in Archipelago.InstanceSlotData.DeckStartingCards[deck])
-                {
-                    set.cards.Add((Card)card.CreateInstance());
-                    soloSet.cards.InsertRange(0, [(Card)card.CreateInstance(), (Card)card.CreateInstance()]);
-                }
-            }
-            return;
+            var baseParts = ModEntry.BaseShips[shipName].ship.parts;
+            var shuffledOrder = Archipelago.Instance.APSaveData.NextShipRando[shipName];
+            var shuffledParts = shuffledOrder.Select(i => baseParts[i]).ToList();
+            StarterShip.ships[shipName].ship.parts = Mutil.DeepCopy(shuffledParts);
         }
-        
-        // If every run, we use the randomizer
-        var rand = Archipelago.Instance.APSaveData.ShipShuffleRand;
-        Archipelago.Instance.APSaveData.PrevStartingCardsSeed = rand.seed;
+    }
+
+    internal static void ShuffleStarterSetsInSaveFromSlotData()
+    {
+        Debug.Assert(Archipelago.Instance.APSaveData != null, "Archipelago.Instance.APSaveData != null");
+        ModEntry.Instance.Logger.LogInformation("Shuffling starting cards from slot data");
+        foreach (var deck in Archipelago.ItemToDeck.Values)
+        {
+            if (deck == Deck.colorless) continue;
+            var cardTypes = Archipelago.InstanceSlotData.DeckStartingCards[deck];
+            Archipelago.Instance.APSaveData.NextCardRando[deck] = cardTypes
+                .Concat(cardTypes)
+                .Select(type => type.Name)
+                .ToList();
+        }
+        APSaveData.Save();
+    }
+
+    internal static void ShuffleStarterSetsInSave(Rand rand)
+    {
+        Debug.Assert(Archipelago.Instance.APSaveData != null, "Archipelago.Instance.APSaveData != null");
         ModEntry.Instance.Logger.LogInformation("Shuffling starting cards with seed: {cardSeed}", rand.seed);
         var unlockedCards = Archipelago.Instance.APSaveData.FoundCards
             .Select(t => t.CreateInstance())
@@ -106,34 +117,80 @@ public static class EndRunShufflePatch
         {
             if (deck == Deck.colorless) continue;
             var defaultStartingCards = Archipelago.InstanceSlotData.DeckStartingCards[deck];
-            var set = StarterDeck.starterSets[deck];
-            var soloSet = SoloStarterDeck.soloStarterSets[deck];
-            var possibleCards = unlockedCards
-                .Where(c => c.GetMeta().deck == deck)
-                .ToList();
-            var offensiveCards = possibleCards
-                .Where(c => OffensiveCards.Contains(c.GetType()))
-                .ToList();
-            var generatorCards = possibleCards
-                .Where(c => GeneratorCards.Contains(c.GetType()))
-                .ToList();
+            var possibleCards = unlockedCards.Where(c => c.GetMeta().deck == deck).ToList();
+            var offensiveCards = possibleCards.Where(c => OffensiveCards.Contains(c.GetType())).ToList();
+            var generatorCards = possibleCards.Where(c => GeneratorCards.Contains(c.GetType())).ToList();
             var offC = RandomOrNull(offensiveCards, rand) ?? (Card)defaultStartingCards[0].CreateInstance();
             var effSecondCards = generatorCards.Count > 0 && !generatorCards.Contains(offC)
                 ? generatorCards
                 : possibleCards;
             effSecondCards.Remove(offC);
             var secC = RandomOrNull(effSecondCards, rand) ?? (Card)defaultStartingCards[1].CreateInstance();
-            set.cards = [offC, secC];
-            var savedBasics = soloSet.cards.Where(IsBasic).ToList();
-            soloSet.cards.Clear();
-            soloSet.cards.AddRange([offC, secC]);
-            soloSet.cards.AddRange(possibleCards
-                                          .Where(c => c != offC && c != secC)
-                                          .Shuffle()
-                                          .Concat([offC, secC]) // Fallback if no more cards
-                                          .Take(2));
-            soloSet.cards.AddRange(savedBasics);
+            var startKeys = new List<string> { offC.Key(), secC.Key() };
+            Archipelago.Instance.APSaveData.NextCardRando[deck] = startKeys
+                .Concat(possibleCards
+                            .Select(c => c.Key())
+                            .Except(startKeys)
+                            .Shuffle()
+                            .Concat(startKeys)
+                            .Take(2))
+                .ToList();
         }
+        APSaveData.Save();
+    }
+
+    internal static void ApplyShuffledStarterSets()
+    {
+        Debug.Assert(Archipelago.Instance.APSaveData != null, "Archipelago.Instance.APSaveData != null");
+        ModEntry.Instance.Logger.LogInformation("Applying shuffled starting cards");
+        foreach (var deck in Archipelago.ItemToDeck.Values)
+        {
+            if (deck == Deck.colorless) continue;
+            var startingCards = Archipelago.Instance.APSaveData.NextCardRando[deck];
+            var set = StarterDeck.starterSets[deck];
+            var soloSet = SoloStarterDeck.soloStarterSets[deck];
+            set.cards = startingCards
+                .Take(2)
+                .Select(key => (Card)DB.cards[key].CreateInstance())
+                .ToList();
+            var soloBasics = soloSet.cards.Where(IsBasic).ToList();
+            soloSet.cards = startingCards
+                .Take(4)
+                .Select(key => (Card)DB.cards[key].CreateInstance())
+                .Concat(soloBasics)
+                .ToList();
+        }
+    }
+
+    internal static void PickNextModifiersInSave(State state, Rand rand)
+    {
+        Debug.Assert(Archipelago.Instance.APSaveData != null, "Archipelago.Instance.APSaveData != null");
+        ModEntry.Instance.Logger.LogInformation("Picking next modifiers with seed: {modSeed}", rand.seed);
+        
+        var modifiersAmount = 1 + rand.NextInt() % 3;
+        var stateArtifacts = state.artifacts
+            .Concat(state.characters.SelectMany(c => c.artifacts))
+            .Select(artifact => artifact.GetType());
+        List<Type> picked = [];
+        foreach (var modifier in Archipelago.Instance.APSaveData.FoundModifiers
+                     .ExceptBy(Archipelago.Instance.APSaveData.NextModifierRando, m => m.Name)
+                     .Except(stateArtifacts)
+                     .Shuffle(rand)
+                     .Take(modifiersAmount))
+        {
+            if (!picked.Any(alreadyPicked => DailyDescriptor.AreDailyModifierArtifactsMutuallyExclusive(modifier.Name, alreadyPicked.Name)))
+            {
+                picked.Add(modifier);
+                ModEntry.Instance.Logger.LogInformation("Adding modifier: {modifier}", modifier);
+            }
+        }
+        if (picked.Contains(typeof(DailyDraftPick)) && picked.Contains(typeof(DailyBossArtifactTreat)))
+        {
+            picked.Remove(typeof(DailyDraftPick));
+            picked.Add(typeof(DailyDraftPick));
+        }
+
+        Archipelago.Instance.APSaveData.NextModifierRando = picked.Select(m => m.Name).ToHashSet();
         APSaveData.Save();
     }
     

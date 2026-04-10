@@ -53,18 +53,12 @@ public class APSaveData
     internal HashSet<string> AllSeenLocations { get; set; }
     [JsonProperty]
     internal HashSet<string> ThisRunSeenLocations { get; set; }
-    [JsonIgnore]
-    internal Rand ShipShuffleRand { get; set; }
     [JsonProperty]
-    internal uint PrevShipShuffleSeed { get; set; }
-    [JsonIgnore]
-    internal Rand StartingCardsRand { get; set; }
+    internal Dictionary<string, List<int>> NextShipRando { get; set; }
     [JsonProperty]
-    internal uint PrevStartingCardsSeed { get; set; }
+    internal Dictionary<Deck, List<string>> NextCardRando { get; set; }
     [JsonProperty]
-    internal Rand ModifiersPickRand { get; set; }
-    [JsonProperty]
-    internal HashSet<string> LastRunModifiers { get; set; }
+    internal HashSet<string> NextModifierRando { get; set; }
     
     // Mod settings
     [JsonProperty]
@@ -121,10 +115,9 @@ public class APSaveData
         RecentlySeenLocations = [];
         AllSeenLocations = [];
         ThisRunSeenLocations = [];
-        ShipShuffleRand = new Rand();
-        StartingCardsRand = new Rand();
-        ModifiersPickRand = new Rand();
-        LastRunModifiers = [];
+        NextShipRando = [];
+        NextCardRando = [];
+        NextModifierRando = [];
     }
 
     internal static void LoadAllSaves()

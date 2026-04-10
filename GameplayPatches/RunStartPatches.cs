@@ -31,40 +31,9 @@ public class RunStartPatches
             ?.GetValue(__instance) as State;
 
         if (state is null) return;
-        
-        foreach (var modifier in PickModifiersForNextRun())
-            state.SendArtifactToChar((Artifact)modifier.CreateInstance());
-    }
 
-    internal static List<Type> PickModifiersForNextRun()
-    {
         Debug.Assert(Archipelago.Instance.APSaveData != null, "Archipelago.Instance.APSaveData != null");
-        var rand = Archipelago.Instance.APSaveData.ModifiersPickRand;
-        
-        ModEntry.Instance.Logger.LogInformation("Picking modifiers with seed: {modSeed}", rand.seed);
-        
-        var modifiersAmount = 1 + rand.NextInt() % 3;
-        List<Type> picked = [];
-        foreach (var modifier in Archipelago.Instance.APSaveData.FoundModifiers
-                     .ExceptBy(Archipelago.Instance.APSaveData.LastRunModifiers, m => m.Name)
-                     .Shuffle(rand)
-                     .Take(modifiersAmount))
-        {
-            if (!picked.Any(alreadyPicked => DailyDescriptor.AreDailyModifierArtifactsMutuallyExclusive(modifier.Name, alreadyPicked.Name)))
-            {
-                picked.Add(modifier);
-                ModEntry.Instance.Logger.LogInformation("Adding modifier: {modifier}", modifier);
-            }
-        }
-        if (picked.Contains(typeof(DailyDraftPick)) && picked.Contains(typeof(DailyBossArtifactTreat)))
-        {
-            picked.Remove(typeof(DailyDraftPick));
-            picked.Add(typeof(DailyDraftPick));
-        }
-
-        Archipelago.Instance.APSaveData.LastRunModifiers = picked.Select(m => m.Name).ToHashSet();
-        APSaveData.Save();
-        
-        return picked;
+        foreach (var modifier in Archipelago.Instance.APSaveData.NextModifierRando)
+            state.SendArtifactToChar((Artifact)DB.artifacts[modifier].CreateInstance());
     }
 }
