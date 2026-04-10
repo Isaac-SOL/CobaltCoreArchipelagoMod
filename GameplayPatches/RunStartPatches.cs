@@ -20,15 +20,20 @@ public class RunStartPatches
                              && method.ReturnType == typeof(Route));
     }
 
-    public static void Postfix(State __instance)
+    public static void Postfix(object __instance)
     {
         if (Archipelago.InstanceSlotData.ModifiersMode is ModifierShuffleMode.Off or ModifierShuffleMode.Immediate)
             return;
 
+        var state = __instance.GetType()
+            .GetFields(AccessTools.all)
+            .FirstOrDefault(f => f.Name.Contains("this"))
+            ?.GetValue(__instance) as State;
+
+        if (state is null) return;
+        
         foreach (var modifier in PickModifiersForNextRun())
-        {
-            __instance.SendArtifactToChar((Artifact)modifier.CreateInstance());
-        }
+            state.SendArtifactToChar((Artifact)modifier.CreateInstance());
     }
 
     internal static List<Type> PickModifiersForNextRun()
