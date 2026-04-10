@@ -56,10 +56,15 @@ public class ConnectionInfoInput : Route, OnInputPhase, OnMouseDown
     {
         Debug.Assert(Archipelago.Instance.APSaveData != null, "Archipelago.Instance.APSaveData != null");
         Draw.Fill(Colors.black);
-        var box = g.Push(null, new Rect(50.0, 86.0), onInputPhase: this, rightHint: null, leftHint: null, upHint: null, downHint: null);
+        var box = g.Push(rect: new Rect(50.0, 86.0), onInputPhase: this);
         var titleString = Localize(["connectionMenu", "title"]);
-        Draw.Text(titleString, box.rect.x + 1.0, box.rect.y - 30.0,
-                  DB.stapler, Colors.textMain, null, null, null, TAlign.Left, lineHeight: null, outline: null);
+        Draw.Text(
+            titleString,
+            box.rect.x + 1.0, box.rect.y - 30.0,
+            font: DB.stapler,
+            color: Colors.textMain,
+            align: TAlign.Left
+        );
         // Slot summary
         var summary = Localize(["connectionMenu", "slot"]) + $" {SlotIdx} <c=mainMenuLoopArrows>>></c> ";
         summary += SaveSlot!.state is not null
@@ -96,12 +101,14 @@ public class ConnectionInfoInput : Route, OnInputPhase, OnMouseDown
             var immButton = SharedArt.ButtonSprite(
                 g,
                 new Rect(x: 100.0, y: offsetY - 6.0, w: 225.0, h: 21.0),
-                new UIKey(uk, line),
+                uk,
                 TextBoxSpr, TextBoxHoverSpr,
                 boxColor: Colors.buttonBoxNormal,
-                onMouseDown: this
+                onMouseDown: this,
+                rightHint: paste_uk
             );
-            if (immButton.isHover) g.tooltips.Add(immButton.v, new TTText(Localize(["connectionMenu", "tooltip", key])));
+            if (immButton.isHover) g.tooltips.Add(new Vec(), new TTText(Localize(["connectionMenu", "tooltip", key])));
+            // TODO tooltips currently can't show if state is null
             
             // Paste button
             var pasteButton = SharedArt.ButtonSprite(
@@ -110,9 +117,11 @@ public class ConnectionInfoInput : Route, OnInputPhase, OnMouseDown
                 paste_uk,
                 PasteSpr, PasteHoverSpr,
                 boxColor: Colors.buttonBoxNormal,
-                onMouseDown: this
+                onMouseDown: this,
+                leftHint: uk,
+                rightHint: ArchipelagoUK.connection_seePassword.ToUK()
             );
-            if (pasteButton.isHover) g.tooltips.Add(pasteButton.v, new TTText(pasteTooltip));
+            if (pasteButton.isHover) g.tooltips.Add(new Vec(), new TTText(pasteTooltip));
             
             // Get text data from storage
             var textToDraw = ConnectionInfo[line];
@@ -138,9 +147,10 @@ public class ConnectionInfoInput : Route, OnInputPhase, OnMouseDown
                     new Rect(354.0, offsetY - 4.0, 18.0, 18.0),
                     ArchipelagoUK.connection_seePassword.ToUK(),
                     baseSpr, downSpr,
-                    onMouseDown: this
+                    onMouseDown: this,
+                    leftHint: paste_uk
                 );
-                if (spoilerButton.isHover) g.tooltips.Add(spoilerButton.v, new TTText(spoilerTooltip));
+                if (spoilerButton.isHover) g.tooltips.Add(new Vec(), new TTText(spoilerTooltip));
             }
 
             // Add blinking cursor if selected
@@ -167,7 +177,10 @@ public class ConnectionInfoInput : Route, OnInputPhase, OnMouseDown
         var buttonBack = SharedArt.ButtonText(
             g, new Vec(79.0, 140.0), ArchipelagoUK.connection_back.ToUK(),
             Localize(["connectionMenu", "back"]),
-            onMouseDown: this
+            onMouseDown: this,
+            rightHint: screenMode == ScreenMode.RoomIdConflict
+                ? ArchipelagoUK.connection_finalizeConnection.ToUK()
+                : ArchipelagoUK.connection_connect.ToUK()
         );
 
         if (screenMode == ScreenMode.RoomIdConflict)
@@ -177,7 +190,8 @@ public class ConnectionInfoInput : Route, OnInputPhase, OnMouseDown
                 Localize(["connectionMenu", "connectAnyway"]),
                 onMouseDown: this,
                 boxColor: Colors.boldPink,
-                textColor: Colors.boldPink
+                textColor: Colors.boldPink,
+                leftHint: ArchipelagoUK.connection_back.ToUK()
             );
         }
         else
@@ -189,7 +203,8 @@ public class ConnectionInfoInput : Route, OnInputPhase, OnMouseDown
                     : Localize(["connectionMenu", "connect"]),
                 onMouseDown: this,
                 boxColor: Colors.boldPink,
-                textColor: Colors.boldPink
+                textColor: Colors.boldPink,
+                leftHint: ArchipelagoUK.connection_back.ToUK()
             );
         }
         

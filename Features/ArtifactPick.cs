@@ -31,7 +31,6 @@ public class ArtifactPick : Route, OnInputPhase, OnMouseDown
 
     private double _scroll;
     private double _scrollTarget;
-    private UIKey? _lastGpSelection;
     private Dictionary<Vec, int> _gridToIdx = new();
     private Dictionary<int, Vec> _idxToGrid = new();
     private static double _rescoutTimer = 0.0;
@@ -60,12 +59,6 @@ public class ArtifactPick : Route, OnInputPhase, OnMouseDown
     public override void Render(G g)
     {
         Debug.Assert(Archipelago.Instance.APSaveData != null, "Archipelago.Instance.APSaveData != null");
-        
-        if (_lastGpSelection is not null)
-        {
-            if (Input.gamepadIsActiveInput) Input.currentGpKey = _lastGpSelection;
-            _lastGpSelection = null;
-        }
 
         if (artifactsAvailable.Count == 0)
             g.CloseRoute(this, CBResult.Done);
@@ -116,25 +109,8 @@ public class ArtifactPick : Route, OnInputPhase, OnMouseDown
             var gridPos = _idxToGrid[i];
             var screenPos = GridToScreenPos(gridPos);
 
-            // Move screen to selected element
-            if (Input.gamepadIsActiveInput && Input.currentGpKey == artifact.UIKey())
-            {
-                _scrollTarget = Math.Clamp(_scrollTarget, -screenPos.y + 60.0, -screenPos.y + 160.0);
-            }
-
             // Only render artifacts onscreen
             if (!ArtifactIsOnScreen(screenPos + scrollVec)) continue;
-
-            // Add d-pad hints for grid movement
-            UIKey upHint = StableUK.NO_TARGET;
-            UIKey downHint = StableUK.NO_TARGET;
-            if (Input.gamepadIsActiveInput && Input.currentGpKey == artifact.UIKey())
-            {
-                if (_gridToIdx.TryGetValue(gridPos + new Vec(y: -1.0), out var upperIdx))
-                    upHint = new UIKey(StableUK.artifactReward_artifact, upperIdx);
-                if (_gridToIdx.TryGetValue(gridPos + new Vec(y: 1.0), out var lowerIdx))
-                    downHint = new UIKey(StableUK.artifactReward_artifact, lowerIdx);
-            }
 
             // -- RENDER THE SPRITE BUTTON --
 
@@ -142,12 +118,15 @@ public class ArtifactPick : Route, OnInputPhase, OnMouseDown
             var artifactBox = g.Push(
                 new UIKey(StableUK.artifactReward_artifact, i),
                 new Rect(screenPos.x + scrollVec.x, screenPos.y + scrollVec.y, ARTIFACT_WIDTH, ARTIFACT_HEIGHT),
-                null,
-                true,
-                onMouseDown: this,
-                upHint: upHint,
-                downHint: downHint
+                autoFocus: true,
+                onMouseDown: this
             );
+
+            // Move screen to selected element
+            if (Input.gamepadIsActiveInput && Input.currentGpKey == artifactBox.key)
+            {
+                _scrollTarget = Math.Clamp(_scrollTarget, -screenPos.y + 60.0, -screenPos.y + 160.0);
+            }
 
             var artifactBoxPos = artifactBox.rect.xy;
             var artifactMeta = artifact.GetMeta();
@@ -232,9 +211,7 @@ public class ArtifactPick : Route, OnInputPhase, OnMouseDown
         {
             _rescoutTimer -= 5.0;
         
-            var checkArtifacts = artifactsAvailable
-                .Where(artifact => artifact is CheckLocationArtifact)
-                .Cast<CheckLocationArtifact>().ToList();
+            var checkArtifacts = artifactsAvailable.OfType<CheckLocationArtifact>().ToList();
             var locations = checkArtifacts.SelectMany(artifact => artifact.locationName).ToArray();
 
             if (locations.Length > 0)

@@ -69,7 +69,7 @@ internal class RouteOverlay
             Blurbs.Render(
                 g,
                 currentShout.message,
-                x: 94.0, y: 20.0,
+                x: 94.0 + g.cornerMenu.GetExtraOffset(), y: 20.0,
                 dir: BlurbDir.Right,
                 align: -0.4,
                 progress: currentShout.progress,

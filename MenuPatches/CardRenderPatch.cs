@@ -24,7 +24,8 @@ public static class CardRenderPatch
                                  + Mutil.Parabola(__instance.flipAnim) * -10.0
                                  + Mutil.Parabola(Math.Abs(__instance.flopAnim)) * -10.0 * Math.Sign(__instance.flopAnim))).round();
         var b = g.Push(rect: rect);
-        Draw.Rect(b.rect.x + 1, b.rect.y + 1, b.rect.w - 3, b.rect.h - (__instance.isForeground ? 2 : 0),
+        Draw.Rect(b.rect.x + 1, b.rect.y + 1,
+                  b.rect.w - 3 + (Input.gamepadIsActiveInput ? 1 : 0), b.rect.h - (__instance.isForeground ? 2 : 0),
                   color: new Color(0.0, 0.0, 0.0, 0.75));
         g.Pop();
     }

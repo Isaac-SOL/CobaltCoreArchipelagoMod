@@ -83,6 +83,7 @@
         "trackerName": "<c=boldPink>ARCHIPELAGO TRACKER</c>",
         "tracker": {
             "name": "ARCHIPELAGO TRACKER",
+            "hoverHint": "(Hover over a line to see additional details)",
             "itemHint": "{0} for {1}",
             "hintedCount": "     <c=card>({0} hinted)</c>",
             "refresh": "REFRESH",

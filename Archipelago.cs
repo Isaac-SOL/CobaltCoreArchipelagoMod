@@ -784,9 +784,18 @@ public class Archipelago
                 : HintCreationPolicy.None,
             addresses.Where(l => l is not null).Select(l => l!.Value).ToArray()
         );
-        return addresses
+        
+        var scoutResult = addresses
             .Select(a => (info is null || a is null) ? null : info.GetValueOrDefault(a.Value))
             .ToArray();
+        
+        ModEntry.Instance.Logger.LogDebug(
+            "Scout locations result: {scoutLocations} => {scoutResults}",
+            locationNames,
+            scoutResult.Select(res => res?.ItemName)
+        );
+
+        return scoutResult;
     }
 }
 
