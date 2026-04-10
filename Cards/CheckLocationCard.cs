@@ -247,7 +247,7 @@ public class CheckLocationCard : Card, IRegisterable
         Debug.Assert(Archipelago.Instance.APSaveData != null, "Archipelago.Instance.APSaveData != null");
         if (locationItemName is null) return false;
         if (!IsLocal()) return false;
-        if (!Archipelago.ItemToArtifact.TryGetValue(locationItemName, out var artifact)) return false;
+        if (!Archipelago.ItemToArtifact.ContainsKey(locationItemName)) return false;
         if (Archipelago.Instance.APSaveData.HasItem(locationItemName)) return false;
         return Archipelago.InstanceSlotData.ImmediateArtifactRewards switch
         {
@@ -262,6 +262,8 @@ public class CheckLocationCard : Card, IRegisterable
         Debug.Assert(Archipelago.Instance.APSaveData != null, "Archipelago.Instance.APSaveData != null");
         if (locationItemName is null) return false;
         if (!IsLocal()) return false;
+        if (!Archipelago.ItemToModifier.TryGetValue(locationItemName, out var modifier)) return false;
+        if (ItemApplier.StartOnlyModifiers.Contains(modifier)) return false;
         if (Archipelago.Instance.APSaveData.HasItem(locationItemName)) return false;
         if (Archipelago.InstanceSlotData.ImmediateRewardsBlacklist.Contains(locationItemName)) return false;
         return Archipelago.InstanceSlotData.ModifiersMode is ModifierShuffleMode.Immediate

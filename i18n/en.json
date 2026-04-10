@@ -175,7 +175,7 @@
             "descBase": "Send {0} to {1}.",
             "descSelf": "Unlock <c=card>{0}</c>.",
             "descSelfAddCard": "Unlock <c=card>{0}</c> and add it to your hand.",
-            "descSelfAddArtifact": "Unlock and get <c=artifact>{0}</c>.",
+            "descSelfAddArtifact": "Unlock and install <c=artifact>{0}</c>.",
             "descSelfAddModifier": "Unlock and activate <c=artifact>{0}</c>.",
             "descContShield": "\nShield <c=healthBarShield>{0}</c>.",
             "descContTempShield": "\nTmp shield <c=healthBarTempShield>{0}</c>.",

@@ -157,10 +157,10 @@ public class CheckLocationArtifact : Artifact, IRegisterable
     private bool WillAddCardToDeck(State state, int pos)
     {
         Debug.Assert(Archipelago.Instance.APSaveData != null, "Archipelago.Instance.APSaveData != null");
-        if (givenCard[pos] is null) return false;
+        if (givenCard[pos] is not { } cardName) return false;
         if (!IsLocal(pos)) return false;
-        if (Archipelago.Instance.APSaveData.HasItem(givenCard[pos]!)) return false;
-        if (Archipelago.InstanceSlotData.ImmediateRewardsBlacklist.Contains(givenCard[pos]!)) return false;
+        if (Archipelago.Instance.APSaveData.HasItem(cardName)) return false;
+        if (Archipelago.InstanceSlotData.ImmediateRewardsBlacklist.Contains(cardName)) return false;
         return Archipelago.InstanceSlotData.ImmediateCardRewards switch
         {
             CardRewardsMode.Always or CardRewardsMode.IfLocal => true,
@@ -172,10 +172,10 @@ public class CheckLocationArtifact : Artifact, IRegisterable
     private bool WillAddArtifact(State state, int pos)
     {
         Debug.Assert(Archipelago.Instance.APSaveData != null, "Archipelago.Instance.APSaveData != null");
-        if (givenArtifact[pos] is null) return false;
+        if (givenArtifact[pos] is not { } artifactName) return false;
         if (!IsLocal(pos)) return false;
-        if (Archipelago.Instance.APSaveData.HasItem(givenArtifact[pos]!)) return false;
-        if (Archipelago.InstanceSlotData.ImmediateRewardsBlacklist.Contains(givenArtifact[pos]!)) return false;
+        if (Archipelago.Instance.APSaveData.HasItem(artifactName)) return false;
+        if (Archipelago.InstanceSlotData.ImmediateRewardsBlacklist.Contains(artifactName)) return false;
         return Archipelago.InstanceSlotData.ImmediateArtifactRewards switch
         {
             CardRewardsMode.Always or CardRewardsMode.IfLocal => true,
@@ -187,10 +187,11 @@ public class CheckLocationArtifact : Artifact, IRegisterable
     private bool WillAddModifier(int pos)
     {
         Debug.Assert(Archipelago.Instance.APSaveData != null, "Archipelago.Instance.APSaveData != null");
-        if (givenModifier[pos] is null) return false;
+        if (givenModifier[pos] is not { } modifierName) return false;
         if (!IsLocal(pos)) return false;
-        if (Archipelago.Instance.APSaveData.HasItem(givenModifier[pos]!)) return false;
-        if (Archipelago.InstanceSlotData.ImmediateRewardsBlacklist.Contains(givenModifier[pos]!)) return false;
+        if (ItemApplier.StartOnlyModifiers.Contains(Archipelago.ItemToModifier[modifierName])) return false;
+        if (Archipelago.Instance.APSaveData.HasItem(modifierName)) return false;
+        if (Archipelago.InstanceSlotData.ImmediateRewardsBlacklist.Contains(modifierName)) return false;
         return Archipelago.InstanceSlotData.ModifiersMode is ModifierShuffleMode.Immediate
                                                              or ModifierShuffleMode.ImmediateAndUnlockable;
     }
