@@ -105,6 +105,7 @@ public static class EndRunShufflePatch
         foreach (var deck in Archipelago.ItemToDeck.Values)
         {
             if (deck == Deck.colorless) continue;
+            var defaultStartingCards = Archipelago.InstanceSlotData.DeckStartingCards[deck];
             var set = StarterDeck.starterSets[deck];
             var soloSet = SoloStarterDeck.soloStarterSets[deck];
             var possibleCards = unlockedCards
@@ -116,12 +117,12 @@ public static class EndRunShufflePatch
             var generatorCards = possibleCards
                 .Where(c => GeneratorCards.Contains(c.GetType()))
                 .ToList();
-            var offC = offensiveCards.Random(rand)!;
+            var offC = RandomOrNull(offensiveCards, rand) ?? (Card)defaultStartingCards[0].CreateInstance();
             var effSecondCards = generatorCards.Count > 0 && !generatorCards.Contains(offC)
                 ? generatorCards
                 : possibleCards;
             effSecondCards.Remove(offC);
-            var secC = effSecondCards.Random(rand)!;
+            var secC = RandomOrNull(effSecondCards, rand) ?? (Card)defaultStartingCards[1].CreateInstance();
             set.cards = [offC, secC];
             var savedBasics = soloSet.cards.Where(IsBasic).ToList();
             soloSet.cards.Clear();
@@ -134,6 +135,13 @@ public static class EndRunShufflePatch
             soloSet.cards.AddRange(savedBasics);
         }
         APSaveData.Save();
+    }
+    
+    private static Card? RandomOrNull(List<Card> list, Rand rng)
+    {
+        return list.Count == 0 ? null :
+            list.Count < 2 ? list[0] :
+            list[rng.NextInt() % list.Count];
     }
 
     private static bool IsBasic(Card c) =>
