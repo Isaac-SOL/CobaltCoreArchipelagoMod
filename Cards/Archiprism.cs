@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.Linq;
 using Archipelago.MultiClient.Net.Enums;
 using Archipelago.MultiClient.Net.Helpers;
+using CobaltCoreArchipelago.Actions;
 using Nanoray.PluginManager;
 using Nickel;
 
@@ -12,7 +13,16 @@ public class Archiprism : Card, IRegisterable
 {
     internal static int totalPlayers;
     
-    private HashSet<string> playersContributing = [];
+    public HashSet<string> playersContributing = [];
+    public HashSet<string> playersContributingProgression = [];
+    public HashSet<string> playersContributingTrap = [];
+
+    private HashSet<string> EffPlayersContributing => upgrade switch
+    {
+        Upgrade.A => playersContributingProgression,
+        Upgrade.B => playersContributingTrap,
+        _ => playersContributing
+    };
     
     public static void Register(IPluginPackage<IModManifest> package, IModHelper helper)
     {
@@ -25,39 +35,62 @@ public class Archiprism : Card, IRegisterable
                 rarity = Rarity.rare,
                 upgradesTo = [Upgrade.A, Upgrade.B]
             },
-            Name = ModEntry.Instance.AnyLocalizations.Bind(["card", "DeathLinkBoros", "name"]).Localize,
+            Name = ModEntry.Instance.AnyLocalizations.Bind(["card", "Archiprism", "name"]).Localize,
         });
     }
 
     public void PlayerFoundItem(string player, ItemFlags flags)
     {
-        switch (upgrade)
-        {
-            case Upgrade.A when (flags & ItemFlags.Advancement) == 0:
-            case Upgrade.B when (flags & ItemFlags.Trap) == 0:
-                return;
-            case Upgrade.None:
-            default:
-                if (player != "Server")
-                    playersContributing.Add(player);
-                return;
-        }
-    }
-
-    public override List<CardAction> GetActions(State s, Combat c)
-    {
-        return
-        [
-            new AAttack
-            {
-                damage = GetPrismDmg(s)
-            }
-        ];
+        if (player == "Server") return;
+        playersContributing.Add(player);
+        if ((flags & ItemFlags.Advancement) != 0) playersContributingProgression.Add(player);
+        if ((flags & ItemFlags.Trap) != 0) playersContributingTrap.Add(player);
     }
 
     public override void AfterWasPlayed(State state, Combat c)
     {
         playersContributing.Clear();
+        playersContributingProgression.Clear();
+        playersContributingTrap.Clear();
+    }
+
+    public override List<CardAction> GetActions(State s, Combat c)
+    {
+        List<CardAction> actions =
+        [
+            new AArchiprismTooltip
+            {
+                playersContributing = EffPlayersContributing,
+                attack = upgrade == Upgrade.B ? GetActualOnePlayerDmg(s) : GetPrismDmg(s),
+                attackTimes = EffPlayersContributing.Count,
+                upgradeB = upgrade == Upgrade.B
+            }
+        ];
+        
+        if (upgrade == Upgrade.B)
+        {
+            for (var i = 0; i < EffPlayersContributing.Count; i++)
+            {
+                actions.Add(new AAttack
+                {
+                    damage = GetActualOnePlayerDmg(s)
+                });
+            }
+        }
+        else
+        {
+            actions.Add(new AAttack
+            {
+                damage = GetPrismDmg(s)
+            });
+        }
+
+        actions.Add(new AInvalidateUndos
+        {
+            type = InvalidationTypes.ArchiprismAttack
+        });
+
+        return actions;
     }
 
     private static int GetCost() => totalPlayers switch
@@ -70,13 +103,17 @@ public class Archiprism : Card, IRegisterable
         _ => 4
         // Doesn't appear above 15
     };
-
-    private int GetPrismDmg(State s) => GetActualDamage(s, playersContributing.Count * upgrade switch
+    
+    private int GetOnePlayerDmg() => upgrade switch
     {
         Upgrade.A => 3,
         Upgrade.B => 5,
         _ => 1
-    });
+    };
+
+    private int GetActualOnePlayerDmg(State s) => GetActualDamage(s, GetOnePlayerDmg());
+
+    private int GetPrismDmg(State s) => GetActualDamage(s, EffPlayersContributing.Count * GetOnePlayerDmg());
 
     public override CardData GetData(State state)
     {
@@ -86,16 +123,19 @@ public class Archiprism : Card, IRegisterable
             Upgrade.B => ["card", "Archiprism", "descB"],
             _ => ["card", "Archiprism", "desc"]
         });
-        description += state.route is Combat
-            ? $": <c=attack>{GetPrismDmg(state)}</c>."
-            : ".";
+        description = string.Format(description, GetOnePlayerDmg());
+
+        description += state.route is CardBrowse { browseSource: CardBrowse.Source.Codex } ? "."
+            : upgrade != Upgrade.B ? $": <c=attack>{GetPrismDmg(state)}</c>."
+            : $": <c=attack>{GetActualOnePlayerDmg(state)}</c>x{EffPlayersContributing.Count}.";
 
         return new CardData
         {
             art = StableSpr.cards_Prism,
             cost = GetCost(),
             description = description,
-            exhaust = upgrade == Upgrade.B
+            exhaust = upgrade == Upgrade.B,
+            artTint = Colors.white.ToString()
         };
     }
 }

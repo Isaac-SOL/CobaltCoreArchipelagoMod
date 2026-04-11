@@ -22,8 +22,9 @@ public class AInvalidateUndos : CardAction
         combatQoL?.InvalidateUndos(c, ICombatQolApi.InvalidationReason.CUSTOM_REASON,
                                    type switch
                                    {
+                                       InvalidationTypes.ItemReceived => Localize("reasonItemReceived"),
                                        InvalidationTypes.DeathlinkReceived => Localize("reasonDeathlinkReceived"),
-                                       _ => Localize("reasonItemReceived")
+                                       _ => Localize("reasonArchiprism")
                                    });
     }
 }
@@ -31,5 +32,6 @@ public class AInvalidateUndos : CardAction
 public enum InvalidationTypes
 {
     ItemReceived,
-    DeathlinkReceived
+    DeathlinkReceived,
+    ArchiprismAttack
 }

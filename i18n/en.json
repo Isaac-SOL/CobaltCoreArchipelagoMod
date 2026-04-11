@@ -165,7 +165,13 @@
         },
         "AInvalidateUndos": {
             "reasonItemReceived": "receiving an item from Archipelago",
-            "reasonDeathlinkReceived": "receiving a deathlink"
+            "reasonDeathlinkReceived": "receiving a deathlink",
+            "reasonArchiprism": "attacking with the Archiprism"
+        },
+        "AArchiprismTooltip": {
+            "title": "Archiprism Attack",
+            "contributing": "Deals {0} damage from players: {1}",
+            "contributingB": "Deals {0} damage, {1} times, from players: {2}"
         }
     },
     "card": {
@@ -193,9 +199,9 @@
         },
         "Archiprism": {
             "name": "Archiprism",
-            "desc": "Attack for 1 dmg per player who has found an item since last use",
-            "descA": "Attack for 3 dmg per player who has found a <c=DDA0DD>progression item</c> since last use",
-            "descB": "Attack for 5 dmg per player who has found a <c=redd>trap</c> since last use"
+            "desc": "Attack for {0} dmg per player who has found an item since last use",
+            "descA": "Attack for {0} dmg per player who has found a <c=DDA0DD>progression item</c>",
+            "descB": "Multi attack for {0} dmg per player who has found a <c=redd>trap</c>"
         }
     },
     "artifact": {

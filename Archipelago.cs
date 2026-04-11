@@ -690,10 +690,15 @@ public class Archipelago
     {
         Debug.Assert(Session != null, nameof(Session) + " != null");
         if (packet.PacketType != ArchipelagoPacketType.PrintJSON) return;
-        var json = packet.ToJObject();
+        var jsonObj = packet.GetType().GetMethod("ToJObject")?.Invoke(packet, null);
+        if (jsonObj is not JObject json) return;
         if (json["type"]?.ToString() != "ItemSend") return;
         if (json["item"]?["player"]?.ToObject<int>() is not { } player) return;
         if (json["item"]?["flags"]?.ToObject<ItemFlags>() is not { } flags) return;
+        ModEntry.Instance.Logger.LogInformation(
+            "Detected ItemSend with player {player} ({playerName}) and flags {flags}",
+            player, Session.Players.GetPlayerName(player), flags
+        );
         lock (playersFoundItemToNotify)
         {
             playersFoundItemToNotify.Add((Session.Players.GetPlayerName(player), flags));

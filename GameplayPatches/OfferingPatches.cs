@@ -27,10 +27,17 @@ public class CardOfferingPatch
         }
     }
 
-    private static int DeathLinkBorosRarity() => Archipelago.Instance.APSaveData!.DeathLinkMode switch
+    private static int DeathLinkBorosChance => Archipelago.Instance.APSaveData!.DeathLinkMode switch
     {
-        DeathLinkMode.Off => 200,
-        _ => 95
+        DeathLinkMode.Off => 0,
+        _ => 3
+    };
+
+    private static int ArchiprismChance => Archiprism.totalPlayers switch
+    {
+        < 2 => 0,
+        <= 15 => 3,
+        _ => 0
     };
 
     static void Postfix(
@@ -126,11 +133,12 @@ public class CardOfferingPatch
             };
 
             Card card;
-            if (rarity == Rarity.rare && s.rngCardOfferings.NextUint() % 100 > DeathLinkBorosRarity())
-            {
-                // Sometimes replace rare cards with a DeathLinkBoros
+            // Sometimes replace rare cards with a special one
+            var specialRoll = s.rngCardOfferings.NextUint() % 100;
+            if (rarity == Rarity.rare && specialRoll < DeathLinkBorosChance)
                 card = new DeathLinkBoros();
-            }
+            else if (rarity == Rarity.rare && specialRoll < DeathLinkBorosChance + ArchiprismChance)
+                card = new Archiprism();
             else
             {
                 // But most of the time we add an actual check card with a set location
@@ -152,9 +160,10 @@ public class CardOfferingPatch
                 };
                 (card as CheckLocationCard)!.locationName = location;
                 pickedLocations.Add(location);
+                card.upgrade = CardReward.GetUpgrade(s, s.rngCardOfferings, s.map, card,
+                                                     s.GetDifficulty() >= 1 ? 0.5 : 1.0, overrideUpgradeChances);
             }
             card.drawAnim = 1.0;
-            card.upgrade = CardReward.GetUpgrade(s, s.rngCardOfferings, s.map, card, s.GetDifficulty() >= 1 ? 0.5 : 1.0, overrideUpgradeChances);
             card.flipAnim = 1.0;
             archipelagoCards.Add(card);
         }

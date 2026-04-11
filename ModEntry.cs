@@ -48,7 +48,8 @@ internal class ModEntry : SimpleMod
     ];
     private static List<Type> DemoRareCardTypes = [
         typeof(CheckLocationCardRare),
-        typeof(DeathLinkBoros)
+        typeof(DeathLinkBoros),
+        typeof(Archiprism)
     ];
     private static IEnumerable<Type> DemoCardTypes =
         DemoCommonCardTypes
