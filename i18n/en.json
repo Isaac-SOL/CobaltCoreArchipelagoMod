@@ -169,9 +169,9 @@
             "reasonArchiprism": "attacking with the Archiprism"
         },
         "AArchiprismTooltip": {
-            "title": "Archiprism Attack",
-            "contributing": "Deals {0} damage from players: {1}",
-            "contributingB": "Deals {0} damage, {1} times, from players: {2}"
+            "title": "Archiprism",
+            "contributing": "Deals {0} damage from players:\n{1}",
+            "contributingB": "Deals {0} damage, {1} times, from players:\n{2}"
         }
     },
     "card": {

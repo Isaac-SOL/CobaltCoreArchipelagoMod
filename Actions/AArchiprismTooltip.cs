@@ -39,7 +39,8 @@ public class AArchiprismTooltip : CardAction
                         ModEntry.Instance.Localizations.Localize(["action", "AArchiprismTooltip", "contributing"]),
                         attack, allPlayers
                     )
-            }
+            },
+            new TTDivider()
         ];
     }
 
