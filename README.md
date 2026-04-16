@@ -176,6 +176,7 @@ the game immediately.
 
 ## Credits
 
+- popouleto for the Linkboros card art and help with the card frames
 - Shockah for making Nickel and helping me with various issues
 - rft50 for making the DemoMod that eased me into modding Cobalt Core
 considering I had no idea what I was doing
