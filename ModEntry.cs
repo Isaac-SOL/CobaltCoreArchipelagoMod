@@ -26,6 +26,7 @@ internal class ModEntry : SimpleMod
     internal IModSettingsApi ModSettings;
     internal ICombatQolApi? CombatQol;
     internal ILocalizationProvider<IReadOnlyList<string>> AnyLocalizations { get; }
+    internal ILocaleBoundLocalizationProvider<IReadOnlyList<string>> DefaultEnglishLocalizations { get; }
     internal ILocaleBoundNonNullLocalizationProvider<IReadOnlyList<string>> Localizations { get; }
 
     internal Archipelago Archipelago;
@@ -91,8 +92,10 @@ internal class ModEntry : SimpleMod
             tokenExtractor: new SimpleLocalizationTokenExtractor(),
             localeStreamFunction: locale => package.PackageRoot.GetRelativeFile($"i18n/{locale}.json").OpenRead()
         );
+        DefaultEnglishLocalizations =
+            new CurrentLocaleOrEnglishLocalizationProvider<IReadOnlyList<string>>(AnyLocalizations);
         Localizations = new MissingPlaceholderLocalizationProvider<IReadOnlyList<string>>(
-            new CurrentLocaleOrEnglishLocalizationProvider<IReadOnlyList<string>>(AnyLocalizations)
+            DefaultEnglishLocalizations
         );
 
         ArchipelagoDeck = helper.Content.Decks.RegisterDeck("Archipelago", new DeckConfiguration

@@ -221,8 +221,119 @@
         }
     },
     "compShouts": {
-        "defaultItem": "Received {0} from {1}.",
-        "defaultDeathlink": "Received deathlink from {0} with cause: {1}."
+        "cat": {
+            "1": "Received {0} from {1}."
+        },
+        "backup": {
+            "1": "TEMPORAL RIFT DETECTED. RECEIVED: {0}\nSENDER: {1}"
+        },
+        
+        "deathlink": {
+            "cat": {
+                "1": "Received deathlink from {0} with cause: {1}."
+            },
+            "backup": {
+                "1": "RECEIVED DEATHLINK. CAUSE: {0}\nSENDER: {1}"
+            }
+        },
+        
+        "card": {
+            "cat": {
+                "1": "Received card {0} from {1}."
+            },
+            "backup": {
+                "1": "RECEIVED CARD: {0}\nSENDER: {1}"
+            },
+            
+            "character": {
+                "cat": {
+                    "1": "Received card for {2}: {0} from {1} (line 1).",
+                    "2": "Received card for {2}: {0} from {1} (line 2).",
+                    "3": "Received card for {2}: {0} from {1} (line 3)."
+                }
+            }
+        },
+        "artifact": {
+            "cat": {
+                "1": "Received artifact {0} from {1}."
+            },
+            
+            "instant": {
+                "cat": {
+                    "1": "Received and installed artifact {0} from {1}."
+                }
+            }
+        },
+        "character": {
+            "cat": {
+                "1": "{0} is here!"
+            },
+            
+            "dizzy": {
+                "cat": {
+                    "1": "{0} is here!"
+                },
+                "backup": {
+                    "1": "{0} DETECTED"
+                }
+            },
+            "riggs": {
+                "cat": {
+                    "1": "{0} is here!"
+                },
+                "backup": {
+                    "1": "{0} DETECTED"
+                }
+            },
+            "peri": {
+                "cat": {
+                    "1": "{0} is here!"
+                },
+                "backup": {
+                    "1": "{0} DETECTED"
+                }
+            },
+            "goat": {
+                "cat": {
+                    "1": "{0} is here!"
+                },
+                "backup": {
+                    "1": "{0} DETECTED"
+                }
+            },
+            "eunice": {
+                "cat": {
+                    "1": "{0} is here!"
+                },
+                "backup": {
+                    "1": "{0} DETECTED"
+                }
+            },
+            "hacker": {
+                "cat": {
+                    "1": "{0} is here!"
+                },
+                "backup": {
+                    "1": "{0} DETECTED"
+                }
+            },
+            "shard": {
+                "cat": {
+                    "1": "{0} is here!"
+                },
+                "backup": {
+                    "1": "{0} DETECTED"
+                }
+            },
+            "colorless": {
+                "cat": {
+                    "1": "{0} is here!"
+                },
+                "backup": {
+                    "1": "{0} DETECTED"
+                }
+            }
+        }
     },
     "story": {
         "event": {

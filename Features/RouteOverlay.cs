@@ -1,5 +1,9 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
 using System.Reflection.Emit;
+using daisyowl.text;
 using HarmonyLib;
 using Nanoray.Shrike;
 using Nanoray.Shrike.Harmony;
@@ -20,33 +24,74 @@ internal class RouteOverlay
     {
         GRenderPostfix.overlay = null;
     }
+
+    internal static bool CompIsBackup(State s) => s.IsOutsideRun()
+                                                  || s.route is Combat { otherShip.ai: TheCobalt }
+                                                  || s.characters.Any(c => c.deckType == Deck.colorless);
     
     internal void Render(G g, State s)
     {
+        var catBackup = CompIsBackup(s);
+        string CBU(string str) => catBackup ? str.ToUpperInvariant() : str;
+        
         if (Archipelago.Instance.MessagesToAnnounce.Count > 0)
         {
             if (currentShout is null)
             {
-                // There is a message to display and no message currently being shown
+                // There is a message to display and no message currently being shown:
+                // Load the message as a string. This is run only once per message
                 var message = Archipelago.Instance.MessagesToAnnounce[0];
+                var item = message.item!;
                 string messageStr;
                 if (message.type == MessageToAnnounce.DeathlinkReceived)
                 {
-                    messageStr = ModEntry.Instance.Localizations.Localize(["compShouts", "defaultDeathlink"]);
-                    messageStr = string.Format(
-                        messageStr,
-                        $"<c={APColors.OtherPlayer}>{message.deathlink!.Source}</c>",
-                        message.deathlink!.Cause
-                        );
+                    messageStr = AdaptiveShoutCache.GetLocalizedRandomLine(
+                        ["compShouts", "deathlink"],
+                        catBackup: catBackup,
+                        $"<c={APColors.OtherPlayer}>{CBU(message.deathlink!.Source)}</c>",
+                        CBU(message.deathlink!.Cause)
+                    );
+                }
+                else if (Archipelago.ItemToCard.TryGetValue(item.ItemName, out var cardType))
+                {
+                    var cardDeck = DB.cardMetas[cardType.Name].deck;
+                    messageStr = AdaptiveShoutCache.GetLocalizedRandomLine(
+                        ["compShouts", "card", "character"],
+                        catBackup: catBackup,
+                        $"<c=card>{CBU(item.ItemName)}</c>",
+                        $"<c={APColors.FromPlayerName(item.Player.Name)}>{CBU(item.Player.Name)}</c>",
+                        $"<c={Colors.LookupColor(cardDeck.Key())}>{CBU(Character.GetDisplayName(cardDeck, s))}</c>"
+                    );
+                }
+                else if (Archipelago.ItemToArtifact.TryGetValue(item.ItemName, out var artifactType))
+                {
+                    List<string> key = ["compShouts", "artifact"];
+                    if (ArtifactValidForAddition(s, artifactType, item.ItemName, item.Player.Name))
+                        key.Add("instant");
+                    messageStr = AdaptiveShoutCache.GetLocalizedRandomLine(
+                        key.ToArray(),
+                        catBackup: catBackup,
+                        $"<c=artifact>{CBU(item.ItemName)}</c>",
+                        $"<c={APColors.FromPlayerName(item.Player.Name)}>{CBU(item.Player.Name)}</c>"
+                    );
+                }
+                else if (Archipelago.ItemToDeck.TryGetValue(item.ItemName, out var deck))
+                {
+                    var deckKey = deck.Key();
+                    messageStr = AdaptiveShoutCache.GetLocalizedRandomLine(
+                        ["compShouts", "character", deckKey],
+                        catBackup: catBackup,
+                        $"<c={Colors.LookupColor(deckKey) ?? 0xFFFFFFFF}>{CBU(item.ItemName)}</c>",
+                        $"<c={APColors.FromPlayerName(item.Player.Name)}>{CBU(item.Player.Name)}</c>"
+                    );
                 }
                 else
                 {
-                    messageStr = ModEntry.Instance.Localizations.Localize(["compShouts", "defaultItem"]);
-                    var item = message.item!;
-                    messageStr = string.Format(
-                        messageStr,
-                        $"<c={APColors.FromFlags(item.Flags)}>{item.ItemName}</c>",
-                        $"<c={APColors.FromPlayerName(item.Player.Name)}>{item.Player.Name}</c>"
+                    messageStr = AdaptiveShoutCache.GetLocalizedRandomLine(
+                        ["compShouts"],
+                        catBackup: catBackup,
+                        $"<c={APColors.FromFlags(item.Flags)}>{CBU(item.ItemName)}</c>",
+                        $"<c={APColors.FromPlayerName(item.Player.Name)}>{CBU(item.Player.Name)}</c>"
                     );
                 }
                 currentShout = new APShout
@@ -66,20 +111,41 @@ internal class RouteOverlay
             currentShout = null;
         if (currentShout is not null && currentShout.delay == 0.0)
         {
+            var textRect = Draw.Text(currentShout.message, 0, 0, maxWidth: 230.0, align: TAlign.Left, dontDraw: true);
+            var yOffset = Math.Max(textRect.h - 14.0, 0);
             Blurbs.Render(
                 g,
                 currentShout.message,
-                x: 94.0 + g.cornerMenu.GetExtraOffset(), y: 20.0,
+                x: 94.0 + g.cornerMenu.GetExtraOffset(), y: 20.0 + yOffset,
                 dir: BlurbDir.Right,
                 align: -0.4,
                 progress: currentShout.progress,
                 textColor: Colors.textBold,
                 borderColor: DB.decks[Deck.colorless].color,
-                maxWidth: 200.0,
+                maxWidth: 230.0,
                 showStem: g.metaRoute is null && ((s.routeOverride is null && s.route.GetShowCockpit())
                                                   || (s.routeOverride is not null && s.routeOverride.GetShowCockpit()))
             );
         }
+    }
+
+    private static bool ArtifactValidForAddition(State state, Type artifactType, string itemName, string itemSender)
+    {
+        if (state.IsOutsideRun()) return false;
+        Debug.Assert(Archipelago.Instance.APSaveData != null, "Archipelago.Instance.APSaveData != null");
+        var newArtifact = (Artifact)artifactType.CreateInstance();
+        var newArtifactMeta = newArtifact.GetMeta();
+        var local = itemSender == Archipelago.Instance.APSaveData.Slot;
+        var hasDeck = state.characters.Any(character => character.deckType == newArtifactMeta.owner);
+        return Archipelago.InstanceSlotData.ImmediateArtifactRewards switch
+            {
+                CardRewardsMode.IfLocal => local,
+                CardRewardsMode.IfHasDeck => hasDeck,
+                CardRewardsMode.IfLocalAndHasDeck => local && hasDeck,
+                CardRewardsMode.Always => true,
+                _ => false
+            } && !Archipelago.InstanceSlotData.ImmediateRewardsBlacklist.Contains(itemName)
+              && !ArtifactReward.GetBlockedArtifacts(state).Contains(artifactType);
     }
 }
 
