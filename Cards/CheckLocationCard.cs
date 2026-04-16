@@ -22,6 +22,7 @@ public class CheckLocationCard : Card, IRegisterable
     public string? locationGameName;
     public string? locationItemName;
     public string? locationItemColor;
+    public Deck? locationFrom;
     
     public static void Register(IPluginPackage<IModManifest> package, IModHelper helper)
     {

@@ -9,6 +9,7 @@ using HarmonyLib;
 using Microsoft.Extensions.Logging;
 using Nanoray.Shrike;
 using Nanoray.Shrike.Harmony;
+using Nickel;
 
 // ReSharper disable MultipleOrderBy
 
@@ -34,9 +35,14 @@ public class CardBrowseListPatch
                 apLocationsCache = GetPickableAPCardsList(s);
                 fixedApCardsCache = apLocationsCache
                     .Select(name =>
-                                name.Contains("Common") ? new CheckLocationCard { locationName = name }
-                                : name.Contains("Uncommon") ? new CheckLocationCardUncommon { locationName = name }
-                                : new CheckLocationCardRare { locationName = name })
+                    {
+                        var card = name.Contains("Common") ? new CheckLocationCard()
+                            : name.Contains("Uncommon") ? new CheckLocationCardUncommon()
+                            : new CheckLocationCardRare();
+                        card.locationName = name;
+                        card.locationFrom = Archipelago.ItemToDeck.FirstOrNull(kvp => name.StartsWith(kvp.Key))?.Value;
+                        return card;
+                    })
                     .ToList();
                 pickableCardsCache = fixedApCardsCache
                     .Cast<Card>()

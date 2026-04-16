@@ -10,6 +10,7 @@ using CobaltCoreArchipelago.Features;
 using HarmonyLib;
 using JetBrains.Annotations;
 using Microsoft.Extensions.Logging;
+using Nickel;
 
 namespace CobaltCoreArchipelago.GameplayPatches;
 
@@ -158,7 +159,9 @@ public class CardOfferingPatch
                     Rarity.uncommon => new CheckLocationCardUncommon(),
                     _ => new CheckLocationCardRare()
                 };
-                (card as CheckLocationCard)!.locationName = location;
+                var apCard = (CheckLocationCard)card;
+                apCard.locationName = location;
+                apCard.locationFrom = Archipelago.ItemToDeck.FirstOrNull(kvp => location.StartsWith(kvp.Key))?.Value;
                 pickedLocations.Add(location);
                 card.upgrade = CardReward.GetUpgrade(s, s.rngCardOfferings, s.map, card,
                                                      s.GetDifficulty() >= 1 ? 0.5 : 1.0, overrideUpgradeChances);

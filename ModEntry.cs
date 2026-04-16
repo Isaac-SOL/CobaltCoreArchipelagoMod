@@ -106,7 +106,10 @@ internal class ModEntry : SimpleMod
                 titleColor = new Color("000000")
             },
             DefaultCardArt = RegisterSprite(package, "assets/Card/ArchipelagoBack.png").Sprite,
-            BorderSprite = RegisterSprite(package, "assets/frame_ap.png").Sprite,
+            BorderSprite = RegisterSprite(package, "assets/Card/frame_ap_spec.png").Sprite,
+            ShineColorOverride = args => (args.Card as CheckLocationCard)?.locationFrom?.Key() is { } colorKey
+                ? Colors.LookupColor(colorKey) ?? new Color(0x55FFFFFF)
+                : new Color(0x55FFFFFF),
             Name = AnyLocalizations.Bind(["deck", "name"]).Localize
         });
 
@@ -122,11 +125,17 @@ internal class ModEntry : SimpleMod
             Name = AnyLocalizations.Bind(["deck", "lockedName"]).Localize
         });
 
+        foreach (var deck in Archipelago.DeckToItem.Keys)
+            CardRenderPatch.FrameOverlays[deck] =
+                RegisterSprite(package, $"assets/Card/frame_overlay_spec_{deck.Key()}.png").Sprite;
+
         AArchipelagoCheckLocation.Spr = RegisterSprite(package, "assets/ap_action.png").Sprite;
 
         CheckLocationCard.ArtCommon = RegisterSprite(package, "assets/Card/ArchipelagoBack2.png").Sprite;
         CheckLocationCard.ArtUncommon = RegisterSprite(package, "assets/Card/ArchipelagoBack5.png").Sprite;
         CheckLocationCard.ArtRare = RegisterSprite(package, "assets/Card/ArchipelagoBack7.png").Sprite;
+
+        DeathLinkBoros.Art = RegisterSprite(package, "assets/Card/DeathLinkBorosBack.png").Sprite;
         
         CheckLocationArtifact.BaseSpr = RegisterSprite(package, "assets/Artifact/Artifact_ap.png").Sprite;
 

@@ -9,6 +9,8 @@ namespace CobaltCoreArchipelago.Cards;
 
 public class DeathLinkBoros : Card, IRegisterable
 {
+    internal static Spr Art;
+    
     public static void Register(IPluginPackage<IModManifest> package, IModHelper helper)
     {
         helper.Content.Cards.RegisterCard(new CardConfiguration
@@ -131,7 +133,9 @@ public class DeathLinkBoros : Card, IRegisterable
         {
             cost = 2,
             description = description,
-            exhaust = value >= 10 || (value >= 5 && upgrade == Upgrade.B)
+            exhaust = value >= 10 || (value >= 5 && upgrade == Upgrade.B),
+            art = Art,
+            artTint = "CCCCCC"
         };
     }
 }
