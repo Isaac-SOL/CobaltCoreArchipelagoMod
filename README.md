@@ -158,12 +158,9 @@ an undertaking I will probably not do it myself.
 
 ## Planned features (no promises!)
 
-- Overhaul of item placement and overall progression, to emphasize making decisions
-while not locking players into long, mostly useless runs
 - Actual dialogue for the additional Books and CAT memories.
 - Additional in-combat dialogue between characters when getting new items from other players,
 or unlocking items for other players. Lots of dialogue if possible!
-- Support for Custom Run Options, including unmanned/solo/duo runs
 - Potentially additional cards or artifacts which give the game more interactivity
 with the multiworld.
 
