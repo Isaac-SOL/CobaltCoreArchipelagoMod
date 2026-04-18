@@ -12,6 +12,7 @@ using CobaltCoreArchipelago.Actions;
 using CobaltCoreArchipelago.Artifacts;
 using CobaltCoreArchipelago.Cards;
 using CobaltCoreArchipelago.ConnectionInfoMenu;
+using CobaltCoreArchipelago.Features;
 using CobaltCoreArchipelago.Map;
 using CobaltCoreArchipelago.MenuPatches;
 using CobaltCoreArchipelago.StoryPatches;
@@ -159,6 +160,8 @@ internal class ModEntry : SimpleMod
         ArtifactRenderPatch.LockedSpr = RegisterSprite(package, "assets/Artifact/locked.png").Sprite;
 
         MapSwapCharacter.Spr = RegisterSprite(package, "assets/swap_character_node.png").Sprite;
+
+        RouteOverlay.CatMiniTalkingSpr = RegisterSprite(package, "assets/cat_mini_talking.png").Sprite;
 
         /*
          * All the IRegisterable types placed into the static lists at the start of the class are initialized here.

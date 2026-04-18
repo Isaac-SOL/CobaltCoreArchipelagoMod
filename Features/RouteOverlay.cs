@@ -12,7 +12,9 @@ namespace CobaltCoreArchipelago.Features;
 
 internal class RouteOverlay
 {
-    private APShout? currentShout;
+    internal static Spr CatMiniTalkingSpr;
+    
+    internal APShout? currentShout;
     
     internal static RouteOverlay MakeNew()
     {
@@ -123,8 +125,7 @@ internal class RouteOverlay
                 textColor: Colors.textBold,
                 borderColor: DB.decks[Deck.colorless].color,
                 maxWidth: 230.0,
-                showStem: g.metaRoute is null && ((s.routeOverride is null && s.route.GetShowCockpit())
-                                                  || (s.routeOverride is not null && s.routeOverride.GetShowCockpit()))
+                showStem: CompRenderPostfix.CanShowText(g)
             );
         }
     }
@@ -180,5 +181,26 @@ public static class GRenderPostfix
     public static void RenderOverlay(G g, State s)
     {
         overlay?.Render(g, s);
+    }
+}
+
+[HarmonyPatch(typeof(Character), nameof(Character.DrawFace))]
+public static class CompRenderPostfix
+{
+    public static bool CanShowText(G g) =>
+        g.metaRoute is null
+        && ((g.state.routeOverride is null && g.state.route.GetShowCockpit())
+            || (g.state.routeOverride is not null && g.state.routeOverride.GetShowCockpit()));
+    
+    public static void Postfix(Character __instance, G g, double x, double y, bool mini)
+    {
+        if ((!GRenderPostfix.overlay?.currentShout?.IsDonePrinting() ?? false)
+            && __instance.type == "comp"
+            && mini
+            && !RouteOverlay.CompIsBackup(g.state)
+            && g.time % (1.0 / 3.0) > (1.0 / 6.0))
+        {
+            Draw.Sprite(RouteOverlay.CatMiniTalkingSpr, x + 5.0, y + 3.0);
+        }
     }
 }
