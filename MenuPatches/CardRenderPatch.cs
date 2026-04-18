@@ -16,17 +16,22 @@ public static class CardRenderPatch
         Debug.Assert(Archipelago.Instance.APSaveData != null, "Archipelago.Instance.APSaveData != null");
         
         var pos = posOverride ?? __instance.pos;
+        var rect = (__instance.GetScreenRect()
+                    + pos
+                    + new Vec(y: __instance.hoverAnim * -2.0
+                                 + Mutil.Parabola(__instance.flipAnim) * -10.0
+                                 + Mutil.Parabola(Math.Abs(__instance.flopAnim)) * -10.0 * Math.Sign(__instance.flopAnim))).round();
 
-        if (__instance is CheckLocationCard { locationFrom: not null } apCard)
+        if (__instance is CheckLocationCard { locationFrom: not null } apCard
+            && !hideFace
+            && (ignoreAnim
+                || ((apCard.drawAnim != 0.0 || apCard.waitBeforeMoving <= 0.0)
+                    && !(apCard.drawAnim < 1.0)
+                    && !(apCard.flipAnim > 0.0))))
         {
-            if (!hideFace
-                && (ignoreAnim
-                    || ((apCard.drawAnim != 0.0 || apCard.waitBeforeMoving <= 0.0)
-                        && !(apCard.drawAnim < 1.0)
-                        && !(apCard.flipAnim > 0.0))))
-            {
-                Draw.Sprite(FrameOverlays[apCard.locationFrom.Value], pos.x - 1.0, pos.y - 1.0 + apCard.hoverAnim * -2.0);
-            }
+            var b = g.Push(rect: rect);
+            Draw.Sprite(FrameOverlays[apCard.locationFrom.Value], b.rect.x, b.rect.y);
+            g.Pop();
         }
         
         if (!Archipelago.InstanceSlotData.ShuffleCards) return;
@@ -36,14 +41,9 @@ public static class CardRenderPatch
         if (ModEntry.Instance.Helper.ModData.TryGetModData(__instance, "tooltipCard", out bool tt) && tt) return;
         // All cards are unlocked during the finale (for now at least)
         if (g.state.route is Combat { otherShip.ai: FinaleFrienemy }) return;
-        var rect = (__instance.GetScreenRect()
-                    + pos
-                    + new Vec(y: __instance.hoverAnim * -2.0
-                                 + Mutil.Parabola(__instance.flipAnim) * -10.0
-                                 + Mutil.Parabola(Math.Abs(__instance.flopAnim)) * -10.0 * Math.Sign(__instance.flopAnim))).round();
-        var b = g.Push(rect: rect);
-        Draw.Rect(b.rect.x + 1, b.rect.y + 1,
-                  b.rect.w - 3 + (Input.gamepadIsActiveInput ? 1 : 0), b.rect.h - (__instance.isForeground ? 2 : 0),
+        var b2 = g.Push(rect: rect);
+        Draw.Rect(b2.rect.x + 1, b2.rect.y + 1,
+                  b2.rect.w - 3 + (Input.gamepadIsActiveInput ? 1 : 0), b2.rect.h - (__instance.isForeground ? 2 : 0),
                   color: new Color(0.0, 0.0, 0.0, 0.75));
         g.Pop();
     }
