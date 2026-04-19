@@ -891,6 +891,7 @@ public class SlotDataVersionInvalidException(string message) : SlotDataInvalidEx
 
 public struct SlotDataHelper
 {
+    public bool CROIsInstalled { get; private set; }
     public List<Deck> StartingCharacters { get; private set; }
     public string StartingShip { get; private set; }
     public FrequencyShuffleMode ShuffleShipParts { get; private set; }
@@ -931,8 +932,17 @@ public struct SlotDataHelper
             var host_tag = Convert.ToString(slotData["version_tag"]);
             if (host_tag != expected_tag)
             {
-                throw new SlotDataVersionInvalidException($"This version of the mod requires APWorld version tag {expected_tag}.\n" +
-                                                          $"(Host version tag is {host_tag})");
+                throw new SlotDataVersionInvalidException(
+                    $"This version of the mod requires APWorld version tag {expected_tag}.\n" +
+                    $"(Host version tag is {host_tag})");
+            }
+
+            res.CROIsInstalled = Convert.ToBoolean(slotData["cro_is_installed"]);
+            if (res.CROIsInstalled && ModEntry.Instance.CROAssembly is null)
+            {
+                throw new SlotDataVersionInvalidException(
+                    "The settings of this slot require the mod <c=card>\"Custom Run Options\"</c>, but it isn't installed." +
+                    "\nEither install the mod, or re-generate with <c=card>cro_is_installed</c> set to <c=card>false</c> in your YAML settings.");
             }
             
             var startingCharacters = (JArray)slotData["starting_characters"];

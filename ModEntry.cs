@@ -85,6 +85,7 @@ internal class ModEntry : SimpleMod
         CombatQol = helper.ModRegistry.GetApi<ICombatQolApi>("TheJazMaster.CombatQoL");
         CROAssembly = AccessTools.AllAssemblies()
             .FirstOrDefault(a => (a.GetName().Name ?? a.GetName().FullName) == "CustomRunOptions");
+        Logger.LogInformation("Custom Run Options is " + (CROAssembly is null ? "NOT installed" : "installed"));
         Harmony = new Harmony("SaltyIsaac.CobaltCoreArchipelago");
         Harmony.PatchAll(Assembly.GetExecutingAssembly());
         NewRunOptionsCustomPatch.MaybeApply(Harmony);
