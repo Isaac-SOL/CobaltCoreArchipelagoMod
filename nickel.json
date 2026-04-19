@@ -10,7 +10,8 @@
   "Dependencies": [
     {
       "UniqueName": "Shockah.CustomRunOptions",
-      "Version": "1.5.3"
+      "Version": "1.5.3",
+      "IsRequired": false
     }
   ],
   "UpdateChecks": {

@@ -117,23 +117,21 @@ internal class ASwapCharacterInChoice : CardAction
 
 internal class AUpgradePartialCrewArtifact : CardAction
 {
-    private static List<Type> partialCrewArtifacts =
-    [
-        AccessTools.GetTypesFromAssembly(
-                AccessTools.AllAssemblies()
-                    .First(a => (a.GetName().Name ?? a.GetName().FullName) == "CustomRunOptions"))
-            .First(type => type.Name == "PartialCrewRuns" && type.Namespace == "Shockah.CustomRunOptions")
-            .GetNestedType("UnmannedRunArtifact", AccessTools.all)!,
-        typeof(DailyJustOneCharacter),
-        AccessTools.GetTypesFromAssembly(
-                AccessTools.AllAssemblies()
-                    .First(a => (a.GetName().Name ?? a.GetName().FullName) == "CustomRunOptions"))
-            .First(type => type.Name == "PartialCrewRuns" && type.Namespace == "Shockah.CustomRunOptions")
-            .GetNestedType("DuoRunArtifact", AccessTools.all)!
-    ];
-    
     public override void Begin(G g, State s, Combat c)
     {
+        if (ModEntry.Instance.CROAssembly is not { } cro) return;
+        
+        List<Type> partialCrewArtifacts =
+        [
+            AccessTools.GetTypesFromAssembly(cro)
+                .First(type => type.Name == "PartialCrewRuns" && type.Namespace == "Shockah.CustomRunOptions")
+                .GetNestedType("UnmannedRunArtifact", AccessTools.all)!,
+            typeof(DailyJustOneCharacter),
+            AccessTools.GetTypesFromAssembly(cro)
+                .First(type => type.Name == "PartialCrewRuns" && type.Namespace == "Shockah.CustomRunOptions")
+                .GetNestedType("DuoRunArtifact", AccessTools.all)!
+        ];
+        
         var crewCount = s.characters.Count;
         s.artifacts.RemoveAll(a => partialCrewArtifacts.Contains(a.GetType()));
         // We don't use a proper AAddArtifact to avoid triggering OnReceiveArtifact

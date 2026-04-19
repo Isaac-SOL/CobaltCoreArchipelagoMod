@@ -12,6 +12,7 @@ using CobaltCoreArchipelago.Actions;
 using CobaltCoreArchipelago.Artifacts;
 using CobaltCoreArchipelago.Cards;
 using CobaltCoreArchipelago.ConnectionInfoMenu;
+using CobaltCoreArchipelago.CustomRunOptionsPatches;
 using CobaltCoreArchipelago.Features;
 using CobaltCoreArchipelago.Map;
 using CobaltCoreArchipelago.MenuPatches;
@@ -26,6 +27,7 @@ internal class ModEntry : SimpleMod
     internal Harmony Harmony;
     internal IModSettingsApi ModSettings;
     internal ICombatQolApi? CombatQol;
+    internal Assembly? CROAssembly;
     internal ILocalizationProvider<IReadOnlyList<string>> AnyLocalizations { get; }
     internal ILocaleBoundLocalizationProvider<IReadOnlyList<string>> DefaultEnglishLocalizations { get; }
     internal ILocaleBoundNonNullLocalizationProvider<IReadOnlyList<string>> Localizations { get; }
@@ -81,8 +83,11 @@ internal class ModEntry : SimpleMod
         Instance = this;
         ModSettings = helper.ModRegistry.GetApi<IModSettingsApi>("Nickel.ModSettings")!;
         CombatQol = helper.ModRegistry.GetApi<ICombatQolApi>("TheJazMaster.CombatQoL");
+        CROAssembly = AccessTools.AllAssemblies()
+            .FirstOrDefault(a => (a.GetName().Name ?? a.GetName().FullName) == "CustomRunOptions");
         Harmony = new Harmony("SaltyIsaac.CobaltCoreArchipelago");
         Harmony.PatchAll(Assembly.GetExecutingAssembly());
+        NewRunOptionsCustomPatch.MaybeApply(Harmony);
         Archipelago = new Archipelago();
         
         // Fill out static data

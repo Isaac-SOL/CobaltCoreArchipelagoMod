@@ -7,17 +7,21 @@ using Microsoft.Extensions.Logging;
 namespace CobaltCoreArchipelago.CustomRunOptionsPatches;
 
 // Prevent the "Custom" button from showing
-[HarmonyPatch]
 public class NewRunOptionsCustomPatch
 {
-    public static IEnumerable<MethodBase> TargetMethods()
+    public static void MaybeApply(Harmony harmony)
     {
-        return AccessTools.GetTypesFromAssembly(
-                AccessTools.AllAssemblies()
-                    .First(a => (a.GetName().Name ?? a.GetName().FullName) == "CustomRunOptions"))
-            .Where(type => type.Name == "NewRunOptionsButton" && type.Namespace == "Shockah.CustomRunOptions")
-            .SelectMany(type => type.GetMethods(AccessTools.all))
-            .Where(method => method.Name.StartsWith("NewRunOptions_"));
+        if (ModEntry.Instance.CROAssembly is not { } cro) return;
+        foreach (var method in AccessTools.GetTypesFromAssembly(cro)
+                     .Where(type => type.Name == "NewRunOptionsButton" && type.Namespace == "Shockah.CustomRunOptions")
+                     .SelectMany(type => type.GetMethods(AccessTools.all))
+                     .Where(method => method.Name.StartsWith("NewRunOptions_")))
+        {
+            harmony.Patch(
+                original: method,
+                prefix: typeof(NewRunOptionsCustomPatch).GetMethod(nameof(Prefix))
+            );
+        }
     }
 
     public static bool Prefix() => false;
