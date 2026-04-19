@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Reflection.Emit;
+using Archipelago.MultiClient.Net.Enums;
 using daisyowl.text;
 using HarmonyLib;
 using Nanoray.Shrike;
@@ -84,6 +85,35 @@ internal class RouteOverlay
                         ["compShouts", "character", deckKey],
                         catBackup: catBackup,
                         $"<c={Colors.LookupColor(deckKey) ?? 0xFFFFFFFF}>{CBU(item.ItemName)}</c>",
+                        $"<c={APColors.FromPlayerName(item.Player.Name)}>{CBU(item.Player.Name)}</c>"
+                    );
+                }
+                else if (Archipelago.ItemToMemory.TryGetValue(item.ItemName, out var deckMemory))
+                {
+                    var deckKey = deckMemory.Key();
+                    messageStr = AdaptiveShoutCache.GetLocalizedRandomLine(
+                        ["compShouts", "memory", deckKey],
+                        catBackup: catBackup,
+                        $"<c={APColors.Progression}>{CBU(item.ItemName)}</c>",
+                        $"<c={APColors.FromPlayerName(item.Player.Name)}>{CBU(item.Player.Name)}</c>",
+                        $"<c={Colors.LookupColor(deckKey)}>{CBU(Character.GetDisplayName(deckMemory, s))}</c>"
+                    );
+                }
+                else if ((item.Flags & ItemFlags.Trap) != ItemFlags.None)
+                {
+                    messageStr = AdaptiveShoutCache.GetLocalizedRandomLine(
+                        ["compShouts", "trap", item.ItemName],
+                        catBackup: catBackup,
+                        $"<c={APColors.Trap}>{CBU(item.ItemName)}</c>",
+                        $"<c={APColors.FromPlayerName(item.Player.Name)}>{CBU(item.Player.Name)}</c>"
+                    );
+                }
+                else if (item.Flags == ItemFlags.None)
+                {
+                    messageStr = AdaptiveShoutCache.GetLocalizedRandomLine(
+                        ["compShouts", "filler", item.ItemName],
+                        catBackup: catBackup,
+                        $"<c={APColors.Trap}>{CBU(item.ItemName)}</c>",
                         $"<c={APColors.FromPlayerName(item.Player.Name)}>{CBU(item.Player.Name)}</c>"
                     );
                 }

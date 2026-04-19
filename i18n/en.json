@@ -333,6 +333,49 @@
                     "1": "{0} DETECTED"
                 }
             }
+        },
+        "memory": {
+            "cat": {
+                "1": "{2} Memory!"
+            },
+            "backup": {
+                "1": "{2} MEMORY"
+            },
+            
+            "shard": {
+                "cat": {
+                    "1": "{2} Memory!"
+                },
+                "backup": {
+                    "1": "{2} MEMORY"
+                }
+            },
+            "colorless": {
+                "cat": {
+                    "1": "{2} Memory!"
+                },
+                "backup": {
+                    "1": "{2} MEMORY"
+                }
+            }
+        },
+        "filler": {
+            
+        },
+        "trap": {
+            "cat": {
+                "1": "Received trap {0} from {1}."
+            },
+            "backup": {
+                "1": "RECEIVED TRAP: {0}\nSENDER: {1}"
+            },
+            
+            "Missing Trap!": {
+                
+            },
+            "Shuffle Trap": {
+                
+            }
         }
     },
     "story": {
