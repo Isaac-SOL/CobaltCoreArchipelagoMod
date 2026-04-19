@@ -8,7 +8,7 @@ public class DialogueChoicePatch
 {
     public static void Prefix(G g, Choice opt, double yOffset)
     {
-        if (yOffset <= 60) return;
+        if (yOffset <= 50) return;
         var textRect = Draw.Text("> " + opt.label, 0.0, 0.0, maxWidth: 158.0, dontDraw: true);
         var choiceHeight = textRect.h + 6.0;
         var textBox = g.Push(rect: new Rect(-5.0, yOffset, 170.0, choiceHeight));
