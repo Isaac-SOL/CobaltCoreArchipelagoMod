@@ -292,6 +292,10 @@
                         "1": "{1} sent us something real strong, {0}!\nThis should hopefully help us big time during the loop.",
                         "2": "A big help just arrived from {1}, it's {0}!\nThat's a pretty big power boost, I'd say."
                     },
+                    "backup": {
+                        "1": "HIGH-VALUE CARGO (Class: <ItemName>) INCOMING.\nSENDER: {1}",
+                        "2": "ADVANCED PACKAGE RECEIVED: <ItemName>\nSENDER: {1}"
+                    },
                     
                     "drawback": {
                         "cat": {
@@ -395,13 +399,39 @@
                 "2": "DEPLOYED MEMORY ENHANCERS FOR {2}."
             },
             
+            "shard": {
+                "memory1": {
+                    "cat": {
+                        "1": "...Huh? Did Books really need the memory booster here too? \nDoubt {1} is a doctor, but if they think its important..."
+                    },
+                    "backup": {
+                        "1": "MEMORY ENHANCERS DEPLOYED FOR <c=shard>BOOKS</c>. ADAPTING TO UNKNOWN PHYSIOLOGY. "
+                    }
+                },
+                "memory2": {
+                    "cat": {
+                        "1": "Books got another memory booster over from {1}.\nI guess she does need those boosters after all...the temporalstream is weird."
+                    },
+                    "backup": {
+                        "1": "ADDITIONAL MEMORY ENHANCERS ADMINISTERED TO <c=shard>BOOKS</c>. ADAPTATION LEVELS 64.12%."
+                    }
+                },
+                "memory3": {
+                    "cat": {
+                        "1": "Look at that, one more memory booster for Books from {1}.\nNow is that enough, so I can stop questioning why she needs them??? "
+                    },
+                    "backup": {
+                        "1": "FINAL MEMORY ENHANCERS ADMINISTERED TO <c=shard>BOOKS</c>. FULLY ADAPTED."
+                    }
+                }
+            },
             "colorless": {
                 "memory1": {
                     "cat": {
                         "1": "What the...! One of my memory banks was already encrypted, and then DECRYPTED???\n{1} is responsible for that...and I feel like the Cobalt wants that."
                     },
                     "backup": {
-                        "1": "REQUEST FROM: {1}\nUNENCRYPTED: CAT MEMORY DATABANK 0x434F42414C54FFFF."
+                        "1": "REQUEST FROM: {1}\nUNENCRYPTED: <c=comp>CAT</c> MEMORY DATABANK 0x434F42414C54FFFF."
                     }
                 },
                 "memory2": {
@@ -409,7 +439,7 @@
                         "1": "Another memory bank unencrypted for me...why these in particular?\n...Hmm, well, if {1} wants us to visit the Cobalt for that, let's do it."
                     },
                     "backup": {
-                        "1": "REQUEST FROM: {1}\nUNENCRYPTED: CAT MEMORY DATABANK 0x434F524520594159."
+                        "1": "REQUEST FROM: {1}\nUNENCRYPTED: <c=comp>CAT</c> MEMORY DATABANK 0x434F524520594159."
                     }
                 },
                 "memory3": {
@@ -417,17 +447,35 @@
                         "1": "...Whoa. I just felt something....ephemeral. Whatever that means in the end,\nI believe {1} allowed me to visit the Cobalt to its fullest extent."
                     },
                     "backup": {
-                        "1": "REQUEST FROM: {1}\nACCESSING TEMPORAL UPLINK. FINAL CAT MEMORY??? ACCESSIBLE. "
+                        "1": "REQUEST FROM: {1}\nACCESSING TEMPORAL UPLINK. FINAL <c=comp>CAT</c> MEMORY??? ACCESSIBLE."
                     }
                 }
             }
         },
         
         "filler": {
-            
+            "cat": {
+                "1": "{1} sent us over...well, nothing, really? Just a minor boost. \nWould it be too greedy to hope for something more?",
+                "2": "Our generators got boosted a bit by {1}.\nDoesn't seem like we got anything else though...",
+                "3": "Small surge in power from {1}, but not much else.\nAt least we didn't get a trap or anything, so it's still appreciated, but..."
+            },
+            "backup": {
+                "1": "MINOR GENERATOR SURGE APPLIED.",
+                "2": "SMALL POWER BOOST ACTIVATED."
+            }
         },
         
         "trap": {
+            "cat": {
+                "1": "Would you look at that, {1} activated a {0} on us.\nNice!!! Maybe reconsider looking for one of their shiny anomalies!",
+                "2": "Wow! {1} decided to send us a {0}!\nAren't we supposed to be working together???",
+                "3": "Ugh, {1} launched a {0} through the temporalstream.\nLet's hope it doesn't mess with us too badly."
+            },
+            "backup": {
+                "1": "ALERT: SUBTERFUGE (Type: {0}) ACTIVATED",
+                "2": "ALERT: TROJAN (Name: {0}) DETECTED"
+            },
+            
             "revengeance": {
                 "cat": {
                     "1": "Yeeeeeah, you all know that prank we sent over to {1}?\nThey got their revenge with a {0}. Kinda deserved?",
@@ -474,7 +522,11 @@
         
         "modifier": {
             "cat": {
-                "1": "Ah,\nNow it seems like we have {0} to contend with..."
+                "1": "Huh??? Now we have {0} to contend with...\n{1} is shaking things up, but I'm not sure if I like that!",
+                "2": "Hey, is {1} secretly working with Books or something?\n{0} was just applied to us, and I didn't expect her chaos here!"
+            },
+            "backup": {
+                "1": "ALERT: {0} ACTIVATED. ADJUSTING LOOP PARAMETERS. "
             }
         }
     },
