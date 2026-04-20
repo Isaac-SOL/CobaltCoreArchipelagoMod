@@ -41,109 +41,45 @@ internal class RouteOverlay
     internal void Render(G g, State s)
     {
         var catBackup = CompIsBackup(s);
-        string CBU(string str) => catBackup ? str.ToUpperInvariant() : str;
-        
-        if (Archipelago.Instance.MessagesToAnnounce.Count > 0)
+
+        var messageCount = Archipelago.Instance.MessagesToAnnounce.Count;
+        if (messageCount > 0)
         {
             if (currentShout is null)
             {
-                // There is a message to display and no message currently being shown:
-                // Load the message as a string. This is run only once per message
-                var message = Archipelago.Instance.MessagesToAnnounce[0];
-                var item = message.item!;
-                string messageStr;
-                if (message.type == MessageToAnnounce.DeathlinkReceived)
+                // There is a message to display and no message currently being shown
+                if (messageCount > 10)
                 {
-                    messageStr = AdaptiveShoutCache.GetLocalizedRandomLine(
-                        ["compShouts", "deathlink"],
-                        catBackup: catBackup,
-                        $"<c={APColors.OtherPlayer}>{CBU(message.deathlink!.Source)}</c>",
-                        CBU(message.deathlink!.Cause)
-                    );
-                }
-                else if (Archipelago.ItemToCard.TryGetValue(item.ItemName, out var cardType))
-                {
-                    var cardDeck = DB.cardMetas[cardType.Name].deck;
-                    messageStr = AdaptiveShoutCache.GetLocalizedRandomLine(
-                        ["compShouts", "card", "character"],
-                        catBackup: catBackup,
-                        $"<c=card>{CBU(item.ItemName)}</c>",
-                        $"<c={APColors.FromPlayerName(item.Player.Name)}>{CBU(item.Player.Name)}</c>",
-                        $"<c={Colors.LookupColor(cardDeck.Key())}>{CBU(Character.GetDisplayName(cardDeck, s))}</c>"
-                    );
-                }
-                else if (Archipelago.ItemToArtifact.TryGetValue(item.ItemName, out var artifactType))
-                {
-                    List<string> key = ["compShouts", "artifact"];
-                    if (DB.artifactMetas[artifactType.Name].pools.Contains(ArtifactPool.Boss))
-                        key.Add("boss");
-                    if (ArtifactValidForAddition(s, artifactType, item.ItemName, item.Player.Name))
+                    // There are A LOT of messages to display.
+                    // We display a standard message instead and empty the queue
+                    string CBU(string str) => catBackup ? str.ToUpperInvariant() : str;
+
+                    var playerCount = Archipelago.Instance.MessagesToAnnounce
+                        .GroupBy(message => message.item?.Player.Name ?? message.deathlink!.Source)
+                        .Select(grouping => (player: grouping.Key, count: grouping.Count()))
+                        .ToList();
+                    playerCount.Sort((t1, t2) => t1.count - t2.count);
+                    var highestPlayer = playerCount[^1];
+                    currentShout = new APShout
                     {
-                        key.Add("instant");
-                        if (artifactsWithDrawbacks.Contains(item.ItemName))
-                            key.Add("drawback");
-                    }
-                    key.Add(item.ItemName);
-                    messageStr = AdaptiveShoutCache.GetLocalizedRandomLine(
-                        key.ToArray(),
-                        catBackup: catBackup,
-                        $"<c=artifact>{CBU(item.ItemName)}</c>",
-                        $"<c={APColors.FromPlayerName(item.Player.Name)}>{CBU(item.Player.Name)}</c>"
-                    );
-                }
-                else if (Archipelago.ItemToDeck.TryGetValue(item.ItemName, out var deck))
-                {
-                    var deckKey = deck.Key();
-                    messageStr = AdaptiveShoutCache.GetLocalizedRandomLine(
-                        ["compShouts", "character", deckKey],
-                        catBackup: catBackup,
-                        $"<c={Colors.LookupColor(deckKey) ?? 0xFFFFFFFF}>{CBU(item.ItemName)}</c>",
-                        $"<c={APColors.FromPlayerName(item.Player.Name)}>{CBU(item.Player.Name)}</c>"
-                    );
-                }
-                else if (Archipelago.ItemToMemory.TryGetValue(item.ItemName, out var deckMemory))
-                {
-                    var deckKey = deckMemory.Key();
-                    messageStr = AdaptiveShoutCache.GetLocalizedRandomLine(
-                        ["compShouts", "memory", deckKey],
-                        catBackup: catBackup,
-                        $"<c={APColors.Progression}>{CBU(item.ItemName)}</c>",
-                        $"<c={APColors.FromPlayerName(item.Player.Name)}>{CBU(item.Player.Name)}</c>",
-                        $"<c={Colors.LookupColor(deckKey)}>{CBU(Character.GetDisplayName(deckMemory, s))}</c>"
-                    );
-                }
-                else if ((item.Flags & ItemFlags.Trap) != ItemFlags.None)
-                {
-                    messageStr = AdaptiveShoutCache.GetLocalizedRandomLine(
-                        ["compShouts", "trap", item.ItemName],
-                        catBackup: catBackup,
-                        $"<c={APColors.Trap}>{CBU(item.ItemName)}</c>",
-                        $"<c={APColors.FromPlayerName(item.Player.Name)}>{CBU(item.Player.Name)}</c>"
-                    );
-                }
-                else if (item.Flags == ItemFlags.None)
-                {
-                    messageStr = AdaptiveShoutCache.GetLocalizedRandomLine(
-                        ["compShouts", "filler", item.ItemName],
-                        catBackup: catBackup,
-                        $"<c={APColors.Trap}>{CBU(item.ItemName)}</c>",
-                        $"<c={APColors.FromPlayerName(item.Player.Name)}>{CBU(item.Player.Name)}</c>"
-                    );
+                        message = AdaptiveShoutCache.GetLocalizedRandomLine(
+                            highestPlayer.count / (double)messageCount > 0.7
+                                ? ["compShouts", "overflow", "oneSender"]
+                                : ["compShouts", "overflow"],
+                            catBackup: catBackup,
+                            $"<c={APColors.FromPlayerName(highestPlayer.player)}>{CBU(highestPlayer.player)}</c>"
+                        )
+                    };
+                    Archipelago.Instance.MessagesToAnnounce.Clear();
                 }
                 else
                 {
-                    messageStr = AdaptiveShoutCache.GetLocalizedRandomLine(
-                        ["compShouts"],
-                        catBackup: catBackup,
-                        $"<c={APColors.FromFlags(item.Flags)}>{CBU(item.ItemName)}</c>",
-                        $"<c={APColors.FromPlayerName(item.Player.Name)}>{CBU(item.Player.Name)}</c>"
-                    );
+                    // Display the message for one item (only loaded once per message)
+                    currentShout = new APShout
+                    {
+                        message = GetMessageForNextQueuedItem(s, catBackup)
+                    };
                 }
-                currentShout = new APShout
-                {
-                    message = messageStr
-                };
-                Archipelago.Instance.MessagesToAnnounce.RemoveAt(0);
             }
             else
             {
@@ -171,6 +107,106 @@ internal class RouteOverlay
                 showStem: CompRenderPostfix.CanShowText(g)
             );
         }
+    }
+    
+    // Load the message as a string. This is run only once per message
+    private static string GetMessageForNextQueuedItem(State s, bool catBackup)
+    {
+        string CBU(string str) => catBackup ? str.ToUpperInvariant() : str;
+        
+        var message = Archipelago.Instance.MessagesToAnnounce[0];
+        Archipelago.Instance.MessagesToAnnounce.RemoveAt(0);
+        var item = message.item!;
+        string messageStr;
+        if (message.type == MessageToAnnounce.DeathlinkReceived)
+        {
+            messageStr = AdaptiveShoutCache.GetLocalizedRandomLine(
+                ["compShouts", "deathlink"],
+                catBackup: catBackup,
+                $"<c={APColors.OtherPlayer}>{CBU(message.deathlink!.Source)}</c>",
+                CBU(message.deathlink!.Cause)
+            );
+        }
+        else if (Archipelago.ItemToCard.TryGetValue(item.ItemName, out var cardType))
+        {
+            var cardDeck = DB.cardMetas[cardType.Name].deck;
+            messageStr = AdaptiveShoutCache.GetLocalizedRandomLine(
+                ["compShouts", "card", "character"],
+                catBackup: catBackup,
+                $"<c=card>{CBU(item.ItemName)}</c>",
+                $"<c={APColors.FromPlayerName(item.Player.Name)}>{CBU(item.Player.Name)}</c>",
+                $"<c={Colors.LookupColor(cardDeck.Key())}>{CBU(Character.GetDisplayName(cardDeck, s))}</c>"
+            );
+        }
+        else if (Archipelago.ItemToArtifact.TryGetValue(item.ItemName, out var artifactType))
+        {
+            List<string> key = ["compShouts", "artifact"];
+            if (DB.artifactMetas[artifactType.Name].pools.Contains(ArtifactPool.Boss))
+                key.Add("boss");
+            if (ArtifactValidForAddition(s, artifactType, item.ItemName, item.Player.Name))
+            {
+                key.Add("instant");
+                if (artifactsWithDrawbacks.Contains(item.ItemName))
+                    key.Add("drawback");
+            }
+            key.Add(item.ItemName);
+            messageStr = AdaptiveShoutCache.GetLocalizedRandomLine(
+                key.ToArray(),
+                catBackup: catBackup,
+                $"<c=artifact>{CBU(item.ItemName)}</c>",
+                $"<c={APColors.FromPlayerName(item.Player.Name)}>{CBU(item.Player.Name)}</c>"
+            );
+        }
+        else if (Archipelago.ItemToDeck.TryGetValue(item.ItemName, out var deck))
+        {
+            var deckKey = deck.Key();
+            messageStr = AdaptiveShoutCache.GetLocalizedRandomLine(
+                ["compShouts", "character", deckKey],
+                catBackup: catBackup,
+                $"<c={Colors.LookupColor(deckKey) ?? 0xFFFFFFFF}>{CBU(item.ItemName)}</c>",
+                $"<c={APColors.FromPlayerName(item.Player.Name)}>{CBU(item.Player.Name)}</c>"
+            );
+        }
+        else if (Archipelago.ItemToMemory.TryGetValue(item.ItemName, out var deckMemory))
+        {
+            var deckKey = deckMemory.Key();
+            messageStr = AdaptiveShoutCache.GetLocalizedRandomLine(
+                ["compShouts", "memory", deckKey],
+                catBackup: catBackup,
+                $"<c={APColors.Progression}>{CBU(item.ItemName)}</c>",
+                $"<c={APColors.FromPlayerName(item.Player.Name)}>{CBU(item.Player.Name)}</c>",
+                $"<c={Colors.LookupColor(deckKey)}>{CBU(Character.GetDisplayName(deckMemory, s))}</c>"
+            );
+        }
+        else if ((item.Flags & ItemFlags.Trap) != ItemFlags.None)
+        {
+            messageStr = AdaptiveShoutCache.GetLocalizedRandomLine(
+                ["compShouts", "trap", item.ItemName],
+                catBackup: catBackup,
+                $"<c={APColors.Trap}>{CBU(item.ItemName)}</c>",
+                $"<c={APColors.FromPlayerName(item.Player.Name)}>{CBU(item.Player.Name)}</c>"
+            );
+        }
+        else if (item.Flags == ItemFlags.None)
+        {
+            messageStr = AdaptiveShoutCache.GetLocalizedRandomLine(
+                ["compShouts", "filler", item.ItemName],
+                catBackup: catBackup,
+                $"<c={APColors.Trap}>{CBU(item.ItemName)}</c>",
+                $"<c={APColors.FromPlayerName(item.Player.Name)}>{CBU(item.Player.Name)}</c>"
+            );
+        }
+        else
+        {
+            messageStr = AdaptiveShoutCache.GetLocalizedRandomLine(
+                ["compShouts"],
+                catBackup: catBackup,
+                $"<c={APColors.FromFlags(item.Flags)}>{CBU(item.ItemName)}</c>",
+                $"<c={APColors.FromPlayerName(item.Player.Name)}>{CBU(item.Player.Name)}</c>"
+            );
+        }
+
+        return messageStr;
     }
 
     private static bool ArtifactValidForAddition(State state, Type artifactType, string itemName, string itemSender)

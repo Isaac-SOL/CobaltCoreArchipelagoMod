@@ -237,6 +237,28 @@
             }
         },
         
+        "overflow": {
+            "cat": {
+                "1": "Okay we just received a bunch of stuff all at once,\nI'm not reading all that.",
+                "2": "Wow, uh, that's a LOT of cargo,\nI'll just let y'all sort through it yourselves.",
+                "3": "Stay calm everyone, but we just got sent a very, VERY BIG package.\nI'll be busy stabilizing the... uh... everything."
+            },
+            "backup": {
+                "1": "ALERT: RECEIVED PACKAGE SIZE EXCEEDING STANDARD LIMITS,\nITEM STACK WRITTEN TO MAIN LOG."
+            },
+            
+            "oneSender": {
+                "cat": {
+                    "1": "Okay we just received a bunch of stuff from {0},\nI'm not reading all that.",
+                    "2": "Wow, uh, {0}, that's a LOT of cargo,\nI'll just let y'all sort through it yourselves.",
+                    "3": "Stay calm everyone, but {0} just sent us a very, VERY BIG package.\nI'll be busy stabilizing the... uh... everything."
+                },
+                "backup": {
+                    "1": "ALERT: RECEIVED PACKAGE SIZE EXCEEDING STANDARD LIMITS,\nSENDER: {0}. ITEM STACK WRITTEN TO MAIN LOG."
+                }
+            }
+        },
+        
         "card": {
             "cat": {
                 "1": "Received card {0} from {1}."
