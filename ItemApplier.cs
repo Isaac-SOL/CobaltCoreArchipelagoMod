@@ -123,7 +123,8 @@ public static class ItemApplier
                 var newArtifact = (Artifact)artifact.CreateInstance();
                 var newArtifactMeta = newArtifact.GetMeta();
                 var local = item.sender == Archipelago.Instance.APSaveData.Slot;
-                var hasDeck = state.characters.Any(character => character.deckType == newArtifactMeta.owner);
+                var hasDeck = newArtifactMeta.owner == Deck.colorless
+                              || state.characters.Any(character => character.deckType == newArtifactMeta.owner);
                 if (slotData.ImmediateArtifactRewards switch
                     {
                         CardRewardsMode.IfLocal => local,
