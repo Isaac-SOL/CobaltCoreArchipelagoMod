@@ -262,6 +262,23 @@
                 "cat": {
                     "1": "Received and installed artifact {0} from {1}."
                 }
+            },
+            "boss": {
+                "cat": {
+                    "1": ""
+                },
+                
+                "instant": {
+                    "cat": {
+                        "1": ""
+                    },
+                    
+                    "drawback": {
+                        "cat": {
+                            "1": ""
+                        }
+                    }
+                }
             }
         },
         "character": {

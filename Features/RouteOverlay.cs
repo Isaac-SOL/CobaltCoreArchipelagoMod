@@ -14,6 +14,12 @@ namespace CobaltCoreArchipelago.Features;
 internal class RouteOverlay
 {
     internal static Spr CatMiniTalkingSpr;
+
+    internal static HashSet<string> artifactsWithDrawbacks =
+    [
+        "Glass Cannon", "Dirty Engines", "Genesis", "Hi Freq Intercom", "Prototype 22", "Demon Thrusters",
+        "Power Diversion", "Berserker Drive", "Thermo Reactor", "Tridimensional Cockpit"
+    ];
     
     internal APShout? currentShout;
     
@@ -69,8 +75,15 @@ internal class RouteOverlay
                 else if (Archipelago.ItemToArtifact.TryGetValue(item.ItemName, out var artifactType))
                 {
                     List<string> key = ["compShouts", "artifact"];
+                    if (DB.artifactMetas[artifactType.Name].pools.Contains(ArtifactPool.Boss))
+                        key.Add("boss");
                     if (ArtifactValidForAddition(s, artifactType, item.ItemName, item.Player.Name))
+                    {
                         key.Add("instant");
+                        if (artifactsWithDrawbacks.Contains(item.ItemName))
+                            key.Add("drawback");
+                    }
+                    key.Add(item.ItemName);
                     messageStr = AdaptiveShoutCache.GetLocalizedRandomLine(
                         key.ToArray(),
                         catBackup: catBackup,
