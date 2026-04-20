@@ -92,7 +92,7 @@ internal class RouteOverlay
             currentShout = null;
         if (currentShout is not null && currentShout.delay == 0.0)
         {
-            var textRect = Draw.Text(currentShout.message, 0, 0, maxWidth: 230.0, align: TAlign.Left, dontDraw: true);
+            var textRect = Draw.Text(currentShout.message, 0, 0, maxWidth: 300.0, align: TAlign.Left, dontDraw: true);
             var yOffset = Math.Max(textRect.h - 14.0, 0);
             Blurbs.Render(
                 g,
@@ -103,7 +103,7 @@ internal class RouteOverlay
                 progress: currentShout.progress,
                 textColor: Colors.textBold,
                 borderColor: DB.decks[Deck.colorless].color,
-                maxWidth: 230.0,
+                maxWidth: 300.0,
                 showStem: CompRenderPostfix.CanShowText(g)
             );
         }
@@ -157,6 +157,15 @@ internal class RouteOverlay
                 $"<c={APColors.FromPlayerName(item.Player.Name)}>{CBU(item.Player.Name)}</c>"
             );
         }
+        else if (Archipelago.ItemToModifier.TryGetValue(item.ItemName, out var modifierType))
+        {
+            messageStr = AdaptiveShoutCache.GetLocalizedRandomLine(
+                ["compShouts", "modifier", item.ItemName],
+                catBackup: catBackup,
+                $"<c=artifact>{CBU(item.ItemName)}</c>",
+                $"<c={APColors.FromPlayerName(item.Player.Name)}>{CBU(item.Player.Name)}</c>"
+            );
+        }
         else if (Archipelago.ItemToDeck.TryGetValue(item.ItemName, out var deck))
         {
             var deckKey = deck.Key();
@@ -170,12 +179,17 @@ internal class RouteOverlay
         else if (Archipelago.ItemToMemory.TryGetValue(item.ItemName, out var deckMemory))
         {
             var deckKey = deckMemory.Key();
+            var memCount = Vault.GetVaultMemories(s)
+                .FirstOrDefault(memSet => memSet.deck == deckMemory)
+                ?.memoryKeys
+                .Count(entry => entry.unlocked) ?? 0;
             messageStr = AdaptiveShoutCache.GetLocalizedRandomLine(
                 ["compShouts", "memory", deckKey],
                 catBackup: catBackup,
                 $"<c={APColors.Progression}>{CBU(item.ItemName)}</c>",
                 $"<c={APColors.FromPlayerName(item.Player.Name)}>{CBU(item.Player.Name)}</c>",
-                $"<c={Colors.LookupColor(deckKey)}>{CBU(Character.GetDisplayName(deckMemory, s))}</c>"
+                $"<c={Colors.LookupColor(deckKey)}>{CBU(Character.GetDisplayName(deckMemory, s))}</c>",
+                $"memory{memCount}"
             );
         }
         else if ((item.Flags & ItemFlags.Trap) != ItemFlags.None)
@@ -216,7 +230,8 @@ internal class RouteOverlay
         var newArtifact = (Artifact)artifactType.CreateInstance();
         var newArtifactMeta = newArtifact.GetMeta();
         var local = itemSender == Archipelago.Instance.APSaveData.Slot;
-        var hasDeck = state.characters.Any(character => character.deckType == newArtifactMeta.owner);
+        var hasDeck = newArtifactMeta.owner == Deck.colorless
+                      || state.characters.Any(character => character.deckType == newArtifactMeta.owner);
         return Archipelago.InstanceSlotData.ImmediateArtifactRewards switch
             {
                 CardRewardsMode.IfLocal => local,

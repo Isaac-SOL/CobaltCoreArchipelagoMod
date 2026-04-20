@@ -222,15 +222,19 @@
     },
     "compShouts": {
         "cat": {
-            "1": "Received {0} from {1}."
+            "1": "Detecting a spatial rift made by {1}!\nLooks like we've got {0} now, sweet.",
+            "2": "Ah, looks like {1} sent us {0}.\nShould come in handy if we use it.",
+            "3": "We've recieved {0} over from {1}!\nHopefully we can use it to its full potential. "
         },
         "backup": {
-            "1": "TEMPORAL RIFT DETECTED. RECEIVED: {0}\nSENDER: {1}"
+            "1": "CARGO (Class: {0}) INCOMING.\nSENDER: {1}",
+            "2": "STANDARD PACKAGE RECEIVED: {0}\nSENDER: {1}",
+            "3": "TEMPORAL RIFT DETECTED. RECEIVED: {0}\nSENDER: {1}"
         },
         
         "deathlink": {
             "cat": {
-                "1": "Received deathlink from {0} with cause: {1}."
+                "1": "We just got hit by a deathlink from {0}!\nIt was caused by: {1}."
             },
             "backup": {
                 "1": "RECEIVED DEATHLINK. CAUSE: {0}\nSENDER: {1}"
@@ -260,160 +264,217 @@
         },
         
         "card": {
-            "cat": {
-                "1": "Received card {0} from {1}."
-            },
-            "backup": {
-                "1": "RECEIVED CARD: {0}\nSENDER: {1}"
-            },
-            
             "character": {
                 "cat": {
-                    "1": "Received card for {2}: {0} from {1} (line 1).",
-                    "2": "Received card for {2}: {0} from {1} (line 2).",
-                    "3": "Received card for {2}: {0} from {1} (line 3)."
+                    "1": "{2}, you got {0}.\nMake sure to thank {1} for that.",
+                    "2": "Oh, we've received {0} for {2}!\nAppreciated, {1}.",
+                    "3": "We've received {0} from {1}.\nLooks like {2} remembers a little more..."
                 }
             }
         },
         "artifact": {
             "cat": {
-                "1": "Received artifact {0} from {1}."
+                "1": "{0} got sent to us by {1}.\nWe'll able to use it in the future!",
+                "2": "{1} sent us over the drivers on {0}.\nIt'll be compatible with whatever ship we have in the future.",
+                "3": "Oh, check the logs, {1} added {0} to them.\nIf we find it somewhere in one of the sectors, it won't be useless!"
             },
             
             "instant": {
                 "cat": {
-                    "1": "Received and installed artifact {0} from {1}."
+                    "1": "Looks like we got {0} from {1}!\nIt's already been synced with our systems, neat!",
+                    "2": "...Huh? Looks like we have {0} now.\nAppreciate it, {1}!",
+                    "3": "Oh, power surge! Looks like we've got {0} \nready, thanks to {1}."
                 }
             },
             "boss": {
-                "cat": {
-                    "1": ""
-                },
-                
                 "instant": {
                     "cat": {
-                        "1": ""
+                        "1": "{1} sent us something real strong, {0}!\nThis should hopefully help us big time during the loop.",
+                        "2": "A big help just arrived from {1}, it's {0}!\nThat's a pretty big power boost, I'd say."
                     },
                     
                     "drawback": {
                         "cat": {
-                            "1": ""
+                            "1": "Whoa, big surge of power from {1}!\nWe got {0} ready now, hope we're fine with the drawbacks!"
                         }
                     }
                 }
             }
         },
+        
         "character": {
             "cat": {
-                "1": "{0} is here!"
+                "1": "Whoa, we've just got a cryo-pod filled up out of nowhere...or wait, it's from {1}.\nWell, should we welcome {0} aboard for the next loop?",
+                "2": "Hey, looks like {0} is here, just in a cryo-pod now.\nYou can thank {1} for that."
+            },
+            "backup": {
+                "1": "DETECTED: CREWMATE {0} ON STANDBY FROM {1}"
             },
             
             "dizzy": {
                 "cat": {
-                    "1": "{0} is here!"
+                    "1": "Better steady up, since Dizzy's on deck thanks to {1}!\nGet it? Steady up. 'Cause it's Dizzy...I'm glad he can't hear me right now.",
+                    "2": "Heads-up from {1}, Dizzy's now part of the crew for later!\nMake sure there aren't any too many big glowy buttons in the next ship."
                 },
                 "backup": {
-                    "1": "{0} DETECTED"
+                    "1": "DETECTED: RESEARCHER <c=dizzy>DIZZY</c> ON STANDBY  FROM {1}.\nREBOOTING ON-BOARD LABRATORY."
                 }
             },
             "riggs": {
                 "cat": {
-                    "1": "{0} is here!"
+                    "1": "Status report, Riggs is here with {1}'s intervention!\nDid we ever get that hand cannon of her's back from the spacial?",
+                    "2": "Hey, Riggs is next-loop ready with the help of {1}.\nMaybe I should prepare some boba as a little treat..."
                 },
                 "backup": {
-                    "1": "{0} DETECTED"
+                    "1": "DETECTED: PILOT <c=riggs>RIGGS</c> ON STANDBY FROM {1}.\nPREPARING TAPIOCA FOR FUTURE CONSUMPTION."
                 }
             },
             "peri": {
                 "cat": {
-                    "1": "{0} is here!"
+                    "1": "Peri's ready to go now, since {1} helped out.\n...Though actually, she really needs the nap, so wait until the next loop?",
+                    "2": "Hey, Peri's on-standby now, thanks {1}!\nShe'll be happy to get her hands on some firing solutions."
                 },
                 "backup": {
-                    "1": "{0} DETECTED"
+                    "1": "DETECTED: CAPTAIN <c=peri>HYPERIA</c> ON STANDBY FROM {1}.\nUPDATING WEAPON CALIBRATION PREFERENCES."
                 }
             },
             "goat": {
                 "cat": {
-                    "1": "{0} is here!"
+                    "1": "Oh, {1} just managed to link us back up with Isaac!\nThe drone bay was kind of collecting dust, overall.",
+                    "2": "Isaac's back in action, since {1} worked some spacial magic."
                 },
                 "backup": {
-                    "1": "{0} DETECTED"
+                    "1": "DETECTED: ENGINEER <c=goat>ISAAC</c> ON STANDBY FROM {1}.\nINITIALIZING DRONE BAY STERILIZATION."
                 }
             },
             "eunice": {
                 "cat": {
-                    "1": "{0} is here!"
+                    "1": "Oh boy, looks like Drake is back due to {1}...\nMaking a reminder to invest in some more fire suppression for later.",
+                    "2": "I think {1} touched the thermostat, because Drake is on-board now.\nWe'll need to turn the A/C on full-blast once she unthaws."
                 },
                 "backup": {
-                    "1": "{0} DETECTED"
+                    "1": "ALERT: MARAUDER <c=eunice>DRAKE</c> ON-BOARD FROM {1}.\nERROR: AIRLOCK SYSTEM DISABLED. CANNOT ASPHYXIATE."
                 }
             },
             "hacker": {
                 "cat": {
-                    "1": "{0} is here!"
+                    "1": "We've got Max on-board now because of {1}!\nJust going to ignore the requested Max wanted to play for that occasion.",
+                    "2": "Sweet, looks like Max has joined us in cryosleep thanks to {1}.\n...He wanted me to play a recording when he arrived but naaaaah."
                 },
                 "backup": {
-                    "1": "{0} DETECTED"
+                    "1": "AUDIO PLAYBACK INITIATED FROM {1} FOR <c=hacker>MAX</c>.\n\"Yeah, neighborhood hacker here. Going to take a quick nap, but wake me up whenever!\""
                 }
             },
             "shard": {
                 "cat": {
-                    "1": "{0} is here!"
+                    "1": "Oh nice, Books is back thanks to {1}...\nOr maybe she just warped back in all by herself...right into the cryo pod.",
+                    "2": "Hey, Books is here now! She wants her regards to be sent to\n{1}...so uh, regards sent?"
                 },
                 "backup": {
-                    "1": "{0} DETECTED"
+                    "1": "TEMPORAL ANAMOLY DETECTED FROM {1}.\nDESIGNATION: <c=shard>BOOKS.</c> TEMPORARY PERMISSIONS GRANTED."
                 }
             },
             "colorless": {
                 "cat": {
-                    "1": "{0} is here!"
+                    "1": "qqqWkeajhg-------d-s23123!!!!!-11111!!!!!...\n...Oh cool, {1} gave me manual overrides to our ships, thanks!",
+                    "2": "{1}<c=keyword>@AP~REMOTE</c>: <c=healthBarShield>~</c>/CC CAT.EXE -unlock\nLog: Successfully unlocked <c=comp>CAT</c> for use in run-- WHAT???"
                 },
                 "backup": {
-                    "1": "{0} DETECTED"
+                    "1": "ERROR: <c=comp>CAT</c> MATRIX UNRECOVERABLE DESPITE {1}\nINSTATING TEMPORAL FLAG FOR STANDARD CREW ACCESS; GRANTED."
                 }
             }
         },
+        
         "memory": {
             "cat": {
-                "1": "{2} Memory!"
+                "1": "Looks like {1} helped abate some of {2}'s amnesia.\nI'm still wondering how that's even possible, but we can make progress!",
+                "2": "{1} worked some magic, and {2} is able\nto remember better. Let's get them to the Cobalt when we can!"
             },
             "backup": {
-                "1": "{2} MEMORY"
+                "1": "MNESTICS APPLIED TO {2}, AMNESIA DAMPENED.",
+                "2": "DEPLOYED MEMORY ENHANCERS FOR {2}."
             },
             
-            "shard": {
-                "cat": {
-                    "1": "{2} Memory!"
-                },
-                "backup": {
-                    "1": "{2} MEMORY"
-                }
-            },
             "colorless": {
-                "cat": {
-                    "1": "{2} Memory!"
+                "memory1": {
+                    "cat": {
+                        "1": "What the...! One of my memory banks was already encrypted, and then DECRYPTED???\n{1} is responsible for that...and I feel like the Cobalt wants that."
+                    },
+                    "backup": {
+                        "1": "REQUEST FROM: {1}\nUNENCRYPTED: CAT MEMORY DATABANK 0x434F42414C54FFFF."
+                    }
                 },
-                "backup": {
-                    "1": "{2} MEMORY"
+                "memory2": {
+                    "cat": {
+                        "1": "Another memory bank unencrypted for me...why these in particular?\n...Hmm, well, if {1} wants us to visit the Cobalt for that, let's do it."
+                    },
+                    "backup": {
+                        "1": "REQUEST FROM: {1}\nUNENCRYPTED: CAT MEMORY DATABANK 0x434F524520594159."
+                    }
+                },
+                "memory3": {
+                    "cat": {
+                        "1": "...Whoa. I just felt something....ephemeral. Whatever that means in the end,\nI believe {1} allowed me to visit the Cobalt to its fullest extent."
+                    },
+                    "backup": {
+                        "1": "REQUEST FROM: {1}\nACCESSING TEMPORAL UPLINK. FINAL CAT MEMORY??? ACCESSIBLE. "
+                    }
                 }
             }
         },
+        
         "filler": {
             
         },
+        
         "trap": {
-            "cat": {
-                "1": "Received trap {0} from {1}."
-            },
-            "backup": {
-                "1": "RECEIVED TRAP: {0}\nSENDER: {1}"
+            "revengeance": {
+                "cat": {
+                    "1": "Yeeeeeah, you all know that prank we sent over to {1}?\nThey got their revenge with a {0}. Kinda deserved?",
+                    "2": "Welp! {1} got their vengeance on us with a {0}.\nWho could've guessed that would've happened???",
+                    "3": "Woop woop woop! Alert alert, we just had a {0} impact us!\nIt was sent by {1}...who we messed with earlier. Coincidence???"
+                }
             },
             
+            "Canister Trap": {
+                "cat": {
+                    "once1": "Oh hey, {1} sent us a bunch of cargo!\n...Wait, it's way too much cargo...and they're all EMPTY?????",
+                    "1": "{1} just sent us a Genesis package. After taking what was\ninside and leaving us the boxes. Wow!!! Thanks!!!",
+                    "2": "Detecting a spacial rift made by {1}!\nLooks like we've got...got...trash. It was a bunch of containers. Great!!!"
+                },
+                "backup": {
+                    "1": "ALERT: GENESIS DELIVERY ACCEPTED. CARGO CONTENTS: N/A",
+                    "2": "ALERT: RECEIVED A COPY OF BIG RIGS: OVER THE ROAD RACING",
+                    "3": "ALERT: RECEIVED ONE WITH NOTHING, BARBARIAN HUT, AND SNAKEBITE."
+                }
+            },
             "Missing Trap!": {
-                
+                "cat": {
+                    "once1": "{1} sent us a Missing Trap...like the trap is missing?\nSeems like we should be perfectly fine then! ...Wait a second.",
+                    "1": "And one of us just got poofed because of {1}.\nWell, good thing it can't be me this time around!!!",
+                    "2": "Ah, one of the crew just vanished! ...{1} was reponsible\nfor that. Maybe we should send them something 'good' as a thank you!"
+                },
+                "backup": {
+                    "1": "ALERT: MINIATURE POCKET DIMENSION ON-BOARD.",
+                    "2": "ALERT: CREW MEMBER MOMENTARILY ON SHORE LEAVE."
+                }
             },
             "Shuffle Trap": {
-                
+                "cat": {
+                    "1": "Wow, I didn't know {1} was a part of Sunshine Heavy Industries.\nBECAUSE THEY JUST MESSED UP OUR WHOLE SHIP!!!",
+                    "2": "What the...hey, {1} just screwed with our entire ship!\nThat girl from the shipyard must be cackling right now.",
+                    "3": "We just got shuffled up from {1}! \nHow would they like it if THEY got randomized around???"
+                },
+                "backup": {
+                    "1": "ALERT: EMERGENCY SWAPPING PROTOCOLS ACTIVATED.",
+                    "2": "ALERT: SHIP SHUFFLE MODE ACTIVATED."
+                }
+            }
+        },
+        
+        "modifier": {
+            "cat": {
+                "1": "Ah,\nNow it seems like we have {0} to contend with..."
             }
         }
     },
