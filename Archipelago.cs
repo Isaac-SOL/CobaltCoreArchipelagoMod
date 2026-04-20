@@ -470,7 +470,7 @@ public class Archipelago
         catch (SlotDataInvalidException e)
         {
             Logger.LogError("Received slot data is invalid for this version:\n{error}", e);
-            if (e is SlotDataVersionInvalidException)
+            if (e is SlotDataInvalidPreciseException)
             {
                 errorMessage = $"Error: {e.Message}";
             }
@@ -887,7 +887,7 @@ public enum ModifierShuffleMode
 
 public class SlotDataInvalidException(string message) : Exception(message);
 
-public class SlotDataVersionInvalidException(string message) : SlotDataInvalidException(message);
+public class SlotDataInvalidPreciseException(string message) : SlotDataInvalidException(message);
 
 public struct SlotDataHelper
 {
@@ -932,7 +932,7 @@ public struct SlotDataHelper
             var host_tag = Convert.ToString(slotData["version_tag"]);
             if (host_tag != expected_tag)
             {
-                throw new SlotDataVersionInvalidException(
+                throw new SlotDataInvalidPreciseException(
                     $"This version of the mod requires APWorld version tag {expected_tag}.\n" +
                     $"(Host version tag is {host_tag})");
             }
@@ -940,7 +940,7 @@ public struct SlotDataHelper
             res.CROIsInstalled = Convert.ToBoolean(slotData["cro_is_installed"]);
             if (res.CROIsInstalled && ModEntry.Instance.CROAssembly is null)
             {
-                throw new SlotDataVersionInvalidException(
+                throw new SlotDataInvalidPreciseException(
                     "The settings of this slot require the mod <c=card>\"Custom Run Options\"</c>, but it isn't installed." +
                     "\nEither install the mod, or re-generate with <c=card>cro_is_installed</c> set to <c=card>false</c> in your YAML settings.");
             }
@@ -1009,7 +1009,8 @@ public struct SlotDataHelper
         catch (Exception e)
         {
             ModEntry.Instance.Logger.LogError("{error}", e.Message);
-            if (e is SlotDataVersionInvalidException)
+            ModEntry.Instance.Logger.LogError("{stackTrace}", e.StackTrace);
+            if (e is SlotDataInvalidPreciseException)
                 throw;
             throw new SlotDataInvalidException(e.Message);
         }
