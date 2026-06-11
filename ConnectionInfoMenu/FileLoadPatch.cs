@@ -93,7 +93,7 @@ public class NewGamePatch
         var startingChars = Archipelago.InstanceSlotData.StartingCharacters;
         state.storyVars.unlockedChars = new HashSet<Deck>(startingChars);
         state.storyVars.unlockedShips = [Archipelago.InstanceSlotData.StartingShip];
-        state.runConfig.selectedChars = new HashSet<Deck>(startingChars);
+        state.runConfig.selectedChars = startingChars.Take(3).ToHashSet();
         state.runConfig.selectedShip = Archipelago.InstanceSlotData.StartingShip;
         // Based on Cheat.UnlockAllContent
         state.storyVars.winCount = 500;  // Forces vault button to be visible.
@@ -106,7 +106,7 @@ public class NewGamePatch
         foreach (var releasedArtifact in DB.releasedArtifacts)
             state.storyVars.artifactsOwned.Add(releasedArtifact); // Unlock the entire codex (artifacts)
         // Start a loop and end it immediately
-        state.PopulateRun(StarterShip.ships["artemis"], chars: startingChars);
+        state.PopulateRun(StarterShip.ships["artemis"], chars: startingChars.Take(3).ToList());
         state.storyVars.ResetAfterRun();
         state.ChangeRoute(() => new NewRunOptions());
         return state;
