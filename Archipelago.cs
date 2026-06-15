@@ -708,6 +708,7 @@ public class Archipelago
     internal void SafeUpdate(G g)
     {
         Debug.Assert(APSaveData != null, nameof(APSaveData) + " != null");
+        Debug.Assert(Session != null, nameof(Session) + " != null");
         
         var state = g.state;
         lock (itemReceivedLock)
@@ -717,11 +718,14 @@ public class Archipelago
             {
                 Logger.LogInformation("Received {item} from {player}", item.ItemName, item.Player.Name);
                 ItemApplier.ApplyReceivedItem((item.ItemName, item.Player.Name), state);
-                MessagesToAnnounce.Add(new MessageToAnnounce
+                if (item.Player.Slot != Session.Players.ActivePlayer.Slot)
                 {
-                    type = MessageToAnnounce.ItemReceived,
-                    item = item
-                });
+                    MessagesToAnnounce.Add(new MessageToAnnounce
+                    {
+                        type = MessageToAnnounce.ItemReceived,
+                        item = item
+                    });
+                }
             }
         }
 
