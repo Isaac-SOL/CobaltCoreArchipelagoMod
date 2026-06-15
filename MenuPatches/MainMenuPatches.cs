@@ -293,3 +293,14 @@ public class MainMenuPatch
         }
     }
 }
+
+[HarmonyPatch(typeof(SharedArt), nameof(SharedArt.MenuItem))]
+public class MainMenuProfileSelectPatch
+{
+    public static bool Prefix(ref Vec v, UIKey key)
+    {
+        if (key == StableUK.menu_settings || key == StableUK.menu_quit)
+            v.y -= 19;
+        return key != StableUK.menu_profile;
+    }
+}
