@@ -62,7 +62,10 @@ public class CheckLocationArtifact : Artifact, IRegisterable
             Archipelago.Instance.CheckLocation(locationName[i]!);
             // Tag players we sent a trap to
             if (locationItemColor[i] == APColors.Trap && locationSlotName[i] is { } playerName)
+            {
                 Archipelago.Instance.APSaveData.PeopleWeWronged.Add(playerName);
+                APSaveData.Save();
+            }
         }
     }
     

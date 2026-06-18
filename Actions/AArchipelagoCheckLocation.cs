@@ -41,7 +41,10 @@ public class AArchipelagoCheckLocation : CardAction
         Archipelago.Instance.CheckLocation(locationName);
         // Tag players we sent a trap to
         if (itemColor == APColors.Trap && receiverName is { } playerName)
+        {
             Archipelago.Instance.APSaveData.PeopleWeWronged.Add(playerName);
+            APSaveData.Save();
+        }
     }
     
     public override Icon? GetIcon(State s)
