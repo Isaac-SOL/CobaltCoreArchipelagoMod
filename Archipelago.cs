@@ -500,7 +500,9 @@ public class Archipelago
             EndRunShufflePatch.ShuffleStartingShipsInSave(new Rand(SlotDataHelper.Value.FixedRandSeed));
         
         // Loading/reloading existing runs: patch starting decks and ships
-        if (SlotDataHelper.Value.RandomizeStartingCards != FrequencyShuffleMode.Off)
+        if (SlotDataHelper.Value.RandomizeStartingCards == FrequencyShuffleMode.Off)
+            EndRunShufflePatch.ApplyNonRandomizedSoloSets();
+        else
             EndRunShufflePatch.ApplyShuffledStarterSets();
         if (SlotDataHelper.Value.ShuffleShipParts != FrequencyShuffleMode.Off)
             EndRunShufflePatch.ApplyShuffledStartingShips();

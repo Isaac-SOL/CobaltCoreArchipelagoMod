@@ -51,11 +51,17 @@ public static class EndRunShufflePatch
             ShuffleStarterSetsInSave(__instance.rngActions);
             ApplyShuffledStarterSets();
         }
+        else if (Archipelago.InstanceSlotData.RandomizeStartingCards == FrequencyShuffleMode.Off)
+        {
+            ApplyNonRandomizedSoloSets();
+        }
+        
         if (Archipelago.InstanceSlotData.ShuffleShipParts == FrequencyShuffleMode.EveryRun)
         {
             ShuffleStartingShipsInSave(__instance.rngActions);
             ApplyShuffledStartingShips();
         }
+        
         if (Archipelago.InstanceSlotData.ModifiersMode is not (ModifierShuffleMode.Immediate
             or ModifierShuffleMode.Off))
         {
@@ -157,6 +163,28 @@ public static class EndRunShufflePatch
             soloSet.cards = startingCards
                 .Take(4)
                 .Select(key => (Card)DB.cards[key].CreateInstance())
+                .Concat(soloBasics)
+                .ToList();
+        }
+    }
+
+    internal static void ApplyNonRandomizedSoloSets()
+    {
+        Debug.Assert(Archipelago.Instance.APSaveData != null, "Archipelago.Instance.APSaveData != null");
+        ModEntry.Instance.Logger.LogInformation("Applying tweak for non-random starting cards with less than 3 characters");
+        foreach (var deck in Archipelago.ItemToDeck.Values)
+        {
+            if (deck == Deck.colorless) continue;
+            var soloSet = SoloStarterDeck.soloStarterSets[deck];
+            var soloBasics = soloSet.cards.Where(IsBasic).ToList();
+            var soloSpecs = soloSet.cards
+                .Where(card => !IsBasic(card) && Archipelago.Instance.APSaveData.HasCardOrNotAP(card.GetType()))
+                .ToList();
+            soloSpecs.AddRange(new List<Card>(soloSpecs));
+            soloSpecs = soloSpecs.Take(4).ToList();
+            
+            soloSet.cards = soloSpecs
+                .Select(card => card.CopyWithNewId())
                 .Concat(soloBasics)
                 .ToList();
         }
