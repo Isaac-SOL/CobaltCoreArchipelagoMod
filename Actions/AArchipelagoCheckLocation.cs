@@ -31,10 +31,17 @@ public class AArchipelagoCheckLocation : CardAction
     public override void Begin(G g, State s, Combat c)
     {
         Debug.Assert(locationName != null, nameof(locationName) + " != null");
+        Debug.Assert(Archipelago.Instance.APSaveData != null, "Archipelago.Instance.APSaveData != null");
         // Can't undo an AP card with CombatQoL
         var combatQoL = ModEntry.Instance.CombatQol;
         combatQoL?.InvalidateUndos(c, ICombatQolApi.InvalidationReason.CUSTOM_REASON, Localize("cannotUndoReason"));
-        if (!combatQoL?.IsSimulating() ?? true) Archipelago.Instance.CheckLocation(locationName);
+        
+        if (!(!combatQoL?.IsSimulating() ?? true)) return;
+        
+        Archipelago.Instance.CheckLocation(locationName);
+        // Tag players we sent a trap to
+        if (itemColor == APColors.Trap && receiverName is { } playerName)
+            Archipelago.Instance.APSaveData.PeopleWeWronged.Add(playerName);
     }
     
     public override Icon? GetIcon(State s)

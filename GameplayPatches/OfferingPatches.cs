@@ -54,6 +54,11 @@ public class CardOfferingPatch
         bool isEvent)
     {
         Debug.Assert(Archipelago.Instance.APSaveData != null, "Archipelago.Instance.APSaveData != null");
+
+        ModEntry.Instance.Logger.LogDebug(
+            "Card reward pre-patch: {cardRewardPrePatch}",
+            __result.Select(card => card.ToString())
+        );
         
         if (!Archipelago.InstanceSlotData.ShuffleCards) return;
         
@@ -291,6 +296,11 @@ public class ArtifactOfferingPatch
         Rand? rngOverride)
     {
         Debug.Assert(Archipelago.Instance.APSaveData != null, "Archipelago.Instance.APSaveData != null");
+
+        ModEntry.Instance.Logger.LogDebug(
+            "Artifact reward pre-patch: {artifactRewardPrePatch}",
+            __result.Select(artifact => artifact.ToString())
+        );
         
         if (Archipelago.InstanceSlotData.ShuffleArtifacts == ArtifactShuffleMode.Off) return;
 

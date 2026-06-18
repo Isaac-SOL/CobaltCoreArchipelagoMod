@@ -112,6 +112,8 @@ internal class RouteOverlay
     // Load the message as a string. This is run only once per message
     private static string GetMessageForNextQueuedItem(State s, bool catBackup)
     {
+        Debug.Assert(Archipelago.Instance.APSaveData != null, "Archipelago.Instance.APSaveData != null");
+        
         string CBU(string str) => catBackup ? str.ToUpperInvariant() : str;
         
         var message = Archipelago.Instance.MessagesToAnnounce[0];
@@ -194,8 +196,11 @@ internal class RouteOverlay
         }
         else if ((item.Flags & ItemFlags.Trap) != ItemFlags.None)
         {
+            var peopleWeWronged = Archipelago.Instance.APSaveData.PeopleWeWronged;
+            var wronged = peopleWeWronged.Contains(item.Player.Name);
+            if (wronged) peopleWeWronged.Remove(item.Player.Name);
             messageStr = AdaptiveShoutCache.GetLocalizedRandomLine(
-                ["compShouts", "trap", item.ItemName],
+                ["compShouts", "trap", wronged ? "revengeance" : item.ItemName],
                 catBackup: catBackup,
                 $"<c={APColors.Trap}>{CBU(item.ItemName)}</c>",
                 $"<c={APColors.FromPlayerName(item.Player.Name)}>{CBU(item.Player.Name)}</c>"
@@ -219,6 +224,8 @@ internal class RouteOverlay
                 $"<c={APColors.FromPlayerName(item.Player.Name)}>{CBU(item.Player.Name)}</c>"
             );
         }
+        
+        APSaveData.Save();
 
         return messageStr;
     }

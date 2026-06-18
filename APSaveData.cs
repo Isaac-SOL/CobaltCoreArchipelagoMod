@@ -59,6 +59,8 @@ public class APSaveData
     internal Dictionary<Deck, List<string>> NextCardRando { get; set; }
     [JsonProperty]
     internal HashSet<string> NextModifierRando { get; set; }
+    [JsonProperty]
+    internal HashSet<string> PeopleWeWronged { get; set; }
     
     // Mod settings
     [JsonProperty]
@@ -118,6 +120,7 @@ public class APSaveData
         NextShipRando = [];
         NextCardRando = [];
         NextModifierRando = [];
+        PeopleWeWronged = [];
     }
 
     internal static void LoadAllSaves()
