@@ -15,11 +15,11 @@ The mod may work with other versions, but has not been tested on them.
 
 [Associated APWorld repository](https://github.com/Isaac-SOL/Archipelago-CobaltCore/tree/cobalt-core/worlds/cobalt_core) (direct link to the relevant folder/branch)
 
-## Current Status (February 2026)
+## Current Status (June 2026)
 
-The mod has been tested my many people who have given lots of very useful feedback.
-It is stable enough to be used in a game, though the random aspect still needs
-a few tweaks to make progression smoother.
+The mod is stable. I will keep an eye out for small bugs and suggestions,
+but I'm taking a break from the mod for the moment. I expect to start working
+on new features again within the year.
 
 If you encounter any issues while playing,
 please ping me on Discord (`saltyisaac`) in the Cobalt Core channel on the

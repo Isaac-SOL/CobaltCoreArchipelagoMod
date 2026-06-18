@@ -934,13 +934,13 @@ public struct SlotDataHelper
         var res = new SlotDataHelper();
         try
         {
-            var expected_tag = "1.2.0";
-            var host_tag = Convert.ToString(slotData["version_tag"]);
-            if (host_tag != expected_tag)
+            const string expectedTag = "1.2.0";
+            var hostTag = Convert.ToString(slotData["version_tag"]);
+            if (hostTag != expectedTag)
             {
                 throw new SlotDataInvalidPreciseException(
-                    $"This version of the mod requires APWorld version tag {expected_tag}.\n" +
-                    $"(Host version tag is {host_tag})");
+                    $"This version of the mod requires APWorld version tag {expectedTag}.\n" +
+                    $"(Host version tag is {hostTag})");
             }
 
             res.CROIsInstalled = Convert.ToBoolean(slotData["cro_is_installed"]);
