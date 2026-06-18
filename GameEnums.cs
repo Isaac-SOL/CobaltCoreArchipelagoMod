@@ -34,7 +34,9 @@ internal enum ArchipelagoUK
     codex_charCards,
     codex_charArtifacts,
     codex_charMemories,
-    codex_refresh
+    codex_refresh,
+    
+    overlay_compShout
 }
 
 internal static class ArchipelagoUKExtensions

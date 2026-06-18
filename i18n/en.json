@@ -293,8 +293,8 @@
                         "2": "A big help just arrived from {1}, it's {0}!\nThat's a pretty big power boost, I'd say."
                     },
                     "backup": {
-                        "1": "HIGH-VALUE CARGO (Class: <ItemName>) INCOMING.\nSENDER: {1}",
-                        "2": "ADVANCED PACKAGE RECEIVED: <ItemName>\nSENDER: {1}"
+                        "1": "HIGH-VALUE CARGO (Class: {0}) INCOMING.\nSENDER: {1}",
+                        "2": "ADVANCED PACKAGE RECEIVED: {0}\nSENDER: {1}"
                     },
                     
                     "drawback": {

@@ -78,11 +78,6 @@ public class TextParserPatch
                 
                 // Otherwise (0), continue. This will do the normal character processing
             ]);
-
-        foreach (var instruction in seqMatched2.AllElements())
-        {
-            Console.WriteLine(instruction.ToString());
-        }
         
         return seqMatched2.AllElements();
     }

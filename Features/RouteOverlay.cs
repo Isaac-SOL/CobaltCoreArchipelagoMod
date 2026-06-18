@@ -94,18 +94,28 @@ internal class RouteOverlay
         {
             var textRect = Draw.Text(currentShout.message, 0, 0, maxWidth: 300.0, align: TAlign.Left, dontDraw: true);
             var yOffset = Math.Max(textRect.h - 14.0, 0);
-            Blurbs.Render(
-                g,
-                currentShout.message,
-                x: 94.0 + g.cornerMenu.GetExtraOffset(), y: 20.0 + yOffset,
-                dir: BlurbDir.Right,
-                align: -0.4,
-                progress: currentShout.progress,
-                textColor: Colors.textBold,
-                borderColor: DB.decks[Deck.colorless].color,
-                maxWidth: 300.0,
-                showStem: CompRenderPostfix.CanShowText(g)
+            var hoverBox = g.Push(
+                ArchipelagoUK.overlay_compShout.ToUK(),
+                new Rect(94.0 + g.cornerMenu.GetExtraOffset(), 0.0, 300.0, 30.0 + yOffset),
+                gamepadUntargetable: true
             );
+            // Draw.RectOutline(hoverBox.rect.x, hoverBox.rect.y, hoverBox.rect.w, hoverBox.rect.h, Colors.redd);
+            g.Pop();
+            if (!hoverBox.IsHover() && g.hoverKey?.k != StableUK.artifact)
+            {
+                Blurbs.Render(
+                    g,
+                    currentShout.message,
+                    x: 94.0 + g.cornerMenu.GetExtraOffset(), y: 20.0 + yOffset,
+                    dir: BlurbDir.Right,
+                    align: -0.4,
+                    progress: currentShout.progress,
+                    textColor: Colors.textBold,
+                    borderColor: DB.decks[Deck.colorless].color,
+                    maxWidth: 300.0,
+                    showStem: CompRenderPostfix.CanShowText(g)
+                );
+            }
         }
     }
     
@@ -186,12 +196,11 @@ internal class RouteOverlay
                 ?.memoryKeys
                 .Count(entry => entry.unlocked) ?? 0;
             messageStr = AdaptiveShoutCache.GetLocalizedRandomLine(
-                ["compShouts", "memory", deckKey],
+                ["compShouts", "memory", deckKey, $"memory{memCount}"],
                 catBackup: catBackup,
                 $"<c={APColors.Progression}>{CBU(item.ItemName)}</c>",
                 $"<c={APColors.FromPlayerName(item.Player.Name)}>{CBU(item.Player.Name)}</c>",
-                $"<c={Colors.LookupColor(deckKey)}>{CBU(Character.GetDisplayName(deckMemory, s))}</c>",
-                $"memory{memCount}"
+                $"<c={Colors.LookupColor(deckKey)}>{CBU(Character.GetDisplayName(deckMemory, s))}</c>"
             );
         }
         else if ((item.Flags & ItemFlags.Trap) != ItemFlags.None)
