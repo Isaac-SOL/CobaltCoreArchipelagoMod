@@ -75,7 +75,7 @@ public class CardOfferingPatch
                                            overrideUpgradeChances, makeAllCardsTemporary, discount, availableDecks);
             if (card is not null)
             {
-                if (inCombat)
+                if (inCombat || isEvent)
                 {
                     // If this is a CAT summon, guarantee that the usable card will appear
                     __result.RemoveAt(s.rngCardOfferingsMidcombat.NextInt() % __result.Count);
