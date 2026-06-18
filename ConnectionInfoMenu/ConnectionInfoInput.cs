@@ -9,12 +9,13 @@ using Microsoft.Extensions.Logging;
 using Microsoft.VisualBasic;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
+using TextCopy;
 
 namespace CobaltCoreArchipelago.ConnectionInfoMenu;
 
 public class ConnectionInfoInput : Route, OnInputPhase, OnMouseDown
 {
-    internal static Spr TextBoxSpr, TextBoxHoverSpr, LeftArrowSpr;
+    internal static Spr TextBoxSpr, TextBoxHoverSpr, LeftArrowSpr, PasteSpr, PasteHoverSpr;
 
     internal int SlotIdx { get; set; }
     internal State.SaveSlot? SaveSlot { get; set; }
@@ -55,10 +56,15 @@ public class ConnectionInfoInput : Route, OnInputPhase, OnMouseDown
     {
         Debug.Assert(Archipelago.Instance.APSaveData != null, "Archipelago.Instance.APSaveData != null");
         Draw.Fill(Colors.black);
-        var box = g.Push(null, new Rect(50.0, 86.0), onInputPhase: this, rightHint: null, leftHint: null, upHint: null, downHint: null);
+        var box = g.Push(rect: new Rect(50.0, 86.0), onInputPhase: this);
         var titleString = Localize(["connectionMenu", "title"]);
-        Draw.Text(titleString, box.rect.x + 1.0, box.rect.y - 30.0,
-                  DB.stapler, Colors.textMain, null, null, null, TAlign.Left, lineHeight: null, outline: null);
+        Draw.Text(
+            titleString,
+            box.rect.x + 1.0, box.rect.y - 30.0,
+            font: DB.stapler,
+            color: Colors.textMain,
+            align: TAlign.Left
+        );
         // Slot summary
         var summary = Localize(["connectionMenu", "slot"]) + $" {SlotIdx} <c=mainMenuLoopArrows>>></c> ";
         summary += SaveSlot!.state is not null
@@ -68,27 +74,55 @@ public class ConnectionInfoInput : Route, OnInputPhase, OnMouseDown
             : Localize(["connectionMenu", "newSave"]);
         Draw.Text(summary, box.rect.x + 1.0, box.rect.y, color: Color.Lerp(Colors.redd, Colors.white, 0.3));
 
+        var pasteTooltip = Localize(["connectionMenu", "tooltip", "paste"]);
+        var spoilerTooltip = Localize(["connectionMenu", "tooltip", "seePassword"]);
+        
         // Text fields and their names
         var line = 0;
-        foreach (var (sectionName, uk) in ((string, UK)[])[
-                     (Localize(["connectionMenu", "host"]), ArchipelagoUK.connection_host.ToUK()),
-                     (Localize(["connectionMenu", "port"]), ArchipelagoUK.connection_port.ToUK()),
-                     (Localize(["connectionMenu", "slotName"]), ArchipelagoUK.connection_slot.ToUK()),
-                     (Localize(["connectionMenu", "password"]), ArchipelagoUK.connection_password.ToUK())
+        foreach (var (key, uk, paste_uk) in ((string, UK, UK)[])[
+                     ("host", ArchipelagoUK.connection_host.ToUK(), ArchipelagoUK.connection_paste_host.ToUK()),
+                     ("port", ArchipelagoUK.connection_port.ToUK(), ArchipelagoUK.connection_paste_port.ToUK()),
+                     ("slotName", ArchipelagoUK.connection_slot.ToUK(), ArchipelagoUK.connection_paste_slot.ToUK()),
+                     ("password", ArchipelagoUK.connection_password.ToUK(), ArchipelagoUK.connection_paste_password.ToUK())
                  ])
         {
             var offsetY = 24 * (line + 1);
+            
             // Name of the field
-            Draw.Text(sectionName, box.rect.x + 98.0, box.rect.y + offsetY, font: DB.thicket, color: Colors.textBold, align: TAlign.Right);
+            Draw.Text(
+                Localize(["connectionMenu", key]),
+                box.rect.x + 98.0, box.rect.y + offsetY,
+                font: DB.thicket,
+                color: Colors.textBold,
+                align: TAlign.Right
+            );
+            
             // Clickable field with background
             var immButton = SharedArt.ButtonSprite(
                 g,
                 new Rect(x: 100.0, y: offsetY - 6.0, w: 225.0, h: 21.0),
-                new UIKey(uk, line),
+                uk,
                 TextBoxSpr, TextBoxHoverSpr,
                 boxColor: Colors.buttonBoxNormal,
-                onMouseDown: this
+                onMouseDown: this,
+                rightHint: paste_uk
             );
+            if (immButton.isHover) g.tooltips.Add(new Vec(), new TTText(Localize(["connectionMenu", "tooltip", key])));
+            // TODO tooltips currently can't show if state is null
+            
+            // Paste button
+            var pasteButton = SharedArt.ButtonSprite(
+                g,
+                new Rect(336.0, offsetY - 4.0, 18.0, 18.0),
+                paste_uk,
+                PasteSpr, PasteHoverSpr,
+                boxColor: Colors.buttonBoxNormal,
+                onMouseDown: this,
+                leftHint: uk,
+                rightHint: ArchipelagoUK.connection_seePassword.ToUK()
+            );
+            if (pasteButton.isHover) g.tooltips.Add(new Vec(), new TTText(pasteTooltip));
+            
             // Get text data from storage
             var textToDraw = ConnectionInfo[line];
             // Password view button
@@ -108,13 +142,15 @@ public class ConnectionInfoInput : Route, OnInputPhase, OnMouseDown
                     textToDraw = new string('*', textToDraw.Length);
                 }
                 // Draw eyeball button
-                SharedArt.ButtonSprite(
+                var spoilerButton = SharedArt.ButtonSprite(
                     g,
-                    new Rect(336.0, offsetY - 4.0, 18.0, 18.0),
+                    new Rect(354.0, offsetY - 4.0, 18.0, 18.0),
                     ArchipelagoUK.connection_seePassword.ToUK(),
                     baseSpr, downSpr,
-                    onMouseDown: this
+                    onMouseDown: this,
+                    leftHint: paste_uk
                 );
+                if (spoilerButton.isHover) g.tooltips.Add(new Vec(), new TTText(spoilerTooltip));
             }
 
             // Add blinking cursor if selected
@@ -125,6 +161,7 @@ public class ConnectionInfoInput : Route, OnInputPhase, OnMouseDown
                 if (offsetTime - Math.Floor(offsetTime) < 0.5) textToDraw += "<c=boldPink>|</c>";
                 Draw.Sprite(LeftArrowSpr, immButton.v.x + 226.0, immButton.v.y + 4.0, color: Colors.boldPink);
             }
+            
             // Draw editable text
             Draw.Text(textToDraw, immButton.v.x + 5.0, immButton.v.y + 8.0,
                       color: immButton.isHover ? Colors.textChoiceHoverActive : Colors.textChoice);
@@ -140,7 +177,10 @@ public class ConnectionInfoInput : Route, OnInputPhase, OnMouseDown
         var buttonBack = SharedArt.ButtonText(
             g, new Vec(79.0, 140.0), ArchipelagoUK.connection_back.ToUK(),
             Localize(["connectionMenu", "back"]),
-            onMouseDown: this
+            onMouseDown: this,
+            rightHint: screenMode == ScreenMode.RoomIdConflict
+                ? ArchipelagoUK.connection_finalizeConnection.ToUK()
+                : ArchipelagoUK.connection_connect.ToUK()
         );
 
         if (screenMode == ScreenMode.RoomIdConflict)
@@ -150,7 +190,8 @@ public class ConnectionInfoInput : Route, OnInputPhase, OnMouseDown
                 Localize(["connectionMenu", "connectAnyway"]),
                 onMouseDown: this,
                 boxColor: Colors.boldPink,
-                textColor: Colors.boldPink
+                textColor: Colors.boldPink,
+                leftHint: ArchipelagoUK.connection_back.ToUK()
             );
         }
         else
@@ -162,7 +203,8 @@ public class ConnectionInfoInput : Route, OnInputPhase, OnMouseDown
                     : Localize(["connectionMenu", "connect"]),
                 onMouseDown: this,
                 boxColor: Colors.boldPink,
-                textColor: Colors.boldPink
+                textColor: Colors.boldPink,
+                leftHint: ArchipelagoUK.connection_back.ToUK()
             );
         }
         
@@ -210,6 +252,30 @@ public class ConnectionInfoInput : Route, OnInputPhase, OnMouseDown
             case (UK)ArchipelagoUK.connection_password:
                 selectedTextField = 3;
                 break;
+            case (UK)ArchipelagoUK.connection_paste_host:
+            {
+                if (ClipboardService.GetText() is { } text)
+                    ConnectionInfo[0] = string.Concat(text.Take(200));
+            }
+                break;
+            case (UK)ArchipelagoUK.connection_paste_port:
+            {
+                if (ClipboardService.GetText() is { } text)
+                    ConnectionInfo[1] = string.Concat(text.Take(200));
+            }
+                break;
+            case (UK)ArchipelagoUK.connection_paste_slot:
+            {
+                if (ClipboardService.GetText() is { } text)
+                    ConnectionInfo[2] = string.Concat(text.Take(200));
+            }
+                break;
+            case (UK)ArchipelagoUK.connection_paste_password:
+            {
+                if (ClipboardService.GetText() is { } text)
+                    ConnectionInfo[3] = string.Concat(text.Take(200));
+            }
+                break;
             case (UK)ArchipelagoUK.connection_connect:
                 TryToConnect(g);
                 break;
@@ -242,20 +308,20 @@ public class ConnectionInfoInput : Route, OnInputPhase, OnMouseDown
         Archipelago.Instance.APSaveData.Port = port;
         Archipelago.Instance.APSaveData.Slot = ConnectionInfo[2];
         Archipelago.Instance.APSaveData.Password = ConnectionInfo[3].Length > 0 ? ConnectionInfo[3] : null;
-        var (loginResult, errorCode) = ModEntry.Instance.Archipelago.Reconnect();
+        var (loginResult, errorCode, errorMessage) = ModEntry.Instance.Archipelago.Reconnect();
         if (errorCode == ArchipelagoErrorCode.ConnectionIssue || !loginResult.Successful)
         {
-            errorText = Localize(["connectionMenu", "connectionIssue"]);
+            errorText = errorMessage ?? Localize(["connectionMenu", "connectionIssue"]);
             screenMode = ScreenMode.RetryConnection;
         }
         else if (errorCode == ArchipelagoErrorCode.RoomIdConflict)
         {
-            errorText = Localize(["connectionMenu", "roomIdConflict"]);
+            errorText = errorMessage ?? Localize(["connectionMenu", "roomIdConflict"]);
             screenMode = ScreenMode.RoomIdConflict;
         }
         else if (errorCode == ArchipelagoErrorCode.SlotDataInvalid)
         {
-            errorText = Localize(["connectionMenu", "slotDataInvalid"]);
+            errorText = errorMessage ?? Localize(["connectionMenu", "slotDataInvalid"]);
             screenMode = ScreenMode.RetryConnection;
         }
         connecting = false;

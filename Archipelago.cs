@@ -11,6 +11,7 @@ using Archipelago.MultiClient.Net.Enums;
 using Archipelago.MultiClient.Net.Helpers;
 using Archipelago.MultiClient.Net.MessageLog.Messages;
 using Archipelago.MultiClient.Net.Models;
+using CobaltCoreArchipelago.Cards;
 using CobaltCoreArchipelago.Features;
 using CobaltCoreArchipelago.GameplayPatches;
 using CobaltCoreArchipelago.MenuPatches;
@@ -370,6 +371,32 @@ public class Archipelago
     public static readonly Dictionary<Type, string> ArtifactToItem = ItemToArtifact
         .Select(pair => (pair.Value, pair.Key))
         .ToDictionary();
+
+    public static readonly Dictionary<string, Type> ItemToModifier = new()
+    {
+        { "Binary Bosses",   typeof(DailyBossBinaryStar) },
+        { "Boss Advantage",  typeof(DailyBossArtifactTreat) },
+        { "Core Corruption", typeof(DailyCorrupted) },
+        { "Enemy Shuffler",  typeof(DailyEnemyShuffler) },
+        { "Jupiter Toys",    typeof(DailyJupiterToys) },
+        { "No Skips",        typeof(DailyThickDeck) },
+        { "Scaffolds",       typeof(DailyScaffold) },
+        { "Shuffler",        typeof(DailyShuffler) },
+        // Hull
+        { "One Hit Wonder",   typeof(DailyOneHit) },
+        { "Supernova",        typeof(DailySolarFlare) },
+        { "Sword and Shield", typeof(DailyHealthEmUp) },
+        // Starter Deck
+        { "Draft Mode", typeof(DailyDraftPick) },
+        { "Thin Deck",  typeof(DailyThinDeck) },
+        // Upgrades
+        { "Only A Upgrades", typeof(DailyUpgradesOnlyA) },
+        { "Only B Upgrades", typeof(DailyUpgradesOnlyB) }
+    };
+    
+    public static readonly Dictionary<Type, string> ModifierToItem = ItemToModifier
+        .Select(pair => (pair.Value, pair.Key))
+        .ToDictionary();
     
     public APSaveData? APSaveData { get; set; }
     public ArchipelagoSession? Session { get; set; }
@@ -379,15 +406,18 @@ public class Archipelago
     public ILogger Logger => ModEntry.Instance.Logger;
     public bool Ready { get; private set; } = false;
     public DeathLinkService? DeathLinkService { get; set; }
+    public List<string> MessagesReceived { get; } = [];
+    public List<(string message, Color color)[]> MessagePartsReceived { get; } = [];
+    public List<MessageToAnnounce> MessagesToAnnounce { get; } = [];
 
-    private static ConcurrentBag<(string name, string sender)> receivedItemsToProcess = [];
+    private static ConcurrentBag<ItemInfo> receivedItemsToProcess = [];
     private static readonly object itemReceivedLock = new();
     private static DeathLink? lastDeathLink;
     private static readonly object deathLinkLock = new();
-    public List<string> MessagesReceived { get; } = [];
-    public List<(string message, Color color)[]> MessagePartsReceived { get; } = [];
     internal static readonly object messagesReceivedLock = new();
     private const int MaxMessages = 2000;
+    internal ConcurrentDictionary<string, (PlayerInfo info, ArchipelagoClientState status)> mainMenuPlayers = [];
+    private static ConcurrentBag<(string name, ItemFlags flags)> playersFoundItemToNotify = [];
 
     public Archipelago()
     {
@@ -399,7 +429,7 @@ public class Archipelago
         APSaveData = APSaveData.LoadFromSlot(slot);
     }
 
-    public (LoginResult, ArchipelagoErrorCode) Connect()
+    public (LoginResult, ArchipelagoErrorCode, string? errorMessage) Connect()
     {
         Debug.Assert(APSaveData != null, nameof(APSaveData) + " != null");
         Debug.Assert(Session == null, nameof(Session) + " == null");
@@ -413,7 +443,7 @@ public class Archipelago
         if (!loginResult.Successful)
         {
             Logger.LogError("Failed to connect to Archipelago host");
-            return (loginResult, ArchipelagoErrorCode.ConnectionIssue);
+            return (loginResult, ArchipelagoErrorCode.ConnectionIssue, null);
         }
 
         var code = ArchipelagoErrorCode.Ok;
@@ -432,6 +462,7 @@ public class Archipelago
             code = ArchipelagoErrorCode.RoomIdConflict;
         }
 
+        string? errorMessage = null;
         try
         {
             CobaltCoreArchipelago.SlotDataHelper.FromSlotData(SlotData);
@@ -439,10 +470,14 @@ public class Archipelago
         catch (SlotDataInvalidException e)
         {
             Logger.LogError("Received slot data is invalid for this version:\n{error}", e);
+            if (e is SlotDataInvalidPreciseException)
+            {
+                errorMessage = $"Error: {e.Message}";
+            }
             code = ArchipelagoErrorCode.SlotDataInvalid;
         }
         
-        return (loginResult, code);
+        return (loginResult, code, errorMessage);
     }
 
     internal void ApplyArchipelagoConnection()
@@ -458,25 +493,20 @@ public class Archipelago
             (ModEntry.Instance.Localizations.Localize(["mainMenu", "welcomeMessage"]), Colors.white)
         ]);
         
-        // Patch starting decks
-        foreach (var deck in ItemToDeck.Values)
-        {
-            StarterDeck.starterSets[deck].cards = [];
-            foreach (var card in SlotDataHelper.Value.DeckStartingCards[deck])
-            {
-                StarterDeck.starterSets[deck].cards.Add((Card)card.CreateInstance());
-            }
-        }
-        // Patch starting ships
-        if (SlotDataHelper.Value.ShuffleShipParts)
-        {
-            foreach (var shipName in StarterShip.ships.Keys)
-            {
-                var shuffledParts = ModEntry.BaseShips[shipName].ship.parts
-                    .Shuffle(new Rand(SlotDataHelper.Value.FixedRandSeed));
-                StarterShip.ships[shipName].ship.parts = Mutil.DeepCopy(new List<Part>(shuffledParts));
-            }
-        }
+        // New save: initialization shuffles
+        if (APSaveData.NextCardRando.Count == 0)
+            EndRunShufflePatch.ShuffleStarterSetsInSaveFromSlotData();
+        if (APSaveData.NextShipRando.Count == 0)
+            EndRunShufflePatch.ShuffleStartingShipsInSave(new Rand(SlotDataHelper.Value.FixedRandSeed));
+        
+        // Loading/reloading existing runs: patch starting decks and ships
+        if (SlotDataHelper.Value.RandomizeStartingCards == FrequencyShuffleMode.Off)
+            EndRunShufflePatch.ApplyNonRandomizedSoloSets();
+        else
+            EndRunShufflePatch.ApplyShuffledStarterSets();
+        if (SlotDataHelper.Value.ShuffleShipParts != FrequencyShuffleMode.Off)
+            EndRunShufflePatch.ApplyShuffledStartingShips();
+        
         // Patch memories
         Vault.charsWithLore = Mutil.DeepCopy(ModEntry.BaseCharsWithLore);
         if (SlotDataHelper.Value.AddCharacterMemories)
@@ -484,9 +514,12 @@ public class Archipelago
             Vault.charsWithLore.Add(Deck.shard);
             Vault.charsWithLore.Add(Deck.colorless);
         }
+        // Setup Archiprism
+        Archiprism.totalPlayers = Session.Players.AllPlayers.Count(info => info.Name != "Server");
 
         Ready = true;
         APSaveData.SyncWithHost();  // Consumes items queue
+        // At this point, state is null, so the items will be applied next frame
         
         Session.Items.ItemReceived += OnItemReceived;
         Session.Locations.CheckedLocationsUpdated += OnCheckedLocationsUpdated; // e.g. when send_location is used
@@ -496,6 +529,35 @@ public class Archipelago
         DeathLinkService.OnDeathLinkReceived += OnDeathLinkReceived;
         if (APSaveData.DeathLinkMode != DeathLinkMode.Off)
             DeathLinkService.EnableDeathLink();
+
+        Session.Socket.PacketReceived += OnPacketReceived;
+
+        // Track some players for display in the main menu
+        var me = Session.Players.ActivePlayer.Name;
+        var playerToTrack = Session.Players.AllPlayers
+            .Where(info => info.Name != me && info.Name != "Server")
+            .Shuffle()
+            .Take(6);
+        foreach (var player in playerToTrack)
+        {
+            mainMenuPlayers[player.Name] = (
+                Session.Players.GetPlayerInfo(player.Slot),
+                ArchipelagoClientState.ClientUnknown);
+            Session.DataStorage.TrackClientStatus(
+                state =>
+                {
+                    var infoAndStatus = mainMenuPlayers[player.Name];
+                    infoAndStatus.status = state;
+                    mainMenuPlayers[player.Name] = infoAndStatus;
+                    ModEntry.Instance.Logger.LogInformation("{playerName}: Status is now {status}", player.Name, state);
+                },
+                slot: player.Slot);
+        }
+        
+        // Add overlay to display messages
+        RouteOverlay.MakeNew();
+        
+        APSaveData.Save();
     }
 
     public void Disconnect()
@@ -518,9 +580,11 @@ public class Archipelago
         Session = null;
         SlotData = null;
         SlotDataHelper = null;
+        
+        RouteOverlay.Remove();
     }
 
-    public (LoginResult, ArchipelagoErrorCode) Reconnect()
+    public (LoginResult, ArchipelagoErrorCode, string?) Reconnect()
     {
         Disconnect();
         return Connect();
@@ -563,15 +627,13 @@ public class Archipelago
 
     private void OnItemReceived(ReceivedItemsHelper helper)
     {
-        lock (itemReceivedLock)  // TODO is that lock redundant with the ConcurrentBag?
+        lock (itemReceivedLock)
         {
-            while (helper.PeekItem() != null)
+            while (helper.PeekItem() is { } info)
             {
-                var name = helper.PeekItem().ItemName;
-                var sender = helper.PeekItem().Player.Name;
                 // We are currently on the websocket thread.
                 // To prevent concurrency issues we store received items in a thread-safe list to process on the main thread.
-                receivedItemsToProcess.Add((name, sender));
+                receivedItemsToProcess.Add(info);
                 helper.DequeueItem();
             }
         }
@@ -626,9 +688,29 @@ public class Archipelago
         }
     }
 
+    private void OnPacketReceived(ArchipelagoPacketBase packet)
+    {
+        Debug.Assert(Session != null, nameof(Session) + " != null");
+        if (packet.PacketType != ArchipelagoPacketType.PrintJSON) return;
+        var jsonObj = packet.GetType().GetMethod("ToJObject")?.Invoke(packet, null);
+        if (jsonObj is not JObject json) return;
+        if (json["type"]?.ToString() != "ItemSend") return;
+        if (json["item"]?["player"]?.ToObject<int>() is not { } player) return;
+        if (json["item"]?["flags"]?.ToObject<ItemFlags>() is not { } flags) return;
+        ModEntry.Instance.Logger.LogInformation(
+            "Detected ItemSend with player {player} ({playerName}) and flags {flags}",
+            player, Session.Players.GetPlayerName(player), flags
+        );
+        lock (playersFoundItemToNotify)
+        {
+            playersFoundItemToNotify.Add((Session.Players.GetPlayerName(player), flags));
+        }
+    }
+
     internal void SafeUpdate(G g)
     {
         Debug.Assert(APSaveData != null, nameof(APSaveData) + " != null");
+        Debug.Assert(Session != null, nameof(Session) + " != null");
         
         var state = g.state;
         lock (itemReceivedLock)
@@ -636,8 +718,16 @@ public class Archipelago
             ItemApplier.ApplyDeferredItems(state);
             while (receivedItemsToProcess.TryTake(out var item))
             {
-                Logger.LogInformation("Received {item} from {player}", item.name, item.sender);
-                ItemApplier.ApplyReceivedItem(item, state);
+                Logger.LogInformation("Received {item} from {player}", item.ItemName, item.Player.Name);
+                ItemApplier.ApplyReceivedItem((item.ItemName, item.Player.Name), state);
+                if (item.Player.Slot != Session.Players.ActivePlayer.Slot)
+                {
+                    MessagesToAnnounce.Add(new MessageToAnnounce
+                    {
+                        type = MessageToAnnounce.ItemReceived,
+                        item = item
+                    });
+                }
             }
         }
 
@@ -645,10 +735,43 @@ public class Archipelago
         {
             if (lastDeathLink is not null && !state.IsOutsideRun() && state.ship.hull > 0)
             {
-                DeathLinkManager.ApplyDeathLink(g, lastDeathLink);
+                DeathLinkManager.ApplyDeathLink(g, lastDeathLink, out var kills);
+                if (!kills)
+                {
+                    MessagesToAnnounce.Add(new MessageToAnnounce
+                    {
+                        type = MessageToAnnounce.DeathlinkReceived,
+                        deathlink = lastDeathLink
+                    });
+                }
             }
 
             lastDeathLink = null;
+        }
+
+        // Notify archiprisms of items found
+        lock (playersFoundItemToNotify)
+        {
+            if (!playersFoundItemToNotify.IsEmpty)
+            {
+                if (g.state.IsOutsideRun()) return;
+                var fullDeck = new List<Card>(g.state.deck);
+                if (g.state.route is Combat combat)
+                {
+                    fullDeck.AddRange(combat.hand);
+                    fullDeck.AddRange(combat.discard);
+                    fullDeck.AddRange(combat.exhausted);
+                }
+                foreach (var card in fullDeck)
+                {
+                    if (card is not Archiprism archiprism) continue;
+                    foreach (var (name, flags) in playersFoundItemToNotify)
+                    {
+                        archiprism.PlayerFoundItem(name, flags);
+                    }
+                }
+            }
+            playersFoundItemToNotify.Clear();
         }
     }
 
@@ -665,9 +788,18 @@ public class Archipelago
                 : HintCreationPolicy.None,
             addresses.Where(l => l is not null).Select(l => l!.Value).ToArray()
         );
-        return addresses
+        
+        var scoutResult = addresses
             .Select(a => (info is null || a is null) ? null : info.GetValueOrDefault(a.Value))
             .ToArray();
+        
+        ModEntry.Instance.Logger.LogDebug(
+            "Scout locations result: {scoutLocations} => {scoutResults}",
+            locationNames,
+            scoutResult.Select(res => res?.ItemName)
+        );
+
+        return scoutResult;
     }
 }
 
@@ -742,16 +874,34 @@ public enum ArtifactShuffleMode
     Double = 2
 }
 
+public enum FrequencyShuffleMode
+{
+    Off = 0,
+    AtStart = 1,
+    EveryRun = 2
+}
+
+public enum ModifierShuffleMode
+{
+    Off = 0,
+    Immediate = 1,
+    Unlockable = 2,
+    ImmediateAndUnlockable = 3,
+    AllAtStart = 4
+}
+
 
 public class SlotDataInvalidException(string message) : Exception(message);
 
-public class SlotDataVersionInvalidException(string message) : Exception(message);
+public class SlotDataInvalidPreciseException(string message) : SlotDataInvalidException(message);
 
 public struct SlotDataHelper
 {
+    public bool CROIsInstalled { get; private set; }
     public List<Deck> StartingCharacters { get; private set; }
     public string StartingShip { get; private set; }
-    public bool ShuffleShipParts { get; private set; }
+    public FrequencyShuffleMode ShuffleShipParts { get; private set; }
+    public FrequencyShuffleMode RandomizeStartingCards { get; private set; }
     public List<Type> StartingCards { get; private set; }
     public Dictionary<Deck, List<Type>> DeckStartingCards { get; private set; }
     public WinCondition WinCondition { get; private set; }
@@ -763,13 +913,17 @@ public struct SlotDataHelper
     public bool DoFutureMemory { get; private set; }
     public bool ShuffleCards { get; private set; }
     public ArtifactShuffleMode ShuffleArtifacts { get; private set; }
+    public ModifierShuffleMode ModifiersMode { get; private set; }
+    public HashSet<string> ModifiersBlacklist { get; private set; }
     public int CheckCardDifficulty { get; private set; }
-    public bool RarerChecksLater { get; private set; }
     public RewardsTweakMode RewardsTweak { get; private set; }
     public int AutoReleaseCharacters { get; private set; }
+    public bool SwapCharacterNode { get; private set; }
+    public bool PickMissedItemsFromEveryRun { get; private set; }
     public CardRewardsMode ImmediateCardRewards { get; private set; }
     public CardRewardAttribute ImmediateCardAttribute { get; private set; }
     public CardRewardsMode ImmediateArtifactRewards { get; private set; }
+    public HashSet<string> ImmediateRewardsBlacklist { get; private set; }
     public uint FixedRandSeed { get; private set; }
 
     public bool HasImmediateCardAttribute(CardRewardAttribute attribute)
@@ -780,19 +934,29 @@ public struct SlotDataHelper
         var res = new SlotDataHelper();
         try
         {
-            var expected_tag = "1.1.5";
-            var host_tag = Convert.ToString(slotData["version_tag"]);
-            if (host_tag != expected_tag)
+            const string expectedTag = "1.2.0";
+            var hostTag = Convert.ToString(slotData["version_tag"]);
+            if (hostTag != expectedTag)
             {
-                throw new SlotDataVersionInvalidException($"This version of the mod requires APWorld version tag {expected_tag} " +
-                                                          $"(Host version tag is {host_tag})");
+                throw new SlotDataInvalidPreciseException(
+                    $"This version of the mod requires APWorld version tag {expectedTag}.\n" +
+                    $"(Host version tag is {hostTag})");
+            }
+
+            res.CROIsInstalled = Convert.ToBoolean(slotData["cro_is_installed"]);
+            if (res.CROIsInstalled && ModEntry.Instance.CROAssembly is null)
+            {
+                throw new SlotDataInvalidPreciseException(
+                    "The settings of this slot require the mod <c=card>\"Custom Run Options\"</c>, but it isn't installed." +
+                    "\nEither install the mod, or re-generate with <c=card>cro_is_installed</c> set to <c=card>false</c> in your YAML settings.");
             }
             
             var startingCharacters = (JArray)slotData["starting_characters"];
             res.StartingCharacters = [];
             res.StartingCharacters.AddRange(startingCharacters.Select(s => Archipelago.ItemToDeck[s.ToString()]));
             res.StartingShip = Archipelago.ItemToStartingShip[(string)slotData["starting_ship"]];
-            res.ShuffleShipParts = Convert.ToBoolean(slotData["shuffle_ship_parts"]);
+            res.ShuffleShipParts = (FrequencyShuffleMode)Convert.ToInt32(slotData["shuffle_ship_parts"]);
+            res.RandomizeStartingCards = (FrequencyShuffleMode)Convert.ToInt32(slotData["randomize_starting_cards"]);
             var startingCards = (JArray)slotData["starting_cards"];
             res.StartingCards = [];
             res.StartingCards.AddRange(startingCards.Select(s => Archipelago.ItemToCard[s.ToString()]));
@@ -806,19 +970,28 @@ public struct SlotDataHelper
                 var deck = ((CardMeta)Attribute.GetCustomAttribute(card, typeof(CardMeta))!).deck;
                 res.DeckStartingCards[deck].Add(card);
             }
+            
             res.WinCondition = (WinCondition)Convert.ToInt32(slotData["win_condition"]);
             res.WinReqTotal = Convert.ToInt32(slotData["memories_required_total"]);
             res.WinReqPerChar = Convert.ToInt32(slotData["memories_required_per_character"]);
             res.ShuffleMemories = Convert.ToBoolean(slotData["shuffle_memories"]);
             res.UnlockMemoryForAllCharacters = Convert.ToBoolean(slotData["unlock_memory_for_all_characters"]);
             res.DoFutureMemory = Convert.ToBoolean(slotData["do_future_memory"]);
+            
             res.ShuffleCards = Convert.ToBoolean(slotData["shuffle_cards"]);
             res.ShuffleArtifacts = (ArtifactShuffleMode)Convert.ToInt32(slotData["shuffle_artifacts"]);
+            res.ModifiersMode = (ModifierShuffleMode)Convert.ToInt32(slotData["modifiers_mode"]);
+            res.ModifiersBlacklist = ((JArray)slotData["modifiers_blacklist"])
+                .Select(j => j.ToString()).ToHashSet();
+            
             res.CheckCardDifficulty = Convert.ToInt32(slotData["check_card_difficulty"]);
-            res.RarerChecksLater = Convert.ToBoolean(slotData["rarer_checks_later"]);
             res.AddCharacterMemories = Convert.ToBoolean(slotData["add_character_memories"]);
+            
             res.RewardsTweak = (RewardsTweakMode)Convert.ToInt32(slotData["rewards_tweak"]);
             res.AutoReleaseCharacters = Convert.ToInt32(slotData["auto_release_characters"]);
+            res.SwapCharacterNode = Convert.ToBoolean(slotData["swap_character_node"]);
+            res.PickMissedItemsFromEveryRun = Convert.ToBoolean(slotData["pick_missed_items_from_every_run"]);
+            
             res.ImmediateCardRewards = (CardRewardsMode)Convert.ToInt32(slotData["immediate_card_rewards"]);
             var attributes = (JArray)slotData["immediate_card_attributes"];
             foreach (var attribute in attributes)
@@ -835,11 +1008,16 @@ public struct SlotDataHelper
                 };
             }
             res.ImmediateArtifactRewards = (CardRewardsMode)Convert.ToInt32(slotData["immediate_artifact_rewards"]);
+            res.ImmediateRewardsBlacklist = ((JArray)slotData["immediate_rewards_blacklist"])
+                .Select(j => j.ToString()).ToHashSet();
             res.FixedRandSeed = Convert.ToUInt32(slotData["fixed_client_seed"]);
         }
         catch (Exception e)
         {
-            Console.WriteLine(e);
+            ModEntry.Instance.Logger.LogError("{error}", e.Message);
+            ModEntry.Instance.Logger.LogError("{stackTrace}", e.StackTrace);
+            if (e is SlotDataInvalidPreciseException)
+                throw;
             throw new SlotDataInvalidException(e.Message);
         }
 

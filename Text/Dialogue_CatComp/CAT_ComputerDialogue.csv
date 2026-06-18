@@ -1,0 +1,194 @@
+Type,Trigger,Character,Dialogue,,,
+[Card_Received],,,,,,
+,Generic: ,,,,,
+,,CAT,"Detecting a spacial rift made by <SenderName>!
+Looks like we've got <ItemName> now, sweet.",,,
+,,CAT,"Ah, looks like <SenderName> sent us <ItemName>.
+Should come in handy if we use it.",,,
+,,CAT,"We've recieved <ItemName> over from <SenderName>!
+Hopefully we can use it to its full potential. ",,,
+,,Backup,"CARGO (Class: <ItemName>) INCOMING.
+SENDER: <SenderName>",,,
+,,Backup,"STANDARD PACKAGE RECEIVED: <ItemName>
+SENDER: <SenderName>",,,
+,,Backup,"TEMPORAL RIFT DETECTED. RECEIVED: <ItemName>
+SENDER: <SenderName>","// Yeah, the back-up computer will always have 
+SENDER: <SenderName>
+In the second line, I imagine. Will omit from future back-up computer lines.",,
+,Character-Specific:,,,,,
+,,CAT,"<CharacterName>, you got <ItemName>.
+Make sure to thank <SenderName> for that.",,,
+,,CAT,"Oh, we've received <ItemName> for <CharacterName>!
+Appreciated, <SenderName>.",,,
+,,CAT,"We've received <ItemName> from <SenderName>.
+Looks like <CharacterName> remembers a little more...",,,
+[Artifact_Received],,,,,,
+,If common artifact is instantly added/enabled:,,,,,
+,,CAT,"Looks like we got <ItemName> from <SenderName>!
+It's already been synced with our systems, neat!",,,
+,,CAT,"...Huh? Looks like we have <ItemName> now.
+Appreciate it, <SenderName>!",,,
+,,CAT,"Oh, power surge! Looks like we've got <ItemName> 
+ready, thanks to <SenderName>.",,,
+,"Else, if common artifact is not applied:",,,,,
+,,CAT,"<ItemName> got sent to us by <SenderName>.
+We'll able to use it in the future!",,,
+,,CAT,"<SenderName> sent us over the drivers on <ItemName>.
+It'll be compatible with whatever ship we have in the future. ",,,
+,,CAT,"Oh, check the logs, <SenderName> added <ItemName> to them.
+If we find it somewhere in one of the sectors, it won't be useless! ",,,
+,If boss artifact is instantly added/enabled:,,,,,
+,// If artifact has drawbacks in any way.,CAT,"Whoa, big surge of power from <SenderName>!
+We got <ItemName> ready now, hope we're fine with the drawbacks!",,,
+,,CAT,"<SenderName> sent us something real strong, <ItemName>!
+This should hopefully help us big time during the loop.",,,
+,,CAT,"A big help just arrived from <SenderName>, it's <ItemName>!
+That's a pretty big power boost, yeah?",,,
+,"Else, if boss artifact isn't applied. ",,,,,
+,,CAT,"Hey, if we find <ItemName> now, <SenderName> primed us for it.
+Time to consider that into our options now, with how potent it is. ",,,
+,,CAT,"...Looks like we should pay that crystal, or Riggs 2 a visit.
+<SenderName> got us <ItemName>, we might salvage it from them.",,,
+,,CAT,"Whoa!!! Big download for the drivers needed to use <ItemName>!
+<SenderName> was the one who sent that over, nice!",,,
+,GENERIC: ,,,,,
+,,Backup,"HIGH-VALUE CARGO (Class: <ItemName>) INCOMING.
+SENDER: <SenderName>",,,
+,,Backup,"ADVANCED PACKAGE RECEIVED: <ItemName>
+SENDER: <SenderName>",,,
+,,Backup,"TEMPORAL RIFT DETECTED. RECEIVED: <ItemName>
+SENDER: <SenderName>",,,
+[Character_Received],,,,,,
+,Riggs,,,Peri,,
+,,CAT,"Status report, Riggs is here with <SenderName>'s intervention!
+Did we ever get that hand cannon of her's back from the spacialstream?",,CAT,"Peri's ready to go now, since <SenderName> helped out.
+...Though actually, she really needs the nap, so wait until the next loop?"
+,,CAT,"Hey, Riggs is next-loop ready with the help of <SenderName>.
+Maybe I should prepare some boba as a little treat...",,CAT,"Hey, Peri's on-standby now, thanks <SenderName>!
+She'll be happy to get her hands on some firing solutions. "
+,(exception to the SENDER: line here when characters are unlocked),Backup,"DETECTED: PILOT <c=riggs>RIGGS</c> ON STANDBY FROM <SenderName>.
+PREPARING TAPIOCA FOR FUTURE CONSUMPTION. ",,Backup,"DETECTED: CAPTAIN <c=peri>HYPERIA</c> ON STANDBY FROM <SenderName>.
+UPDATING WEAPON CALIBRATION PREFERENCES. "
+,Dizzy,,,Isaac,,
+,,CAT,"Better steady up, since Dizzy's on deck thanks to <SenderName>!
+Get it? Steady up. 'Cause it's Dizzy...I'm glad he can't hear me right now.",,CAT,"Oh, <SenderName> just managed to link us back up with Isaac!
+The drone bay was kind of collecting dust, overall. "
+,,CAT,"Heads-up from <SenderName>, Dizzy's now part of the crew for later!
+Make sure there aren't any too many big glowy buttons in the next ship.",,CAT,"Isaac's back in action, since <SenderName> worked some spacial magic.
+Nobody touched Isaac Jr. while he was gone, right? "
+,,Backup,"DETECTED: RESEARCHER <c=dizzy>DIZZY</c> ON STANDBY  FROM <SenderName>.
+REBOOTING ON-BOARD LABRATORY. ",,Backup,"DETECTED: ENGINEER <c=goat>ISAAC</c> ON STANDBY FROM <SenderName>.
+INTIALIZING DRONE BAY STERILIZATION. "
+,Max,,,Drake,,
+,,CAT,"We've got Max on-board now because of <SenderName>!
+Just going to ignore the requested Max wanted to play for that occasion. ",,CAT,"Oh boy, looks like Drake is back due to <SenderName>...
+Making a reminder to invest in some more fire suppression for later."
+,,CAT,"Sweet, looks like Max has joined us in cryosleep thanks to <SenderName>. 
+...He wanted me to play a recording when he arrived but naaaaah.",,CAT,"I think <SenderName> touched the thermostat, because Drake is on-board now. We'll need to turn the A/C on full-blast once she unthaws."
+,,Backup,"AUDIO PLAYBACK INITIATED FROM <SenderName> FOR <c=hacker>MAX</c>. 
+""Yeah, neighborhood hacker here. Going to take a quick nap, but wake me up whenever!"" ",,Backup,"ALERT: MARAUDER <c=eunice>DRAKE</c> ON-BOARD FROM <SenderName>.
+ERROR: AIRLOCK SYSTEM DISABLED. CANNOT ASPHYXIATE. "
+,Books,,,CAT,,
+,,CAT,"Oh nice, Books is back thanks to <SenderName>...
+Or maybe she just warped back in all by herself...right into the cryo pod. ",,CAT,"qqqWkeajhg-------d-s23123!!!!!-11111!!!!!...
+...Oh cool, <SenderName> gave me manual overrides to our ships, thanks!"
+,,CAT,"Hey, Books is here now! She wants her regards to be sent to
+<SenderName>...so uh, regards sent? ",,CAT,"<c=keyword><SenderName></c>@AP~REMOTE: ~/CC CAT.EXE -unlock
+Log: Successfully unlocked <c=comp>CAT</c> for use in run-- WHAT???"
+,,Backup,"TEMPORAL ANAMOLY DETECTED FROM <SenderName>.
+DESIGNATION: <c=shard>BOOKS.</c> TEMPORARY PERMISSIONS GRANTED. ",(only possible during cobalt fight),Backup,"ERROR: <c=comp>CAT</c> MATRIX UNRECOVERABLE DESPITE <SenderName>
+INSTATING TEMPORAL FLAG FOR STANDARD CREW ACCESS; GRANTED. "
+,GENERIC:,,// Suppose generics can be used for custom crew in the future? Just as generic fallback. ,,,
+,,CAT,"Whoa, we've just got a cryo-pod filled up out of nowhere...or wait, it's from <SenderName>.
+Well, should we welcome <CharacterName> aboard for the next loop? ",,,
+,,CAT,"Hey, looks like <CharacterName> is here, just in a cryo-pod now.
+You can thank <SenderName> for that.",,,
+,,Backup,DETECTED: CREWMATE <c=keyword><CrewmateName></c> ON STANDBY FROM <SenderName>,,,
+[Memory_Received],,,,,,
+,GENERIC:,,,,,
+,,CAT,"Looks like <SenderName> helped abate some of <CharacterName>'s amnesia.
+I'm still wondering how that's even possible, but we can make progress! ",,,
+,,CAT,"<SenderName> worked some magic, and <CharacterName> is able
+to remember better. Let's get them to the Cobalt when we can!",,,
+,,Backup,"MNESTICS APPLIED TO <CharacterName>, AMNESIA DAMPENED.",,,
+,,Backup,DEPLOYED MEMORY ENHANCERS FOR <CharacterName>.,,,
+,Books Memory 1 ,,,CAT Memory 1,,
+,// Once per run.,CAT,"...Huh? Did Books really need the memory booster here too? 
+Doubt <SenderName> is a doctor, but if they think its important...",,CAT,"What the...! One of my memory banks was already encrypted, and then DECRYPTED???
+<SenderName> activated that logic...what does that mean?"
+,,Backup,MEMORY ENHANCERS DEPLOYED FOR BOOKS. ADAPTING TO UNKNOWN PHYSIOLOGY. ,,Backup,"REQUEST FROM: <SenderName>
+UNENCRYPTED: CAT MEMORY DATABANK 0x434F42414C54FFFF. "
+,Books Memory 2,,,CAT Memory 2,,
+,,CAT,"Books got another memory booster over from <SenderName>.
+I guess she does need those boosters after all...the temporalstream is weird. ",,CAT,"Another memory bank unencrypted for me...why these in particular?
+...Hmm, well, if <SenderName> wants us to visit the Cobalt for that, let's do it. "
+,,Backup,ADDITIONAL MEMORY ENHANCERS ADMINISTERED TO BOOKS. ADAPTATION LEVELS 64.12%.,,Backup,"REQUEST FROM: <SenderName>
+UNENCRYPTED: CAT MEMORY DATABANK 0x434F524520594159. "
+,Books Memory 3,,,CAT Memory 3,,
+,,CAT,"Look at that, one more memory booster for Books from <SenderName>.
+Now is that enough, so I can stop questioning why she needs them??? ",,CAT,"...Whoa. I just felt something....ephemeral. Whatever that means in the end,
+I think <SenderName>...allowed me to visit the Cobalt to its fullest extent. "
+,,Backup,FINAL MEMORY ENHANCERS ADMINISTERED TO BOOKS. FULLY ADAPTED.,,Backup,"REQUEST FROM: <SenderName>
+ACCESSING TEMPORAL UPLINK. FINAL CAT MEMORY??? ACCESSIBLE.  "
+[Filler_Recieved],,,,,,
+,GENERIC:,,,,,
+,,CAT,"<SenderName> sent us over...well, nothing, really? Just a minor boost. 
+Would it be too greedy to hope for something more? ",,,
+,,CAT,"Our generators got boosted a bit by <SenderName>.
+Doesn't seem like we got anything else though...",,,
+,,CAT,"Small surge in power from <SenderName>, but not much else.
+At least we didn't get a trap or anything, so it's still appreciated, but...",,,
+,,Backup,MINOR GENERATOR SURGE APPLIED. ,,,
+,,Backup,SMALL POWER BOOST ACTIVATED.,,,
+[Trap_Received] ,,,,,,
+,Canister Trap,,,,,
+,// Once per run. ,CAT,"Oh hey, <SenderName> sent us a bunch of cargo!
+...Wait, it's way too much cargo...and they're all EMPTY?????",,,
+,,CAT,"<SenderName> just sent us a Genesis package. After taking what was
+inside and leaving us the boxes. Wow!!! Thanks!!!",,,
+,,CAT,"Detecting a spacial rift made by <SenderName>!
+Looks like we've got...got...trash. Just those stupid containers. Great!!!",,,
+,,Backup,ALERT: GENESIS DELIVERY ACCEPTED. CARGO CONTENTS: N/A,,,
+,,Backup,ALERT: RECEIVED A COPY OF BIG RIGS: OVER THE ROAD RACING,,,
+,,Backup,"ALERT: RECEIVED ONE WITH NOTHING, BARBARIAN HUT, AND SNAKEBITE.",,,
+,Missing Trap,,,,,
+,// Once per run. ,CAT,"<SenderName> sent us a Missing Trap...like the trap is missing?
+Seems like we should be perfectly fine then! ...Wait a second. ",,,
+,,CAT,"And one of us is just about to get poofed because of <SenderName>.
+Well, good thing it can't be me this time around!!!",,,
+,,CAT,"Ah, one of the crew just vanished! ...<SenderName> was reponsible
+for that. Maybe we should send them something 'good' as a thank you!",,,
+,,Backup,ALERT: MINIATURE POCKET DIMENSION ON-BOARD.,,,
+,,Backup,ALERT: CREW MEMBER MOMENTARILY ON SHORE LEAVE. ,,,
+,Shuffle Trap,,,,,
+,,CAT,"Wow, I didn't know <SenderName> was a part of Sunshine Heavy Industries.
+BECAUSE THEY JUST MESSED UP OUR WHOLE SHIP!!!",,,
+,,CAT,"What the...hey, <SenderName> just screwed with our entire ship!
+That girl from the shipyard must be cackling right now. ",,,
+,,CAT,"We just got shuffled up from <SenderName>! 
+How would they like it if THEY got randomized around???",,,
+,,Backup,ALERT: EMERGENCY SWAPPING PROTOCOLS ACTIVATED.,,,
+,,Backup,ALERT: SHIP SHUFFLE MODE ACTIVATED. ,,,
+,If we sent a trap previously:,,,,,
+,,CAT,"Yeeeeeah, you all know that prank we sent over to <SenderName>?
+They got their revenge with a <TrapName>. Kinda deserved?",,,
+,,CAT,"Welp! <SenderName> got their vengeance on us with a <TrapName>.
+Who could've guessed that would've happened???",,,
+,,CAT,"Woop woop woop! Alert alert, we just had a <TrapName> impact us!
+It was sent by <SenderName>...who we messed with earlier. Coincidence???",,,
+,GENERIC:,,,,,
+,,CAT,"Would you look at that, <SenderName> activated a <TrapName> on us.
+Nice!!! Maybe reconsider looking for one of their shiny anomolies!",,,
+,,CAT,"Wow! <SenderName> decided to send us a <TrapName>!
+Aren't we supposed to be working together???",,,
+,,CAT,"Ugh, <SenderName> launched a <TrapName> through the temporalstream.
+Let's hope it doesn't mess with us too badly. ",,,
+,,Backup,ALERT: SUBTERFUGE (Type: <TrapName>) ACTIVATED,,,
+,,Backup,ALERT: TROJAN (Name: <TrapName>) DETECTED,,,
+[RunModifier_Received],,,,,,
+,GENERIC:,,,,,
+,,CAT,"Huh??? Now we have <RunModifier> to contend with...
+<SenderName> is shaking things up, but I'm not sure if I like that!",,,
+,,CAT,"Hey, is <SenderName> secretly working with Books or something?
+<RunModifier> was just applied to us, and I didn't expect her chaos here!",,,
+,,Backup,ALERT: <RunModifier> ACTIVATED. ADJUSTING LOOP PARAMETERS. ,,,

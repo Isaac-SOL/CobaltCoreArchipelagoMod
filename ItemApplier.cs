@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using CobaltCoreArchipelago.Actions;
@@ -14,6 +15,12 @@ public static class ItemApplier
     private static List<(string name, string sender)> DeferredUnappliedItems { get; set; } = [];
     
     internal static bool CanApplyItems => Archipelago.Instance.Ready;
+
+    public static readonly HashSet<Type> StartOnlyModifiers =
+    [
+        typeof(DailyBossArtifactTreat), typeof(DailyOneHit), typeof(DailyDraftPick), typeof(DailyThinDeck),
+        typeof(DailyUpgradesOnlyA), typeof(DailyUpgradesOnlyB)
+    ];
     
     internal static void ApplyReceivedItem((string name, string sender) item, State? state = null)
     {
@@ -90,7 +97,7 @@ public static class ItemApplier
                         CardRewardsMode.IfLocalAndHasDeck => local && hasDeck,
                         CardRewardsMode.Always => true,
                         _ => false
-                    })
+                    } && !Archipelago.InstanceSlotData.ImmediateRewardsBlacklist.Contains(item.name))
                 {
                     if (combat is not null && !combat.EitherShipIsDead(state))
                     {
@@ -116,7 +123,8 @@ public static class ItemApplier
                 var newArtifact = (Artifact)artifact.CreateInstance();
                 var newArtifactMeta = newArtifact.GetMeta();
                 var local = item.sender == Archipelago.Instance.APSaveData.Slot;
-                var hasDeck = state.characters.Any(character => character.deckType == newArtifactMeta.owner);
+                var hasDeck = newArtifactMeta.owner == Deck.colorless
+                              || state.characters.Any(character => character.deckType == newArtifactMeta.owner);
                 if (slotData.ImmediateArtifactRewards switch
                     {
                         CardRewardsMode.IfLocal => local,
@@ -124,7 +132,8 @@ public static class ItemApplier
                         CardRewardsMode.IfLocalAndHasDeck => local && hasDeck,
                         CardRewardsMode.Always => true,
                         _ => false
-                    } && !ArtifactReward.GetBlockedArtifacts(state).Contains(artifact))
+                    } && !Archipelago.InstanceSlotData.ImmediateRewardsBlacklist.Contains(item.name)
+                      && !ArtifactReward.GetBlockedArtifacts(state).Contains(artifact))
                 {
                     if (combat is not null && !combat.EitherShipIsDead(state))
                     {
@@ -142,42 +151,79 @@ public static class ItemApplier
             // Also unlock artifacts in current deck if applicable
             UnlockReplacements.UnlockCodexArtifact(state, artifact);
         }
-        else if (item.name == "1 Energy")
+        else if (Archipelago.ItemToModifier.TryGetValue(item.name, out var modifier))
         {
-            var action = new AEnergy
+            if (state.storyVars.hasStartedGame)
+            {
+                if (slotData.ModifiersMode is not (ModifierShuffleMode.Immediate
+                                                   or ModifierShuffleMode.ImmediateAndUnlockable))
+                    return;
+                if (Archipelago.InstanceSlotData.ImmediateRewardsBlacklist.Contains(item.name)) return;
+                if (StartOnlyModifiers.Contains(modifier)) return;
+                if (state.artifacts.Any(a => DailyDescriptor.AreDailyModifierArtifactsMutuallyExclusive(modifier.Name, a.Key())))
+                    return;
+                var newArtifact = (Artifact)modifier.CreateInstance();
+                if (combat is not null && !combat.EitherShipIsDead(state))
+                    combat.Queue(new AAddArtifact { artifact = newArtifact });
+                else
+                    state.SendArtifactToChar(newArtifact);
+            }
+        }
+        else QueueFillerAction(combat, item.name switch
+        {
+            "1 Energy" => new AEnergy
             {
                 changeAmount = 1
-            };
-            if (combat is not null) combat.Queue(action);
-            else NextCombatManager.Queue(action);
-        }
-        else if (item.name == "3 Temp Shield")
-        {
-            var action = new AStatus
+            },
+            
+            "3 Temp Shield" => new AStatus
             {
                 status = Status.tempShield,
                 statusAmount = 3,
                 targetPlayer = true,
                 mode = AStatusMode.Add
-            };
-            if (combat is not null) combat.Queue(action);
-            else NextCombatManager.Queue(action);
-        }
-        else if (item.name == "Missing Trap!")
-        {
-            var action = new AStatus
+            },
+            
+            "Missing Trap!" => new AStatus
             {
                 status = DeathLinkManager.GetAssignableStatuses(state).Random(state.rngActions),
                 statusAmount = 1,
                 targetPlayer = true
-            };
-            if (combat is not null) combat.Queue(action);
-            else NextCombatManager.Queue(action);
-        }
+            },
+            
+            "Shuffle Trap" => new AShuffleShip
+            {
+                targetPlayer = true
+            },
+            
+            "Canister Trap" => new AAddCard
+            {
+                card = new GenesisCanister(),
+                destination = CardDestination.Hand
+            },
+            
+            "Scaffold Trap" => new AInsertPart
+            {
+                x = (int)(state.rngActions.NextUint() % (state.ship.parts.Count - 1) + 1),
+                part = new Part
+                {
+                    type = PType.empty,
+                    skin = state.ship.key == "boat" ? "scaffolding_boat" : "scaffolding"
+                }
+            },
+            
+            _ => new CardAction()
+        });
         
         // If we have CombatQoL installed, any state update can be undone in combat unless we explicitly prevent it
         combat?.Queue(new AInvalidateUndos());
         Archipelago.Instance.APSaveData.AddAppliedItem(item.name);
+    }
+
+    private static void QueueFillerAction(Combat? combat, CardAction action)
+    {
+        if (combat is not null) combat.Queue(action);
+        else NextCombatManager.Queue(action);
     }
 
     internal static void ApplyDeferredItems(State state)

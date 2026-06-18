@@ -22,6 +22,7 @@ public class CheckLocationCard : Card, IRegisterable
     public string? locationGameName;
     public string? locationItemName;
     public string? locationItemColor;
+    public Deck? locationFrom;
     
     public static void Register(IPluginPackage<IModManifest> package, IModHelper helper)
     {
@@ -61,6 +62,10 @@ public class CheckLocationCard : Card, IRegisterable
                     checkAction.givenCard = locationItemName;
                 else if (Archipelago.ItemToArtifact.ContainsKey(locationItemName))
                     checkAction.givenArtifact = locationItemName;
+                else if (Archipelago.ItemToModifier.ContainsKey(locationItemName))
+                    checkAction.givenModifier = locationItemName;
+                else if (Archipelago.ItemToDeck.ContainsKey(locationItemName))
+                    checkAction.givenCharacter = locationItemName;
             }
         }
         
@@ -114,11 +119,10 @@ public class CheckLocationCard : Card, IRegisterable
         else if (IsLocal())
         {
             // Location was scouted, not already checked, item is local
-            description = Localize(WillAddCardToDeck(state)
-                                       ? "descSelfAddCard"
-                                       : WillAddArtifact(state)
-                                           ? "descSelfAddArtifact"
-                                           : "descSelf");
+            description = Localize(WillAddCardToDeck(state) ? "descSelfAddCard"
+                                   : WillAddArtifact(state) ? "descSelfAddArtifact"
+                                   : WillAddModifier() ? "descSelfAddModifier"
+                                   : "descSelf");
             description = string.Format(description, locationItemName);
         }
         else
@@ -186,7 +190,13 @@ public class CheckLocationCard : Card, IRegisterable
         };
     }
 
-    private int GetShield(State _) => Difficulty <= 2 ? 2 : 3;
+    private int GetShield(State _) => Difficulty switch
+        {
+            <= 0 => 1,
+            <= 1 => 2,
+            <= 2 => 3,
+            _ => 4
+        };
 
     private bool IsShieldTemp(State _) => Difficulty <= 3;
     
@@ -238,7 +248,7 @@ public class CheckLocationCard : Card, IRegisterable
         Debug.Assert(Archipelago.Instance.APSaveData != null, "Archipelago.Instance.APSaveData != null");
         if (locationItemName is null) return false;
         if (!IsLocal()) return false;
-        if (!Archipelago.ItemToArtifact.TryGetValue(locationItemName, out var artifact)) return false;
+        if (!Archipelago.ItemToArtifact.ContainsKey(locationItemName)) return false;
         if (Archipelago.Instance.APSaveData.HasItem(locationItemName)) return false;
         return Archipelago.InstanceSlotData.ImmediateArtifactRewards switch
         {
@@ -246,6 +256,19 @@ public class CheckLocationCard : Card, IRegisterable
             CardRewardsMode.IfHasDeck or CardRewardsMode.IfLocalAndHasDeck => HasDeck(state),
             _ => false
         };
+    }
+
+    private bool WillAddModifier()
+    {
+        Debug.Assert(Archipelago.Instance.APSaveData != null, "Archipelago.Instance.APSaveData != null");
+        if (locationItemName is null) return false;
+        if (!IsLocal()) return false;
+        if (!Archipelago.ItemToModifier.TryGetValue(locationItemName, out var modifier)) return false;
+        if (ItemApplier.StartOnlyModifiers.Contains(modifier)) return false;
+        if (Archipelago.Instance.APSaveData.HasItem(locationItemName)) return false;
+        if (Archipelago.InstanceSlotData.ImmediateRewardsBlacklist.Contains(locationItemName)) return false;
+        return Archipelago.InstanceSlotData.ModifiersMode is ModifierShuffleMode.Immediate
+            or ModifierShuffleMode.ImmediateAndUnlockable;
     }
 
     internal void LoadInfo(ScoutedItemInfo? info)

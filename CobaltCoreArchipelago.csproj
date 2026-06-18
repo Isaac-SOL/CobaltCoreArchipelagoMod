@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
 		<RootNamespace>CobaltCoreArchipelago</RootNamespace>
-		<Version>1.1.6</Version>
+		<Version>1.2.0</Version>
 		<IncludedModProjectPaths>i18n;assets</IncludedModProjectPaths>
 
 		<TargetFramework>net8.0</TargetFramework>
@@ -16,11 +16,12 @@
 		-->
 	</PropertyGroup>
 	<ItemGroup>
-		<PackageReference Include="Newtonsoft.Json" Version="13.0.0.0" />
-		<PackageReference Include="Archipelago.MultiClient.Net" Version="6.7.0" />
+		<PackageReference Include="Newtonsoft.Json" Version="13.0.3" IncludeAssets="all" />
+		<PackageReference Include="Archipelago.MultiClient.Net" Version="6.7.1" />
 		<PackageReference Include="Nickel.ModBuildConfig" Version="2.0.2" />
 		<PackageReference Include="EnumByNameSourceGenerator" Version="1.1.2" PrivateAssets="all" ExcludeAssets="runtime">
 		  <IncludeAssets>compile; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
+		<PackageReference Include="TextCopy" Version="6.2.1" />
 	</ItemGroup>
 </Project>

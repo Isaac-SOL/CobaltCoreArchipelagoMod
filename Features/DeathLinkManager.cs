@@ -13,10 +13,11 @@ public class DeathLinkManager
 {
     public static bool PreventDeathLink { get; set; } = false;
 
-    internal static void ApplyDeathLink(G g, DeathLink lastDeathLink)
+    internal static void ApplyDeathLink(G g, DeathLink lastDeathLink, out bool kills)
     {
         var apSaveData = Archipelago.Instance.APSaveData;
         Debug.Assert(apSaveData != null, "Archipelago.Instance.APSaveData != null");
+        kills = false;
         var state = g.state;
         var combat = state.route as Combat;
         switch (apSaveData.DeathLinkMode)
@@ -62,6 +63,7 @@ public class DeathLinkManager
                     state.ship.hull = 0;
                     SnapScreen(g, state, combat);
                     FinishApplyFullDeathLink(lastDeathLink);
+                    kills = true;
                 }
                 else if (combat is not null)
                 {
@@ -97,6 +99,7 @@ public class DeathLinkManager
                 state.ship.hull = 0;
                 SnapScreen(g, state, combat);
                 FinishApplyFullDeathLink(lastDeathLink);
+                kills = true;
                 break;
         }
                 

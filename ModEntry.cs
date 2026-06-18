@@ -12,6 +12,9 @@ using CobaltCoreArchipelago.Actions;
 using CobaltCoreArchipelago.Artifacts;
 using CobaltCoreArchipelago.Cards;
 using CobaltCoreArchipelago.ConnectionInfoMenu;
+using CobaltCoreArchipelago.CustomRunOptionsPatches;
+using CobaltCoreArchipelago.Features;
+using CobaltCoreArchipelago.Map;
 using CobaltCoreArchipelago.MenuPatches;
 using CobaltCoreArchipelago.StoryPatches;
 using TheJazMaster.CombatQoL;
@@ -24,7 +27,9 @@ internal class ModEntry : SimpleMod
     internal Harmony Harmony;
     internal IModSettingsApi ModSettings;
     internal ICombatQolApi? CombatQol;
+    internal Assembly? CROAssembly;
     internal ILocalizationProvider<IReadOnlyList<string>> AnyLocalizations { get; }
+    internal ILocaleBoundLocalizationProvider<IReadOnlyList<string>> DefaultEnglishLocalizations { get; }
     internal ILocaleBoundNonNullLocalizationProvider<IReadOnlyList<string>> Localizations { get; }
 
     internal Archipelago Archipelago;
@@ -47,7 +52,8 @@ internal class ModEntry : SimpleMod
     ];
     private static List<Type> DemoRareCardTypes = [
         typeof(CheckLocationCardRare),
-        typeof(DeathLinkBoros)
+        typeof(DeathLinkBoros),
+        typeof(Archiprism)
     ];
     private static IEnumerable<Type> DemoCardTypes =
         DemoCommonCardTypes
@@ -77,8 +83,12 @@ internal class ModEntry : SimpleMod
         Instance = this;
         ModSettings = helper.ModRegistry.GetApi<IModSettingsApi>("Nickel.ModSettings")!;
         CombatQol = helper.ModRegistry.GetApi<ICombatQolApi>("TheJazMaster.CombatQoL");
+        CROAssembly = AccessTools.AllAssemblies()
+            .FirstOrDefault(a => (a.GetName().Name ?? a.GetName().FullName) == "CustomRunOptions");
+        Logger.LogInformation("Custom Run Options is " + (CROAssembly is null ? "NOT installed" : "installed"));
         Harmony = new Harmony("SaltyIsaac.CobaltCoreArchipelago");
         Harmony.PatchAll(Assembly.GetExecutingAssembly());
+        NewRunOptionsCustomPatch.MaybeApply(Harmony);
         Archipelago = new Archipelago();
         
         // Fill out static data
@@ -89,8 +99,10 @@ internal class ModEntry : SimpleMod
             tokenExtractor: new SimpleLocalizationTokenExtractor(),
             localeStreamFunction: locale => package.PackageRoot.GetRelativeFile($"i18n/{locale}.json").OpenRead()
         );
+        DefaultEnglishLocalizations =
+            new CurrentLocaleOrEnglishLocalizationProvider<IReadOnlyList<string>>(AnyLocalizations);
         Localizations = new MissingPlaceholderLocalizationProvider<IReadOnlyList<string>>(
-            new CurrentLocaleOrEnglishLocalizationProvider<IReadOnlyList<string>>(AnyLocalizations)
+            DefaultEnglishLocalizations
         );
 
         ArchipelagoDeck = helper.Content.Decks.RegisterDeck("Archipelago", new DeckConfiguration
@@ -101,7 +113,10 @@ internal class ModEntry : SimpleMod
                 titleColor = new Color("000000")
             },
             DefaultCardArt = RegisterSprite(package, "assets/Card/ArchipelagoBack.png").Sprite,
-            BorderSprite = RegisterSprite(package, "assets/frame_ap.png").Sprite,
+            BorderSprite = RegisterSprite(package, "assets/Card/frame_ap_spec.png").Sprite,
+            ShineColorOverride = args => (args.Card as CheckLocationCard)?.locationFrom?.Key() is { } colorKey
+                ? Colors.LookupColor(colorKey) ?? new Color(0x55FFFFFF)
+                : new Color(0x55FFFFFF),
             Name = AnyLocalizations.Bind(["deck", "name"]).Localize
         });
 
@@ -117,22 +132,31 @@ internal class ModEntry : SimpleMod
             Name = AnyLocalizations.Bind(["deck", "lockedName"]).Localize
         });
 
+        foreach (var deck in Archipelago.DeckToItem.Keys)
+            CardRenderPatch.FrameOverlays[deck] =
+                RegisterSprite(package, $"assets/Card/frame_overlay_spec_{deck.Key()}.png").Sprite;
+
         AArchipelagoCheckLocation.Spr = RegisterSprite(package, "assets/ap_action.png").Sprite;
 
         CheckLocationCard.ArtCommon = RegisterSprite(package, "assets/Card/ArchipelagoBack2.png").Sprite;
         CheckLocationCard.ArtUncommon = RegisterSprite(package, "assets/Card/ArchipelagoBack5.png").Sprite;
         CheckLocationCard.ArtRare = RegisterSprite(package, "assets/Card/ArchipelagoBack7.png").Sprite;
+
+        DeathLinkBoros.Art = RegisterSprite(package, "assets/Card/DeathLinkBorosBack.png").Sprite;
         
         CheckLocationArtifact.BaseSpr = RegisterSprite(package, "assets/Artifact/Artifact_ap.png").Sprite;
 
         ConnectionInfoInput.TextBoxSpr = RegisterSprite(package, "assets/UI/Textbox.png").Sprite;
         ConnectionInfoInput.TextBoxHoverSpr = RegisterSprite(package, "assets/UI/Textbox_hover.png").Sprite;
         ConnectionInfoInput.LeftArrowSpr = RegisterSprite(package, "assets/UI/LeftArrow.png").Sprite;
+        ConnectionInfoInput.PasteSpr = RegisterSprite(package, "assets/UI/Paste.png").Sprite;
+        ConnectionInfoInput.PasteHoverSpr = RegisterSprite(package, "assets/UI/Paste_hover.png").Sprite;
 
         MainMenuPatch.TextBoxSpr = RegisterSprite(package, "assets/UI/Textbox_mainMenu.png").Sprite;
         MainMenuPatch.TextBoxHoverSpr = RegisterSprite(package, "assets/UI/Textbox_mainMenu_hover.png").Sprite;
 
         DrawCorePatch.SmolCobaltSpr = RegisterSprite(package, "assets/UI/SmolCobalt.png").Sprite;
+        DrawCorePatch.PlayerArrow = RegisterSprite(package, "assets/UI/PlayerArrow.png").Sprite;
         MainMenuPatch.ArchipelagoTitleSpr = RegisterSprite(package, "assets/UI/ArchipelagoLogo.png").Sprite;
         MkSlotPatch.ArchipelagoSaveSpr = RegisterSprite(package, "assets/UI/ArchipelagoSave.png").Sprite;
         MkSlotPatch.NotArchipelagoSaveSpr = RegisterSprite(package, "assets/UI/NotArchipelagoSave2.png").Sprite;
@@ -140,6 +164,10 @@ internal class ModEntry : SimpleMod
         BGRunWin.charFullBodySprites.Add(Deck.colorless, RegisterSprite(package, "assets/cat_end.png").Sprite);
 
         ArtifactRenderPatch.LockedSpr = RegisterSprite(package, "assets/Artifact/locked.png").Sprite;
+
+        MapSwapCharacter.Spr = RegisterSprite(package, "assets/swap_character_node.png").Sprite;
+
+        RouteOverlay.CatMiniTalkingSpr = RegisterSprite(package, "assets/cat_mini_talking.png").Sprite;
 
         /*
          * All the IRegisterable types placed into the static lists at the start of the class are initialized here.
@@ -150,6 +178,8 @@ internal class ModEntry : SimpleMod
         
         // Add story memories immediately (we won't see them if charsWithLore is not patched anyway)
         AdditionalStoryNodes.Register(AdditionalStoryNodes.memoryNodes);
+        AdditionalStoryNodes.Register(AdditionalStoryNodes.eventNodes);
+        AdditionalStoryNodes.Register(AdditionalStoryNodes.eventChoices);
 
         ModSettings.RegisterModSettings(
             ModSettings.MakeList([
@@ -258,6 +288,12 @@ internal class ModEntry : SimpleMod
             if (!Archipelago.InstanceSlotData.ShuffleCards) return;
             if (!Archipelago.CardToItem.TryGetValue(args.Card.GetType(), out var cardItem)) return;
             if (Archipelago.Instance.APSaveData.HasItem(cardItem)) return;
+            // Not unplayable in tooltips
+            if (TTCardRenderPatch.cardsInTooltip.Contains(args.Card.GetType()))
+            {
+                TTCardRenderPatch.cardsInTooltip.Remove(args.Card.GetType());
+                return;
+            }
             // All cards are unlocked during the finale (for now at least)
             if (args.State.route is Combat { otherShip.ai: FinaleFrienemy }) return;
             args.SetOverride(ModCards.UnplayableCardTrait, true);

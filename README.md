@@ -4,21 +4,22 @@
 
 A Cobalt Core mod for [the Archipelago multi-game randomizer system](https://archipelago.gg/).
 
-- Version: 1.1.6
+- Version: 1.2.0
 - Archipelago version: 0.6.6
 - Cobalt Core version: 1.2.9
 - Nickel Version: 1.20.3+
 - Nickel API Version: 1.5.7
+- (Optional) Custom Run Options version: 1.5.3
 
 The mod may work with other versions, but has not been tested on them.
 
 [Associated APWorld repository](https://github.com/Isaac-SOL/Archipelago-CobaltCore/tree/cobalt-core/worlds/cobalt_core) (direct link to the relevant folder/branch)
 
-## Current Status (February 2026)
+## Current Status (June 2026)
 
-The mod has been tested my many people who have given lots of very useful feedback.
-It is stable enough to be used in a game, though the random aspect still needs
-a few tweaks to make progression smoother.
+The mod is stable. I will keep an eye out for small bugs and suggestions,
+but I'm taking a break from the mod for the moment. I expect to start working
+on new features again within the year.
 
 If you encounter any issues while playing,
 please ping me on Discord (`saltyisaac`) in the Cobalt Core channel on the
@@ -75,42 +76,45 @@ mod settings (such as Deathlink).
 - Make sure Cobalt Core is installed in the current version.
 - Install [Nickel](https://github.com/Shockah/Nickel). You can use [this setup guide](https://github.com/Shockah/Nickel/blob/master/docs/player-guide.md).
 - Run the nickel launcher at least once and close the game.
+- Optionally, you can also install [Custom Run Options](https://www.nexusmods.com/cobaltcore/mods/60)
+  (only available through NexusMods). It will allow you to start with less than
+  3 characters.
 - Install the core Archipelago tools (at least version 0.6.4,
-but preferably the latest version) from
-[Archipelago's GitHub Releases page](https://github.com/ArchipelagoMW/Archipelago/releases).
-On that page, scroll down to the "Assets" section for the release you want,
-click on the appropriate installer for your system to start downloading it
-(for most Windows users, that will be the file called `Setup.Archipelago.X.Y.Z.exe`),
-then run it.
+  but preferably the latest version) from
+  [Archipelago's GitHub Releases page](https://github.com/ArchipelagoMW/Archipelago/releases).
+  On that page, scroll down to the "Assets" section for the release you want,
+  click on the appropriate installer for your system to start downloading it
+  (for most Windows users, that will be the file called `Setup.Archipelago.X.Y.Z.exe`),
+  then run it.
 - Go to the [Releases page of this repository](https://github.com/Isaac-SOL/CobaltCoreArchipelagoMod/releases)
-and look at the latest release.
-There should be three files: A .zip, an .apworld and a .yaml.
-Download all three.
+  and look at the latest release.
+  There should be three files: A .zip, an .apworld and a .yaml.
+  Download all three.
 
 ### Archipelago tools setup
 
 - Go to your Archipelago installation folder. Typically, that will be `C:\ProgramData\Archipelago`.
 - Put the `Cobalt.Core.yaml` file in `Archipelago\Players`.
-You may leave the `.yaml` unchanged to play on default settings, or use your
-favorite text editor to read and change the settings in it.
+  You may leave the `.yaml` unchanged to play on default settings, or use your
+  favorite text editor to read and change the settings in it.
 - Double-click on the `cobalt_core.apworld` file. Archipelago should display a
-popup saying it installed the apworld. Optionally, you can double-check that
-there's now an `cobalt_core.apworld` file in `Archipelago\custom_worlds\`.
+  popup saying it installed the apworld. Optionally, you can double-check that
+  there's now an `cobalt_core.apworld` file in `Archipelago\custom_worlds\`.
 
 #### I've never used Archipelago before. How do I generate a multiworld?
 
 Let's create a randomized "multiworld" with only a single Cobalt Core world in it.
 
 - Make sure `Cobalt.Core.yaml` is the only file in `Archipelago\Players`
-(subfolders here are fine).
+  (subfolders here are fine).
 - Double-click on `Archipelago\ArchipelagoGenerate.exe`. You should see a
-console window appear and then disappear after a few seconds.
+  console window appear and then disappear after a few seconds.
 - In `Archipelago\output\` there should now be a file with a name similar to
-`AP_95887452552422108902.zip`.
+  `AP_95887452552422108902.zip`.
 - Open https://archipelago.gg/uploads in your favorite web browser, and upload
-the output .zip you just generated. Click "Create New Room".
+  the output .zip you just generated. Click "Create New Room".
 - The room page should give you a hostname and port number to connect to, e.g.
-"archipelago.gg:12345".
+  "archipelago.gg:12345".
 
 For a more complex multiworld, you'd put one `.yaml` file in the `\Players`
 folder for each world you want to generate. You can have multiple worlds of
@@ -122,29 +126,31 @@ one game in a multiworld.
 ### Installing and running the Cobalt Core mod
 
 - Extract the .zip file you downloaded at the end of the [Prerequisites section](#prerequisites-and-dependencies)
-in the `ModLibrary` folder inside your `Nickel` folder.
+  in the `ModLibrary` folder inside your `Nickel` folder.
 - Run the game using the Nickel Launcher. Cobalt Core mods only work when the 
-game is run this way.
+  game is run this way.
 - If the mod is correctly installed, the game will always start on the save
-selection screen. If it does not, there was an issue during installation.
+  selection screen. If it does not, there was an issue during installation.
 - You cannot run already-existing saves with the Archipelago mod. These will
-be marked with a crossed AP icon and will not be clickable.
-Click on an empty save (delete one if necessary), and you will be prompted
-for your connection info: hostname, port number, slot name and password.
+  be marked with a crossed AP icon and will not be clickable.
+  Click on an empty save (delete one if necessary), and you will be prompted
+  for your connection info: hostname, port number, slot name and password.
 - Use the hostname and port number from the previous section. Your slot name will be
-CAT1 by default, but you can change it in `Cobalt.Core.yaml`. If you didn't set
-a password you can leave it empty.
+  CAT1 by default, but you can change it in `Cobalt.Core.yaml`. If you didn't set
+  a password you can leave it empty.
 - Press "Connect", and, if everything went right, you should be in the main menu.
-You are now connected and ready to start playing with other people!
+  You are now connected and ready to start playing with other people!
 
 ## Mods that are supported / known to work with AP
 
+- Custom Run Options >= 1.5.3 ([NexusMods](https://www.nexusmods.com/cobaltcore/mods/60)),
+  required if you want to start with less than 3 characters.
 - Rerolls ([NexusMods](https://www.nexusmods.com/cobaltcore/mods/2))
 - Better Run Summaries ([NexusMods](https://www.nexusmods.com/cobaltcore/mods/19))
 - UI Suite ([NexusMods](https://www.nexusmods.com/cobaltcore/mods/45))
 - Combat QoL >= 1.6.1 ([NexusMods](https://www.nexusmods.com/cobaltcore/mods/49))
 - More Difficulty Options ([NexusMods](https://www.nexusmods.com/cobaltcore/mods/15), [GitHub](https://github.com/TheJazMaster/MoreDifficulties/releases/latest)):
-Be careful, alternate starting cards aren't unlocked at the start!
+  Be careful, alternate starting cards aren't unlocked at the start!
 - Extra Boot Options ([NexusMods](https://www.nexusmods.com/cobaltcore/mods/80), [GitHub](https://github.com/Vin-117/CobaltCoreExtraBootOptions/releases))
 
 ### Will other mods be supported?
@@ -158,34 +164,33 @@ an undertaking I will probably not do it myself.
 
 ## Planned features (no promises!)
 
-- Overhaul of item placement and overall progression, to emphasize making decisions
-while not locking players into long, mostly useless runs
 - Actual dialogue for the additional Books and CAT memories.
 - Additional in-combat dialogue between characters when getting new items from other players,
-or unlocking items for other players. Lots of dialogue if possible!
-- Support for Custom Run Options, including unmanned/solo/duo runs
+  or unlocking items for other players. Lots of dialogue if possible!
 - Potentially additional cards or artifacts which give the game more interactivity
-with the multiworld.
+  with the multiworld.
 
 ## Known issues
 
 - Using Nickel's import function to import a save from the vanilla game will
-immediately throw you onto the main menu without connecting to a host. This is not
-supported and will probably crash quickly, but it's fine as long as you close
-the game immediately.
+  immediately throw you onto the main menu without connecting to a host. This is not
+  supported and will probably crash quickly, but it's fine as long as you close
+  the game immediately.
 
 ## Credits
 
+- Mufflebuns: Writing for CAT's announcements
+- popouleto: Linkboros card art and help with the card frames
 - Shockah for making Nickel and helping me with various issues
 - rft50 for making the DemoMod that eased me into modding Cobalt Core
-considering I had no idea what I was doing
+  considering I had no idea what I was doing
 - All players who have tested the mod and given feedback, notably JyGein and Exuno
 - Ixrec for making the great Nine Sols AP mod whose code helped
-me figure out how an AP integration is supposed to work considering I *also* had no
-idea what I was doing on that front either
+  me figure out how an AP integration is supposed to work considering I *also* had no
+  idea what I was doing on that front either
 - Landmaster who first started a Cobalt Core Archipelago project which was never
-finished but can be found [here](https://github.com/Landmaster/CobaltCoreArchipelago)
+  finished but can be found [here](https://github.com/Landmaster/CobaltCoreArchipelago)
 - All the people in the CC modding community who answered my many questions
 - All the Archipelago contributors for making this frankly absurd project
 - Everyone at Rocket Rat Games for making a very cool and cute game that is not only
-very fun to play but also very fun to mod
+  very fun to play but also very fun to mod

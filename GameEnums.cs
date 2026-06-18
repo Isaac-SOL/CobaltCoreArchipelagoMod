@@ -19,6 +19,10 @@ internal enum ArchipelagoUK
     connection_port,
     connection_slot,
     connection_password,
+    connection_paste_host,
+    connection_paste_port,
+    connection_paste_slot,
+    connection_paste_password,
     connection_connect,
     connection_back,
     connection_finalizeConnection,
@@ -30,7 +34,9 @@ internal enum ArchipelagoUK
     codex_charCards,
     codex_charArtifacts,
     codex_charMemories,
-    codex_refresh
+    codex_refresh,
+    
+    overlay_compShout
 }
 
 internal static class ArchipelagoUKExtensions

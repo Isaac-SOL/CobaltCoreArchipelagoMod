@@ -9,6 +9,7 @@ using HarmonyLib;
 using Microsoft.Extensions.Logging;
 using Nanoray.Shrike;
 using Nanoray.Shrike.Harmony;
+using Nickel;
 
 // ReSharper disable MultipleOrderBy
 
@@ -34,9 +35,14 @@ public class CardBrowseListPatch
                 apLocationsCache = GetPickableAPCardsList(s);
                 fixedApCardsCache = apLocationsCache
                     .Select(name =>
-                                name.Contains("Common") ? new CheckLocationCard { locationName = name }
-                                : name.Contains("Uncommon") ? new CheckLocationCardUncommon { locationName = name }
-                                : new CheckLocationCardRare { locationName = name })
+                    {
+                        var card = name.Contains("Common") ? new CheckLocationCard()
+                            : name.Contains("Uncommon") ? new CheckLocationCardUncommon()
+                            : new CheckLocationCardRare();
+                        card.locationName = name;
+                        card.locationFrom = Archipelago.ItemToDeck.FirstOrNull(kvp => name.StartsWith(kvp.Key))?.Value;
+                        return card;
+                    })
                     .ToList();
                 pickableCardsCache = fixedApCardsCache
                     .Cast<Card>()
@@ -102,12 +108,18 @@ public class CardBrowseListPatch
     
     internal static List<Artifact> GetPickableUnlockedArtifactsList(State s) => Archipelago.Instance.APSaveData!.FoundArtifacts
         .Select(artifactType => (artifactType.CreateInstance() as Artifact)!)
-        .Where(artifact => s.characters.Any(c => c.deckType!.Value == artifact.GetMeta().owner)
+        .Where(artifact => s.characters.Any(c => c.deckType!.Value == artifact.GetMeta().owner
+                                                 || artifact.GetMeta().owner == Deck.colorless)
                            && s.artifacts.All(ownedArtifact => ownedArtifact.GetType() != artifact.GetType())
                            && !ArtifactReward.GetBlockedArtifacts(s).Contains(artifact.GetType()))
         .ToList();
 
-    internal static List<string> GetPickableAPLocationsList(State s) => Archipelago.Instance.APSaveData!.AllSeenLocations
+    internal static IEnumerable<string> SeenLocationsFromSlotData() =>
+        Archipelago.InstanceSlotData.PickMissedItemsFromEveryRun
+            ? Archipelago.Instance.APSaveData!.AllSeenLocations
+            : Archipelago.Instance.APSaveData!.ThisRunSeenLocations;
+
+    internal static List<string> GetPickableAPLocationsList(State s) => SeenLocationsFromSlotData()
         .Intersect(Archipelago.Instance.Session!.Locations.AllMissingLocations
                        .Select(l => Archipelago.Instance.Session.Locations.GetLocationNameFromId(l)))
         .Where(name => s.characters

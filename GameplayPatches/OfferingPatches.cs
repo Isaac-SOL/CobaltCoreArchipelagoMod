@@ -8,7 +8,9 @@ using CobaltCoreArchipelago.Artifacts;
 using CobaltCoreArchipelago.Cards;
 using CobaltCoreArchipelago.Features;
 using HarmonyLib;
+using JetBrains.Annotations;
 using Microsoft.Extensions.Logging;
+using Nickel;
 
 namespace CobaltCoreArchipelago.GameplayPatches;
 
@@ -26,10 +28,17 @@ public class CardOfferingPatch
         }
     }
 
-    private static int DeathLinkBorosRarity() => Archipelago.Instance.APSaveData!.DeathLinkMode switch
+    private static int DeathLinkBorosChance => Archipelago.Instance.APSaveData!.DeathLinkMode switch
     {
-        DeathLinkMode.Off => 200,
-        _ => 95
+        DeathLinkMode.Off => 0,
+        _ => 3
+    };
+
+    private static int ArchiprismChance => Archiprism.totalPlayers switch
+    {
+        < 2 => 0,
+        <= 15 => 3,
+        _ => 0
     };
 
     static void Postfix(
@@ -45,6 +54,11 @@ public class CardOfferingPatch
         bool isEvent)
     {
         Debug.Assert(Archipelago.Instance.APSaveData != null, "Archipelago.Instance.APSaveData != null");
+
+        ModEntry.Instance.Logger.LogDebug(
+            "Card reward pre-patch: {cardRewardPrePatch}",
+            __result.Select(card => card.ToString())
+        );
         
         if (!Archipelago.InstanceSlotData.ShuffleCards) return;
         
@@ -66,7 +80,7 @@ public class CardOfferingPatch
                                            overrideUpgradeChances, makeAllCardsTemporary, discount, availableDecks);
             if (card is not null)
             {
-                if (inCombat)
+                if (inCombat || isEvent)
                 {
                     // If this is a CAT summon, guarantee that the usable card will appear
                     __result.RemoveAt(s.rngCardOfferingsMidcombat.NextInt() % __result.Count);
@@ -125,11 +139,12 @@ public class CardOfferingPatch
             };
 
             Card card;
-            if (rarity == Rarity.rare && s.rngCardOfferings.NextInt() % 100 > DeathLinkBorosRarity())
-            {
-                // Sometimes replace rare cards with a DeathLinkBoros
+            // Sometimes replace rare cards with a special one
+            var specialRoll = s.rngCardOfferings.NextUint() % 100;
+            if (rarity == Rarity.rare && specialRoll < DeathLinkBorosChance)
                 card = new DeathLinkBoros();
-            }
+            else if (rarity == Rarity.rare && specialRoll < DeathLinkBorosChance + ArchiprismChance)
+                card = new Archiprism();
             else
             {
                 // But most of the time we add an actual check card with a set location
@@ -149,11 +164,14 @@ public class CardOfferingPatch
                     Rarity.uncommon => new CheckLocationCardUncommon(),
                     _ => new CheckLocationCardRare()
                 };
-                (card as CheckLocationCard)!.locationName = location;
+                var apCard = (CheckLocationCard)card;
+                apCard.locationName = location;
+                apCard.locationFrom = Archipelago.ItemToDeck.FirstOrNull(kvp => location.StartsWith(kvp.Key))?.Value;
                 pickedLocations.Add(location);
+                card.upgrade = CardReward.GetUpgrade(s, s.rngCardOfferings, s.map, card,
+                                                     s.GetDifficulty() >= 1 ? 0.5 : 1.0, overrideUpgradeChances);
             }
             card.drawAnim = 1.0;
-            card.upgrade = CardReward.GetUpgrade(s, s.rngCardOfferings, s.map, card, s.GetDifficulty() >= 1 ? 0.5 : 1.0, overrideUpgradeChances);
             card.flipAnim = 1.0;
             archipelagoCards.Add(card);
         }
@@ -163,13 +181,17 @@ public class CardOfferingPatch
         while (__result.Count > targetCount)
             __result.RemoveAt(s.rngCardOfferings.NextInt() % __result.Count);
         __result = __result.Shuffle(s.rngCardOfferings).ToList();
+
+        ModEntry.Instance.Logger.LogDebug(
+            "Card reward: {cardReward}",
+            __result.Select(card => card is CheckLocationCard apCard ? apCard.locationName : card.ToString())
+        );
         
         // Scout proposed archipelago cards if the options allow for it
         if (Archipelago.Instance.APSaveData.CardScoutMode == CardScoutMode.DontScout) return;
         
         var checkCards = __result
-            .Where(card => card is CheckLocationCard)
-            .Cast<CheckLocationCard>()
+            .OfType<CheckLocationCard>()
             .ToList();
         var locations = checkCards.Select(card => card.locationName).ToArray();
         NotSoRandomManager.AddSeenLocations(locations);
@@ -222,8 +244,12 @@ public class CardOfferingPatch
             if (discount != 0)
                 card.discount = discount;
 
+            ModEntry.Instance.Logger.LogDebug("Rolling new unlocked card: {unlockedCard}", card);
+
             return card;
         }
+
+        ModEntry.Instance.Logger.LogDebug("Rolling new unlocked card failed");
 
         return null;
     }
@@ -231,14 +257,6 @@ public class CardOfferingPatch
     private static Rarity GetRandomAPCheckRarity(State s, BattleType battleType)
     {
         var roll = s.rngCardOfferings.Next();
-        var power = s.map switch
-        {
-            MapFirst => 2.0,
-            MapLawless => 1.0,
-            _ => 0.5
-        };
-        if (Archipelago.InstanceSlotData.RarerChecksLater)
-            roll = Math.Pow(roll, power);
         return battleType switch
         {
             BattleType.Elite => Mutil.Roll(roll, (0.35, Rarity.common), (0.45, Rarity.uncommon), (0.2, Rarity.rare)),
@@ -251,8 +269,6 @@ public class CardOfferingPatch
 [HarmonyPatch(typeof(ArtifactReward), nameof(ArtifactReward.GetOffering))]
 public class ArtifactOfferingPatch
 {
-    internal static ArtifactOfferingAPData? nextOverridingData;
-    
     private static ILocationCheckHelper Locations
     {
         get
@@ -265,60 +281,11 @@ public class ArtifactOfferingPatch
     static void Postfix(
         ref List<Artifact> __result,
         State s,
-        int count,
         Deck? limitDeck = null,
         List<ArtifactPool>? limitPools = null,
         Rand? rngOverride = null)
     {
-        if (nextOverridingData is not null)
-        {
-            RandomAmongFixedReward(ref __result, s, count, nextOverridingData);
-            nextOverridingData = null;
-        }
-        else
-        {
-            RegularReward(ref __result, s, limitDeck, limitPools, rngOverride);
-        }
-    }
-
-    private static void RandomAmongFixedReward(
-        ref List<Artifact> __result,
-        State s,
-        int maxCount,
-        ArtifactOfferingAPData data)
-    {
-        switch (data.filterMode)
-        {
-            case ArtifactOfferingAPData.FilterMode.UnlockedArtifactsNotInDeck:
-                __result = CardBrowseListPatch.GetPickableUnlockedArtifactsList(s)
-                    .Shuffle(s.rngArtifactOfferings)
-                    .Take(maxCount)
-                    .ToList();
-                break;
-            
-            case ArtifactOfferingAPData.FilterMode.FoundMissingLocations:
-                Debug.Assert(Archipelago.Instance.APSaveData != null, "Archipelago.Instance.APSaveData != null");
-                
-                var locationsToScout = CardBrowseListPatch.GetPickableAPArtifactsList(s)
-                    .Shuffle(s.rngArtifactOfferings)
-                    .Take(maxCount)
-                    .ToList();
-                var apArtifacts = locationsToScout
-                    .Select(name =>
-                                name.Contains("Boss") ? new CheckLocationArtifactBoss { locationName = [name, null] }
-                                : new CheckLocationArtifact { locationName = [name, null] })
-                    .ToList();
-                __result = apArtifacts.Cast<Artifact>().ToList();
-
-                if (Archipelago.Instance.APSaveData.CardScoutMode == CardScoutMode.DontScout) break;
-                
-                Archipelago.Instance.ScoutLocationInfo(locationsToScout.ToArray()).ContinueWith(task =>
-                {
-                    for (var i = 0; i < apArtifacts.Count; i++)
-                        apArtifacts[i].LoadInfo(task.Result?.GetSlice(i).ToArray());
-                });
-                break;
-        }
+        RegularReward(ref __result, s, limitDeck, limitPools, rngOverride);
     }
 
     private static void RegularReward(
@@ -329,6 +296,11 @@ public class ArtifactOfferingPatch
         Rand? rngOverride)
     {
         Debug.Assert(Archipelago.Instance.APSaveData != null, "Archipelago.Instance.APSaveData != null");
+
+        ModEntry.Instance.Logger.LogDebug(
+            "Artifact reward pre-patch: {artifactRewardPrePatch}",
+            __result.Select(artifact => artifact.ToString())
+        );
         
         if (Archipelago.InstanceSlotData.ShuffleArtifacts == ArtifactShuffleMode.Off) return;
 
@@ -466,11 +438,17 @@ public class ArtifactOfferingPatch
         while (__result.Count > targetCount)
             __result.RemoveAt(s.rngCardOfferings.NextInt() % __result.Count);
         __result = __result.Shuffle(s.rngCardOfferings).ToList();
+
+        ModEntry.Instance.Logger.LogDebug(
+            "Artifact reward: {artifactReward}",
+            __result.Select(artifact => artifact is CheckLocationArtifact apArti
+                                ? $"[{apArti.locationName}]"
+                                : artifact.ToString())
+        );
         
         // Add seen locations to the NotSoRandomManager so that they won't be seen for a while
         var checkArtifacts = __result
-            .Where(artifact => artifact is CheckLocationArtifact)
-            .Cast<CheckLocationArtifact>()
+            .OfType<CheckLocationArtifact>()
             .ToList();
         // Only add the first location to the seen locations.
         // In the case of double artifacts, the other location will never be picked by itself.

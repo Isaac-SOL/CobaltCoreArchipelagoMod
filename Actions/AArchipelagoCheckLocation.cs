@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using CobaltCoreArchipelago.Cards;
+using CobaltCoreArchipelago.Features;
 using HarmonyLib;
 using Nickel;
 using TheJazMaster.CombatQoL;
@@ -19,6 +20,8 @@ public class AArchipelagoCheckLocation : CardAction
     public string? receiverName;
     public string? givenCard;
     public string? givenArtifact;
+    public string? givenModifier;
+    public string? givenCharacter;
 
     public AArchipelagoCheckLocation()
     {
@@ -28,10 +31,20 @@ public class AArchipelagoCheckLocation : CardAction
     public override void Begin(G g, State s, Combat c)
     {
         Debug.Assert(locationName != null, nameof(locationName) + " != null");
+        Debug.Assert(Archipelago.Instance.APSaveData != null, "Archipelago.Instance.APSaveData != null");
         // Can't undo an AP card with CombatQoL
         var combatQoL = ModEntry.Instance.CombatQol;
         combatQoL?.InvalidateUndos(c, ICombatQolApi.InvalidationReason.CUSTOM_REASON, Localize("cannotUndoReason"));
-        if (!combatQoL?.IsSimulating() ?? true) Archipelago.Instance.CheckLocation(locationName);
+        
+        if (!(!combatQoL?.IsSimulating() ?? true)) return;
+        
+        Archipelago.Instance.CheckLocation(locationName);
+        // Tag players we sent a trap to
+        if (itemColor == APColors.Trap && receiverName is { } playerName)
+        {
+            Archipelago.Instance.APSaveData.PeopleWeWronged.Add(playerName);
+            APSaveData.Save();
+        }
     }
     
     public override Icon? GetIcon(State s)
@@ -82,6 +95,27 @@ public class AArchipelagoCheckLocation : CardAction
             tooltips.Add(new TTDivider());
             tooltips.AddRange(artifact.GetTooltips());
             tooltips.Add(new TTDivider());
+        }
+
+        if (givenModifier != null)
+        {
+            var artifact = (Artifact) Archipelago.ItemToModifier[givenModifier].CreateInstance();
+            tooltips.Add(new TTDivider());
+            tooltips.AddRange(artifact.GetTooltips());
+            tooltips.Add(new TTDivider());
+        }
+        
+        if (givenCharacter != null)
+        {
+            var deck = Archipelago.ItemToDeck[givenCharacter];
+            tooltips.Add(new TTCharacter
+            {
+                character = new Character
+                {
+                    type = deck.Key(),
+                    deckType = deck
+                }
+            });
         }
 
         return tooltips;

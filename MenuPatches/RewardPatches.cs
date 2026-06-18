@@ -81,6 +81,13 @@ public static class ArtifactRewardRenderPatch
     {
         Debug.Assert(Archipelago.Instance.APSaveData != null, "Archipelago.Instance.APSaveData != null");
         
+        // Show tip about AP artifacts
+        if (__instance.artifacts.Any(artifact => artifact is CheckLocationArtifact))
+        {
+            Draw.Text(ModEntry.Instance.Localizations.Localize(["artifactReward", "apArtifactsTip"]),
+                      240, 245, align: TAlign.Center, color: Colors.textMain, outline: Colors.black);
+        }
+        
         if (Archipelago.Instance.APSaveData.CardScoutMode == CardScoutMode.DontScout) return;
         
         // Recheck AP checks every 5 seconds
@@ -149,22 +156,39 @@ public static class ArtifactRewardRenderPatch
             {
                 var effItemName1 = apArtifact.locationItemName[0]!;
                 var effItemName2 = apArtifact.locationItemName[1]!;
-                var charsToRemove = effItemName1.Length + effItemName2.Length - 22;
-                if (charsToRemove > 0)
+                if (effItemName1 == effItemName2)
                 {
-                    var diff = Math.Abs(effItemName1.Length - effItemName2.Length);
-                    var halfRest = (charsToRemove - diff) / 2;
-                    var charsToRemove1 = effItemName1.Length > effItemName2.Length ? diff + halfRest : halfRest;
-                    var charsToRemove2 = effItemName1.Length < effItemName2.Length ? diff + halfRest : halfRest;
-                    if (charsToRemove1 > 0) effItemName1 = effItemName1.Remove(effItemName1.Length - charsToRemove1) + "...";
-                    if (charsToRemove2 > 0) effItemName2 = effItemName2.Remove(effItemName2.Length - charsToRemove2) + "...";
+                    // Two items with the same name
+                    var charsToRemove = effItemName1.Length - 22;
+                    if (charsToRemove > 0)
+                        effItemName1 = effItemName1.Remove(Math.Max(effItemName1.Length - charsToRemove, 0)) + "...";
+                    return string.Format(
+                        ModEntry.Instance.Localizations.Localize(["artifactReward", "sameItemsName"]),
+                        effItemName1.ToUpper());
                 }
-                return (effItemName1 + " & " + effItemName2).ToUpper();
+                else
+                {
+                    // Two items with different names
+                    var charsToRemove = effItemName1.Length + effItemName2.Length - 22;
+                    if (charsToRemove > 0)
+                    {
+                        var diff = Math.Abs(effItemName1.Length - effItemName2.Length);
+                        var halfRest = (charsToRemove - diff) / 2;
+                        var charsToRemove1 = effItemName1.Length > effItemName2.Length ? diff + halfRest : halfRest;
+                        var charsToRemove2 = effItemName1.Length < effItemName2.Length ? diff + halfRest : halfRest;
+                        if (charsToRemove1 > 0) effItemName1 = effItemName1.Remove(effItemName1.Length - charsToRemove1) + "...";
+                        if (charsToRemove2 > 0) effItemName2 = effItemName2.Remove(effItemName2.Length - charsToRemove2) + "...";
+                    }
+                    return string.Format(
+                        ModEntry.Instance.Localizations.Localize(["artifactReward", "twoItemsNames"]),
+                        effItemName1.ToUpper(), effItemName2.ToUpper());
+                }
             }
             else
             {
-                var charsToRemove = apArtifact.locationItemName[0]!.Length - 25;
+                // One item
                 var effItemName = apArtifact.locationItemName[0]!;
+                var charsToRemove = effItemName.Length - 25;
                 if (charsToRemove > 0)
                     effItemName = effItemName.Remove(Math.Max(effItemName.Length - charsToRemove, 0)) + "...";
                 return effItemName.ToUpper();
@@ -183,24 +207,39 @@ public static class ArtifactRewardRenderPatch
             {
                 var effSlotName1 = apArtifact.locationSlotName[0]!;
                 var effSlotName2 = apArtifact.locationSlotName[1]!;
-                var charsToRemove = effSlotName1.Length + effSlotName2.Length - 20;
-                if (charsToRemove > 0)
+                if (effSlotName1 == effSlotName2)
                 {
-                    var diff = Math.Abs(effSlotName1.Length - effSlotName2.Length);
-                    var halfRest = (charsToRemove - diff) / 2;
-                    var charsToRemove1 = effSlotName1.Length > effSlotName2.Length ? diff + halfRest : halfRest;
-                    var charsToRemove2 = effSlotName1.Length < effSlotName2.Length ? diff + halfRest : halfRest;
-                    if (charsToRemove1 > 0) effSlotName1 = effSlotName1.Remove(effSlotName1.Length - charsToRemove1) + "...";
-                    if (charsToRemove2 > 0) effSlotName2 = effSlotName2.Remove(effSlotName2.Length - charsToRemove2) + "...";
+                    // Two items, same player
+                    var charsToRemove = effSlotName1.Length - 19;
+                    if (charsToRemove > 0)
+                        effSlotName1 = effSlotName1.Remove(Math.Max(effSlotName1.Length - charsToRemove, 0)) + "...";
+                    return string.Format(
+                        ModEntry.Instance.Localizations.Localize(["artifactReward", "twoItemsSameCharName"]),
+                        effSlotName1);
                 }
-                return string.Format(
-                    ModEntry.Instance.Localizations.Localize(["artifactReward", "twoItemsCharNames"]),
-                    effSlotName1, effSlotName2);
+                else
+                {
+                    // Two items, different players
+                    var charsToRemove = effSlotName1.Length + effSlotName2.Length - 20;
+                    if (charsToRemove > 0)
+                    {
+                        var diff = Math.Abs(effSlotName1.Length - effSlotName2.Length);
+                        var halfRest = (charsToRemove - diff) / 2;
+                        var charsToRemove1 = effSlotName1.Length > effSlotName2.Length ? diff + halfRest : halfRest;
+                        var charsToRemove2 = effSlotName1.Length < effSlotName2.Length ? diff + halfRest : halfRest;
+                        if (charsToRemove1 > 0) effSlotName1 = effSlotName1.Remove(effSlotName1.Length - charsToRemove1) + "...";
+                        if (charsToRemove2 > 0) effSlotName2 = effSlotName2.Remove(effSlotName2.Length - charsToRemove2) + "...";
+                    }
+                    return string.Format(
+                        ModEntry.Instance.Localizations.Localize(["artifactReward", "twoItemsCharNames"]),
+                        effSlotName1, effSlotName2);
+                }
             }
             else
             {
-                var charsToRemove = apArtifact.locationSlotName[0]!.Length - 20;
+                // One item, one player
                 var effPlayerName = apArtifact.locationSlotName[0]!;
+                var charsToRemove = effPlayerName.Length - 20;
                 if (charsToRemove > 0)
                     effPlayerName = effPlayerName.Remove(Math.Max(effPlayerName.Length - charsToRemove, 0)) + "...";
                 return string.Format(

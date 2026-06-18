@@ -44,7 +44,6 @@ public class CharacterRenderPatch
     public static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions, ILGenerator generator)
     {
         List<CodeInstruction> storedInstructions = new(instructions);
-        var codeMatcher = new CodeMatcher(storedInstructions, generator);
 
         // Using Shrike here because I don't know how to use indices with CodeMatcher
         var seqMatched = new SequenceBlockMatcher<CodeInstruction>(storedInstructions)
@@ -82,14 +81,17 @@ public class CharacterRenderPatch
     }
 }
 
-// Ensure we don't have unlocked characters we shouldn't have everytime we open the NewRunOptions screen
 [HarmonyPatch(typeof(NewRunOptions), nameof(NewRunOptions.OnEnter))]
 public class NewRunOptionsEnterPatch
 {
     public static void Postfix(State s)
     {
+        // Ensure we don't have unlocked characters we shouldn't have everytime we open the NewRunOptions screen
         UnlockCharPatch.RewriteUnlockedCharsFromAP(s.storyVars);
         UnlockShipPatch.RewriteUnlockedShipsFromAP(s.storyVars);
+        // Also prevent getting crystallized friend events when the character swap option is active
+        if (Archipelago.InstanceSlotData.SwapCharacterNode)
+            DB.story.MarkNodeSeen(s, "CrystallizedFriendEvent");
     }
 }
 

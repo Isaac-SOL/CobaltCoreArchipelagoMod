@@ -1,8 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Globalization;
 using System.Linq;
 using Archipelago.MultiClient.Net.Helpers;
+using daisyowl.text;
+using Microsoft.Extensions.Logging;
 using Microsoft.Xna.Framework.Input;
 
 namespace CobaltCoreArchipelago;
@@ -16,10 +19,10 @@ public class Tracker : Route, OnInputPhase, OnMouseDown
     private Dictionary<Deck, CharacterLocationsSummary> summaryCache = [];
     private Dictionary<string, (string item, string player)> hintsCache = [];
     private bool awaitingHost = false;
-
+    
     private static IHintsHelper Hints => Archipelago.Instance.Session!.Hints;
     
-    internal int GetMaxScrollLength() => 150;
+    internal int GetMaxScrollLength() => Math.Max(0, -185 + (Archipelago.DeckToItem.Count * 45));
 
     public Tracker()
     {
@@ -80,14 +83,18 @@ public class Tracker : Route, OnInputPhase, OnMouseDown
     public override void Render(G g)
     {
         SharedArt.DrawEngineering(g);
+        g.Push(onInputPhase: this);
         
         ScrollUtils.ReadScrollInputAndUpdate(g.dt, GetMaxScrollLength(), ref scroll, ref scrollTarget);
-        if (Input.gamepadIsActiveInput && Input.currentGpKey.HasValue)
-        {
-            scrollTarget = Mutil.Clamp(scrollTarget, 20.0 - GetMaxScrollLength(), 120.0 - GetMaxScrollLength());
-        }
         
         Draw.Text(Localize("name"), 111, 15.0 + scroll, DB.stapler, Colors.textMain);
+        
+        Draw.Text(
+            Localize("hoverHint"),
+            240, 42 + scroll,
+            color: Colors.textMain.gain(0.5),
+            align: TAlign.Center
+        );
 
         if (Archipelago.InstanceSlotData.ShuffleArtifacts != ArtifactShuffleMode.Off)
         {
@@ -99,7 +106,7 @@ public class Tracker : Route, OnInputPhase, OnMouseDown
             var basicBossArtifactAll = summaryCache[Deck.tooth].Artifacts.Boss.Count;
             var basicArtifactAll = basicCommonArtifactAll + basicBossArtifactAll;
 
-            var basicArtifactsBox = g.Push(rect: new Rect(170, 42 + scroll, 150, 8),
+            var basicArtifactsBox = g.Push(rect: new Rect(170, 60 + scroll, 150, 8),
                                            key: new UIKey(ArchipelagoUK.codex_charArtifacts.ToUK(), 0));
             var hintCount = GetHints(summaryCache[Deck.tooth].AllArtifacts).Count();
             Draw.Text(
@@ -142,7 +149,7 @@ public class Tracker : Route, OnInputPhase, OnMouseDown
 
             character.Render(
                 g,
-                130, (int)(60 + offset),
+                130, (int)(78 + offset),
                 mini: true,
                 renderLocked: !unlocked
             );
@@ -151,7 +158,7 @@ public class Tracker : Route, OnInputPhase, OnMouseDown
 
             Draw.Text(
                 Character.GetDisplayName(deck, g.state).ToUpper(),
-                170, 62 + offset,
+                170, 80 + offset,
                 color: charColor,
                 outline: Colors.black
             );
@@ -174,7 +181,7 @@ public class Tracker : Route, OnInputPhase, OnMouseDown
             var artifactAll = commonArtifactAll + bossArtifactAll;
             var memoryAll = summaryCache[deck].Memories.Count;
 
-            var subOffset = 71;
+            var subOffset = 89;
 
             if (Archipelago.InstanceSlotData.ShuffleCards)
             {
@@ -297,17 +304,41 @@ public class Tracker : Route, OnInputPhase, OnMouseDown
             ArchipelagoUK.codex_refresh.ToUK(),
             Localize("refresh"),
             onMouseDown: this,
-            platformButtonHint: Btn.X
+            platformButtonHint: Btn.Y
         );
 
+        // Move screen to selected element
+        if (Input.gamepadIsActiveInput && (Input.currentGpKey?.k == StableUK.char_mini
+                                           || Input.currentGpKey is
+                                           {
+                                               k: (UK)ArchipelagoUK.codex_charCards
+                                               or (UK)ArchipelagoUK.codex_charArtifacts
+                                               or (UK)ArchipelagoUK.codex_charMemories
+                                           }))
+        {
+            var screenPosY = Input.currentGpKey.Value.k == StableUK.char_mini
+                ? Archipelago.DeckToItem.Keys.ToList().IndexOf((Deck)Input.currentGpKey.Value.v)
+                : Input.currentGpKey.Value.v - 1;
+            screenPosY *= 45;
+            screenPosY += 60;
+            scrollTarget = Math.Clamp(scrollTarget, -screenPosY + 60.0, -screenPosY + 160.0);
+        }
+        
+        g.Pop();
     }
 
     public void OnInputPhase(G g, Box b)
     {
         if (Input.GetGpDown(Btn.B) || Input.GetKeyDown(Keys.Escape))
+        {
+            Audio.Play(FSPRO.Event.Click);
             g.CloseRoute(this);
-        else if (Input.GetGpDown(Btn.X))
+        }
+        else if (Input.GetGpDown(Btn.Y))
+        {
+            Audio.Play(FSPRO.Event.Click);
             LoadData();
+        }
     }
 
     public void OnMouseDown(G g, Box b)
@@ -317,7 +348,7 @@ public class Tracker : Route, OnInputPhase, OnMouseDown
             Audio.Play(FSPRO.Event.Click);
             g.CloseRoute(this);
         }
-        if (b.key == ArchipelagoUK.codex_refresh.ToUK())
+        else if (b.key == ArchipelagoUK.codex_refresh.ToUK())
         {
             Audio.Play(FSPRO.Event.Click);
             LoadData();

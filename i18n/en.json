@@ -9,6 +9,14 @@
         "port": "PORT:",
         "slotName": "SLOT NAME:",
         "password": "PASSWORD:",
+        "tooltip": {
+            "host": "The URL or IP of the server hosting this Archipelago room",
+            "port": "The port of the server you are connecting to",
+            "slotName": "Your player name in this Archipelago room, as configured in the YAML",
+            "password": "The password of the Archipelago room, leave blank if none was set",
+            "paste": "Paste clipboard contents",
+            "seePassword": "Show/hide password"
+        },
         "connect": "CONNECT",
         "invalidPort": "Invalid port number",
         "connectionIssue": "Failed to connect to Archipelago host.\nMake sure the address, port, slot name and password are correct.",
@@ -75,6 +83,7 @@
         "trackerName": "<c=boldPink>ARCHIPELAGO TRACKER</c>",
         "tracker": {
             "name": "ARCHIPELAGO TRACKER",
+            "hoverHint": "(Hover over a line to see additional details)",
             "itemHint": "{0} for {1}",
             "hintedCount": "     <c=card>({0} hinted)</c>",
             "refresh": "REFRESH",
@@ -109,23 +118,34 @@
         "timelineFixed": "<c=card>Timeline Fixed: {0}/3</c>"
     },
     "cardBrowse": {
+        "bootOptionUnlockedItemName": "Pick an <c=boldPink>unlocked</c> card or artifact",
         "bootOptionUnlockedCardName": "Pick an <c=boldPink>unlocked</c> card",
         "bootOptionUnlockedCardDesc": "unlocked cards",
         "bootOptionUnlockedCardTitle": "Unlocked cards: {0} cards",
-        "bootOptionUnlockedArtifactName": "Pick 1 of {0} <c=boldPink>unlocked</c> artifacts",
+        "bootOptionUnlockedArtifactName": "Pick an <c=boldPink>unlocked</c> artifact",
+        "bootOptionUnlockedArtifactDesc": "unlocked artifacts",
+        "bootOptionUnlockedArtifactTitle": "Unlocked artifacts: {0} artifacts",
+        "eventMissedAPItemName": "Pick a missed <c=boldPink>archipelago</c> item",
         "eventMissedAPCardName": "Pick a missed <c=boldPink>archipelago</c> card",
         "eventMissedAPCardDesc": "missed archipelago items",
         "eventMissedAPCardTitle": "Missed archipelago items: {0} cards",
-        "eventMissedAPArtifactName": "Pick 1 of {0} missed <c=boldPink>archipelago</c> artifacts",
+        "eventMissedAPArtifactName": "Pick a missed <c=boldPink>archipelago</c> artifact",
+        "eventMissedAPArtifactDesc": "missed archipelago items",
+        "eventMissedAPArtifactTitle": "Missed archipelago items: {0} artifacts",
         "addCardActionDoing": "Select a card to add to your deck.",
+        "addArtifactActionDoing": "Select an artifact to install.",
         "addCardActionDone": "The card has been added to your deck."
     },
     "cardReward": {
         "apCardsTip": "<c=boldPink>Archipelago cards</c> that you don't pick will not reappear\nfor a while, but you can find them again at Cleo's shop."
     },
     "artifactReward": {
+        "twoItemsNames": "{0} & {1}",
+        "sameItemsName": "{0} x2",
         "oneItemCharName": "{0} Item",
-        "twoItemsCharNames": "{0} & {1} Items"
+        "twoItemsCharNames": "{0} & {1} Items",
+        "twoItemsSameCharName": "{0} Items",
+        "apArtifactsTip": "<c=boldPink>Archipelago artifacts</c> that you don't pick will not reappear\nfor a while, but you can find them again at Cleo's shop."
     },
     "vault": {
         "goalTotalMemories": "Memories found:\n{0} / {1}",
@@ -145,7 +165,13 @@
         },
         "AInvalidateUndos": {
             "reasonItemReceived": "receiving an item from Archipelago",
-            "reasonDeathlinkReceived": "receiving a deathlink"
+            "reasonDeathlinkReceived": "receiving a deathlink",
+            "reasonArchiprism": "attacking with the Archiprism"
+        },
+        "AArchiprismTooltip": {
+            "title": "Archiprism",
+            "contributing": "Deals {0} damage from players:\n{1}",
+            "contributingB": "Deals {0} damage, {1} times, from players:\n{2}"
         }
     },
     "card": {
@@ -155,7 +181,8 @@
             "descBase": "Send {0} to {1}.",
             "descSelf": "Unlock <c=card>{0}</c>.",
             "descSelfAddCard": "Unlock <c=card>{0}</c> and add it to your hand.",
-            "descSelfAddArtifact": "Unlock and get <c=artifact>{0}</c>.",
+            "descSelfAddArtifact": "Unlock and install <c=artifact>{0}</c>.",
+            "descSelfAddModifier": "Unlock and activate <c=artifact>{0}</c>.",
             "descContShield": "\nShield <c=healthBarShield>{0}</c>.",
             "descContTempShield": "\nTmp shield <c=healthBarTempShield>{0}</c>.",
             "descContAttack": "\nAttack <c=attack>{0}</c>x{1}.",
@@ -169,6 +196,12 @@
             "descB": "<c=status>Overdrive {0}</c>.",
             "descRamp": "\n+1 for every {1} <c=redd>deathlink</c>.\n<c=action>({0}/{1})</c>",
             "descRampOne": "\n+1 for every <c=redd>deathlink</c>."
+        },
+        "Archiprism": {
+            "name": "Archiprism",
+            "desc": "Attack for {0} dmg per player who has found an item since last use",
+            "descA": "Attack for {0} dmg per player who has found a <c=DDA0DD>progression item</c>",
+            "descB": "Multi attack for {0} dmg per player who has found a <c=redd>trap</c>"
         }
     },
     "artifact": {
@@ -178,7 +211,8 @@
             "descBase": "Send <c=card>{0}</c> to <c=attack>{1}</c>.",
             "descSelf": "Unlock <c=card>{0}</c>.",
             "descSelfAddCard": "Unlock <c=card>{0}</c> and add it to your deck.",
-            "descSelfAddArtifact": "Unlock and get <c=artifact>{0}</c>."
+            "descSelfAddArtifact": "Unlock and install <c=artifact>{0}</c>.",
+            "descSelfAddModifier": "Unlock and activate <c=artifact>{0}</c>."
         },
         "LockedArtifact": {
             "name": "LOCKED ARTIFACT",
@@ -186,10 +220,356 @@
             "descNotFound": "No underlying artifact! <c=attack>This should not happen!</c>"
         }
     },
+    "compShouts": {
+        "cat": {
+            "1": "Detecting a spatial rift made by {1}!\nLooks like we've got {0} now, sweet.",
+            "2": "Ah, looks like {1} sent us {0}.\nShould come in handy if we use it.",
+            "3": "We've recieved {0} over from {1}!\nHopefully we can use it to its full potential. "
+        },
+        "backup": {
+            "1": "CARGO (Class: {0}) INCOMING.\nSENDER: {1}",
+            "2": "STANDARD PACKAGE RECEIVED: {0}\nSENDER: {1}",
+            "3": "TEMPORAL RIFT DETECTED. RECEIVED: {0}\nSENDER: {1}"
+        },
+        
+        "deathlink": {
+            "cat": {
+                "1": "We just got hit by a deathlink from {0}!\nIt was caused by: {1}."
+            },
+            "backup": {
+                "1": "RECEIVED DEATHLINK. CAUSE: {0}\nSENDER: {1}"
+            }
+        },
+        
+        "overflow": {
+            "cat": {
+                "1": "Okay we just received a bunch of stuff all at once,\nI'm not reading all that.",
+                "2": "Wow, uh, that's a LOT of cargo,\nI'll just let y'all sort through it yourselves.",
+                "3": "Stay calm everyone, but we just got sent a very, VERY BIG package.\nI'll be busy stabilizing the, uh, everything."
+            },
+            "backup": {
+                "1": "ALERT: RECEIVED PACKAGE SIZE EXCEEDING STANDARD LIMITS,\nITEM STACK WRITTEN TO MAIN LOG."
+            },
+            
+            "oneSender": {
+                "cat": {
+                    "1": "Okay we just received a bunch of stuff from {0},\nI'm not reading all that.",
+                    "2": "Wow, uh, {0}, that's a LOT of cargo,\nI'll just let y'all sort through it yourselves.",
+                    "3": "Stay calm everyone, but {0} just sent us a very, VERY BIG package.\nI'll be busy stabilizing the, uh, everything."
+                },
+                "backup": {
+                    "1": "ALERT: RECEIVED PACKAGE SIZE EXCEEDING STANDARD LIMITS,\nSENDER: {0}. ITEM STACK WRITTEN TO MAIN LOG."
+                }
+            }
+        },
+        
+        "card": {
+            "character": {
+                "cat": {
+                    "1": "{2}, you got {0}.\nMake sure to thank {1} for that.",
+                    "2": "Oh, we've received {0} for {2}!\nAppreciated, {1}.",
+                    "3": "We've received {0} from {1}.\nLooks like {2} remembers a little more..."
+                }
+            }
+        },
+        "artifact": {
+            "cat": {
+                "1": "{0} got sent to us by {1}.\nWe'll able to use it in the future!",
+                "2": "{1} sent us over the drivers on {0}.\nIt'll be compatible with whatever ship we have in the future.",
+                "3": "Oh, check the logs, {1} added {0} to them.\nIf we find it somewhere in one of the sectors, it won't be useless!"
+            },
+            
+            "instant": {
+                "cat": {
+                    "1": "Looks like we got {0} from {1}!\nIt's already been synced with our systems, neat!",
+                    "2": "...Huh? Looks like we have {0} now.\nAppreciate it, {1}!",
+                    "3": "Oh, power surge! Looks like we've got {0} \nready, thanks to {1}."
+                }
+            },
+            "boss": {
+                "instant": {
+                    "cat": {
+                        "1": "{1} sent us something real strong, {0}!\nThis should hopefully help us big time during the loop.",
+                        "2": "A big help just arrived from {1}, it's {0}!\nThat's a pretty big power boost, I'd say."
+                    },
+                    "backup": {
+                        "1": "HIGH-VALUE CARGO (Class: {0}) INCOMING.\nSENDER: {1}",
+                        "2": "ADVANCED PACKAGE RECEIVED: {0}\nSENDER: {1}"
+                    },
+                    
+                    "drawback": {
+                        "cat": {
+                            "1": "Whoa, big surge of power from {1}!\nWe got {0} ready now, hope we're fine with the drawbacks!"
+                        }
+                    }
+                }
+            }
+        },
+        
+        "character": {
+            "cat": {
+                "1": "Whoa, we've just got a cryo-pod filled up out of nowhere...or wait, it's from {1}.\nWell, should we welcome {0} aboard for the next loop?",
+                "2": "Hey, looks like {0} is here, just in a cryo-pod now.\nYou can thank {1} for that."
+            },
+            "backup": {
+                "1": "DETECTED: CREWMATE {0} ON STANDBY FROM {1}"
+            },
+            
+            "dizzy": {
+                "cat": {
+                    "1": "Better steady up, since Dizzy's on deck thanks to {1}!\nGet it? Steady up. 'Cause it's Dizzy...I'm glad he can't hear me right now.",
+                    "2": "Heads-up from {1}, Dizzy's now part of the crew for later!\nMake sure there aren't any too many big glowy buttons in the next ship."
+                },
+                "backup": {
+                    "1": "DETECTED: RESEARCHER <c=dizzy>DIZZY</c> ON STANDBY  FROM {1}.\nREBOOTING ON-BOARD LABRATORY."
+                }
+            },
+            "riggs": {
+                "cat": {
+                    "1": "Status report, Riggs is here with {1}'s intervention!\nDid we ever get that hand cannon of her's back from the spacial?",
+                    "2": "Hey, Riggs is next-loop ready with the help of {1}.\nMaybe I should prepare some boba as a little treat..."
+                },
+                "backup": {
+                    "1": "DETECTED: PILOT <c=riggs>RIGGS</c> ON STANDBY FROM {1}.\nPREPARING TAPIOCA FOR FUTURE CONSUMPTION."
+                }
+            },
+            "peri": {
+                "cat": {
+                    "1": "Peri's ready to go now, since {1} helped out.\n...Though actually, she really needs the nap, so wait until the next loop?",
+                    "2": "Hey, Peri's on-standby now, thanks {1}!\nShe'll be happy to get her hands on some firing solutions."
+                },
+                "backup": {
+                    "1": "DETECTED: CAPTAIN <c=peri>HYPERIA</c> ON STANDBY FROM {1}.\nUPDATING WEAPON CALIBRATION PREFERENCES."
+                }
+            },
+            "goat": {
+                "cat": {
+                    "1": "Oh, {1} just managed to link us back up with Isaac!\nThe drone bay was kind of collecting dust, overall.",
+                    "2": "Isaac's back in action, since {1} worked some spacial magic."
+                },
+                "backup": {
+                    "1": "DETECTED: ENGINEER <c=goat>ISAAC</c> ON STANDBY FROM {1}.\nINITIALIZING DRONE BAY STERILIZATION."
+                }
+            },
+            "eunice": {
+                "cat": {
+                    "1": "Oh boy, looks like Drake is back due to {1}...\nMaking a reminder to invest in some more fire suppression for later.",
+                    "2": "I think {1} touched the thermostat, because Drake is on-board now.\nWe'll need to turn the A/C on full-blast once she unthaws."
+                },
+                "backup": {
+                    "1": "ALERT: MARAUDER <c=eunice>DRAKE</c> ON-BOARD FROM {1}.\nERROR: AIRLOCK SYSTEM DISABLED. CANNOT ASPHYXIATE."
+                }
+            },
+            "hacker": {
+                "cat": {
+                    "1": "We've got Max on-board now because of {1}!\nJust going to ignore the requested Max wanted to play for that occasion.",
+                    "2": "Sweet, looks like Max has joined us in cryosleep thanks to {1}.\n...He wanted me to play a recording when he arrived but naaaaah."
+                },
+                "backup": {
+                    "1": "AUDIO PLAYBACK INITIATED FROM {1} FOR <c=hacker>MAX</c>.\n\"Yeah, neighborhood hacker here. Going to take a quick nap, but wake me up whenever!\""
+                }
+            },
+            "shard": {
+                "cat": {
+                    "1": "Oh nice, Books is back thanks to {1}...\nOr maybe she just warped back in all by herself...right into the cryo pod.",
+                    "2": "Hey, Books is here now! She wants her regards to be sent to\n{1}...so uh, regards sent?"
+                },
+                "backup": {
+                    "1": "TEMPORAL ANAMOLY DETECTED FROM {1}.\nDESIGNATION: <c=shard>BOOKS.</c> TEMPORARY PERMISSIONS GRANTED."
+                }
+            },
+            "colorless": {
+                "cat": {
+                    "1": "qqqWkeajhg-------d-s23123!!!!!-11111!!!!!...\n...Oh cool, {1} gave me manual overrides to our ships, thanks!",
+                    "2": "{1}<c=keyword>@AP~REMOTE</c>: <c=healthBarShield>~</c>/CC CAT.EXE -unlock\nLog: Successfully unlocked <c=comp>CAT</c> for use in run-- WHAT???"
+                },
+                "backup": {
+                    "1": "ERROR: <c=comp>CAT</c> MATRIX UNRECOVERABLE DESPITE {1}\nINSTATING TEMPORAL FLAG FOR STANDARD CREW ACCESS; GRANTED."
+                }
+            }
+        },
+        
+        "memory": {
+            "cat": {
+                "1": "Looks like {1} helped abate some of {2}'s amnesia.\nI'm still wondering how that's even possible, but we can make progress!",
+                "2": "{1} worked some magic, and {2} is able\nto remember better. Let's get them to the Cobalt when we can!"
+            },
+            "backup": {
+                "1": "MNESTICS APPLIED TO {2}, AMNESIA DAMPENED.",
+                "2": "DEPLOYED MEMORY ENHANCERS FOR {2}."
+            },
+            
+            "shard": {
+                "memory1": {
+                    "cat": {
+                        "1": "...Huh? Did Books really need the memory booster here too? \nDoubt {1} is a doctor, but if they think its important..."
+                    },
+                    "backup": {
+                        "1": "MEMORY ENHANCERS DEPLOYED FOR <c=shard>BOOKS</c>. ADAPTING TO UNKNOWN PHYSIOLOGY. "
+                    }
+                },
+                "memory2": {
+                    "cat": {
+                        "1": "Books got another memory booster over from {1}.\nI guess she does need those boosters after all...the temporalstream is weird."
+                    },
+                    "backup": {
+                        "1": "ADDITIONAL MEMORY ENHANCERS ADMINISTERED TO <c=shard>BOOKS</c>. ADAPTATION LEVELS 64.12%."
+                    }
+                },
+                "memory3": {
+                    "cat": {
+                        "1": "Look at that, one more memory booster for Books from {1}.\nNow is that enough, so I can stop questioning why she needs them??? "
+                    },
+                    "backup": {
+                        "1": "FINAL MEMORY ENHANCERS ADMINISTERED TO <c=shard>BOOKS</c>. FULLY ADAPTED."
+                    }
+                }
+            },
+            "colorless": {
+                "memory1": {
+                    "cat": {
+                        "1": "What the...! One of my memory banks was already encrypted, and then DECRYPTED???\n{1} is responsible for that...and I feel like the Cobalt wants that."
+                    },
+                    "backup": {
+                        "1": "REQUEST FROM: {1}\nUNENCRYPTED: <c=comp>CAT</c> MEMORY DATABANK 0x434F42414C54FFFF."
+                    }
+                },
+                "memory2": {
+                    "cat": {
+                        "1": "Another memory bank unencrypted for me...why these in particular?\n...Hmm, well, if {1} wants us to visit the Cobalt for that, let's do it."
+                    },
+                    "backup": {
+                        "1": "REQUEST FROM: {1}\nUNENCRYPTED: <c=comp>CAT</c> MEMORY DATABANK 0x434F524520594159."
+                    }
+                },
+                "memory3": {
+                    "cat": {
+                        "1": "...Whoa. I just felt something....ephemeral. Whatever that means in the end,\nI believe {1} allowed me to visit the Cobalt to its fullest extent."
+                    },
+                    "backup": {
+                        "1": "REQUEST FROM: {1}\nACCESSING TEMPORAL UPLINK. FINAL <c=comp>CAT</c> MEMORY??? ACCESSIBLE."
+                    }
+                }
+            }
+        },
+        
+        "filler": {
+            "cat": {
+                "1": "{1} sent us over...well, nothing, really? Just a minor boost. \nWould it be too greedy to hope for something more?",
+                "2": "Our generators got boosted a bit by {1}.\nDoesn't seem like we got anything else though...",
+                "3": "Small surge in power from {1}, but not much else.\nAt least we didn't get a trap or anything, so it's still appreciated, but..."
+            },
+            "backup": {
+                "1": "MINOR GENERATOR SURGE APPLIED.",
+                "2": "SMALL POWER BOOST ACTIVATED."
+            }
+        },
+        
+        "trap": {
+            "cat": {
+                "1": "Would you look at that, {1} activated a {0} on us.\nNice!!! Maybe reconsider looking for one of their shiny anomalies!",
+                "2": "Wow! {1} decided to send us a {0}!\nAren't we supposed to be working together???",
+                "3": "Ugh, {1} launched a {0} through the temporalstream.\nLet's hope it doesn't mess with us too badly."
+            },
+            "backup": {
+                "1": "ALERT: SUBTERFUGE (Type: {0}) ACTIVATED",
+                "2": "ALERT: TROJAN (Name: {0}) DETECTED"
+            },
+            
+            "revengeance": {
+                "cat": {
+                    "1": "Yeeeeeah, you all know that prank we sent over to {1}?\nThey got their revenge with a {0}. Kinda deserved?",
+                    "2": "Welp! {1} got their vengeance on us with a {0}.\nWho could've guessed that would've happened???",
+                    "3": "Woop woop woop! Alert alert, we just had a {0} impact us!\nIt was sent by {1}...who we messed with earlier. Coincidence???"
+                }
+            },
+            
+            "Canister Trap": {
+                "cat": {
+                    "once1": "Oh hey, {1} sent us a bunch of cargo!\n...Wait, it's way too much cargo...and they're all EMPTY?????",
+                    "1": "{1} just sent us a Genesis package. After taking what was\ninside and leaving us the boxes. Wow!!! Thanks!!!",
+                    "2": "Detecting a spacial rift made by {1}!\nLooks like we've got...got...trash. It was a bunch of containers. Great!!!"
+                },
+                "backup": {
+                    "1": "ALERT: GENESIS DELIVERY ACCEPTED. CARGO CONTENTS: N/A",
+                    "2": "ALERT: RECEIVED A COPY OF BIG RIGS: OVER THE ROAD RACING",
+                    "3": "ALERT: RECEIVED ONE WITH NOTHING, BARBARIAN HUT, AND SNAKEBITE."
+                }
+            },
+            "Missing Trap!": {
+                "cat": {
+                    "once1": "{1} sent us a Missing Trap...like the trap is missing?\nSeems like we should be perfectly fine then! ...Wait a second.",
+                    "1": "And one of us just got poofed because of {1}.\nWell, good thing it can't be me this time around!!!",
+                    "2": "Ah, one of the crew just vanished! ...{1} was reponsible\nfor that. Maybe we should send them something 'good' as a thank you!"
+                },
+                "backup": {
+                    "1": "ALERT: MINIATURE POCKET DIMENSION ON-BOARD.",
+                    "2": "ALERT: CREW MEMBER MOMENTARILY ON SHORE LEAVE."
+                }
+            },
+            "Shuffle Trap": {
+                "cat": {
+                    "1": "Wow, I didn't know {1} was a part of Sunshine Heavy Industries.\nBECAUSE THEY JUST MESSED UP OUR WHOLE SHIP!!!",
+                    "2": "What the...hey, {1} just screwed with our entire ship!\nThat girl from the shipyard must be cackling right now.",
+                    "3": "We just got shuffled up from {1}! \nHow would they like it if THEY got randomized around???"
+                },
+                "backup": {
+                    "1": "ALERT: EMERGENCY SWAPPING PROTOCOLS ACTIVATED.",
+                    "2": "ALERT: SHIP SHUFFLE MODE ACTIVATED."
+                }
+            }
+        },
+        
+        "modifier": {
+            "cat": {
+                "1": "Huh??? Now we have {0} to contend with...\n{1} is shaking things up, but I'm not sure if I like that!",
+                "2": "Hey, is {1} secretly working with Books or something?\n{0} was just applied to us, and I didn't expect her chaos here!"
+            },
+            "backup": {
+                "1": "ALERT: {0} ACTIVATED. ADJUSTING LOOP PARAMETERS. "
+            }
+        }
+    },
     "story": {
+        "event": {
+            "BootSequenceUnlockedItem": "ERROR: [ItemType] EXPECTED! >>>\nMANUAL INPUT NEEDED:",
+            "ShopMissedItem": "Which item do you want?",
+            
+            "MapSwapCharacter": {
+                "tooltip": "A collection of otherworldly crystals.\nIt may hide some familiar faces...",
+                
+                "CAT1": "Are these... our friends? Stuck in other worlds?",
+                "CAT2": "We might be able to get one out...",
+                "CAT3": "But we don't have room for more in here. One of you will have to go into cryo-stasis again.",
+                "DizzyPre": "I do some of my best thinking while asleep.",
+                "RiggsPre": "Can I bring my boba?",
+                "PeriPre": "I wouldn't mind a nap.",
+                "IsaacPre": "Aw, man.",
+                "DrakePre": "Heh. You won't survive without me.",
+                "MaxPre": "Bummer...",
+                "BooksPre": "Cool!",
+                "CAT4": "Alright, who's it gonna be?",
+
+                "choice2": "Who are we swapping them with?",
+                
+                "DizzyPost": "I'm ready!",
+                "RiggsPost": "It's me!",
+                "PeriPost": "Let's go get 'em.",
+                "IsaacPost": "Huh. Hello!",
+                "DrakePost": "WAUGH! Don't startle me like that!",
+                "MaxPost": "Huh. Alright. Hey guys.",
+                "BooksPost": "Hello!!!",
+                "CATPost": "Wait, this doesn't make any sense. Is this a time loop thing?",
+                
+                "CATRefuse": "They'll be fine.",
+                
+                "optionLabelNoSwapOut": "Nice!"
+            }
+        },
         "memory": {
             "twoChoice": "<c=boldPink>Both of them!</c>",
             "allChoice": "<c=boldPink>All of them!</c>",
+            
             "AllThreeEndTalk": {
                 "Void1": "Then so it shall be."
             },

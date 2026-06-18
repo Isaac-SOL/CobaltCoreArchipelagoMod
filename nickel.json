@@ -7,6 +7,13 @@
   "RequiredApiVersion": "1.5.7",
   "EntryPointAssembly": "CobaltCoreArchipelago.dll",
   "LoadPhase": "AfterDbInit",
+  "Dependencies": [
+    {
+      "UniqueName": "Shockah.CustomRunOptions",
+      "Version": "1.5.3",
+      "IsRequired": false
+    }
+  ],
   "UpdateChecks": {
     "GitHub": {
       "Repository": "Isaac-SOL/CobaltCoreArchipelagoMod"

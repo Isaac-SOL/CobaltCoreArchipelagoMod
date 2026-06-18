@@ -8,6 +8,7 @@ public static class NotSoRandomManager
 {
     private static HashSet<string> RecentlySeenLocations => Archipelago.Instance.APSaveData!.RecentlySeenLocations;
     private static HashSet<string> AllSeenLocations => Archipelago.Instance.APSaveData!.AllSeenLocations;
+    private static HashSet<string> ThisRunSeenLocations => Archipelago.Instance.APSaveData!.ThisRunSeenLocations;
     
     // Whenever we pick a location, we prevent it from being seen until there are no valid choices left
     internal static string RandomLocation(List<string> validChoices, Rand rng)
@@ -33,6 +34,7 @@ public static class NotSoRandomManager
         Debug.Assert(Archipelago.Instance.APSaveData != null, "Archipelago.Instance.APSaveData != null");
         RecentlySeenLocations.Add(location);
         AllSeenLocations.Add(location);
+        ThisRunSeenLocations.Add(location);
     }
 
     internal static void AddSeenLocations(IEnumerable<string> locations)

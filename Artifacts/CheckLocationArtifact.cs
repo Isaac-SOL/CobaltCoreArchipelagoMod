@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using Archipelago.MultiClient.Net.Models;
+using CobaltCoreArchipelago.Features;
 using HarmonyLib;
 using Nanoray.PluginManager;
 using Newtonsoft.Json;
@@ -25,6 +26,8 @@ public class CheckLocationArtifact : Artifact, IRegisterable
     public string?[] locationItemColor = [null, null];
     public string?[] givenCard = [null, null];
     public string?[] givenArtifact = [null, null];
+    public string?[] givenModifier = [null, null];
+    public string?[] givenCharacter = [null, null];
     
     public static void Register(IPluginPackage<IModManifest> package, IModHelper helper)
     {
@@ -53,8 +56,17 @@ public class CheckLocationArtifact : Artifact, IRegisterable
 
     public override void OnReceiveArtifact(State state)
     {
-        Archipelago.Instance.CheckLocation(locationName[0]!);
-        if (IsDouble()) Archipelago.Instance.CheckLocation(locationName[1]!);
+        Debug.Assert(Archipelago.Instance.APSaveData != null, "Archipelago.Instance.APSaveData != null");
+        foreach (var i in IsDouble() ? (int[])[0] : [0, 1])
+        {
+            Archipelago.Instance.CheckLocation(locationName[i]!);
+            // Tag players we sent a trap to
+            if (locationItemColor[i] == APColors.Trap && locationSlotName[i] is { } playerName)
+            {
+                Archipelago.Instance.APSaveData.PeopleWeWronged.Add(playerName);
+                APSaveData.Save();
+            }
+        }
     }
     
     private static string Localize(params string[] key) =>
@@ -80,11 +92,10 @@ public class CheckLocationArtifact : Artifact, IRegisterable
         if (IsLocal(pos))
         {
             var state = MG.inst.g.state;  // This is really ugly but my hands were tied
-            description = Localize(WillAddCardToDeck(state, pos)
-                                       ? "descSelfAddCard"
-                                       : WillAddArtifact(state, pos)
-                                           ? "descSelfAddArtifact"
-                                           : "descSelf");
+            description = Localize(WillAddCardToDeck(state, pos) ? "descSelfAddCard"
+                                   : WillAddArtifact(state, pos) ? "descSelfAddArtifact"
+                                   : WillAddModifier(pos) ? "descSelfAddModifier"
+                                   : "descSelf");
             description = string.Format(description, locationItemName[pos]);
         }
         else
@@ -109,6 +120,26 @@ public class CheckLocationArtifact : Artifact, IRegisterable
             var artifact = (Artifact) Archipelago.ItemToArtifact[givenArtifact[pos]!].CreateInstance();
             tooltips.Add(new TTDivider());
             tooltips.AddRange(artifact.GetTooltips());
+        }
+        
+        if (givenModifier[pos] != null)
+        {
+            var artifact = (Artifact) Archipelago.ItemToModifier[givenModifier[pos]!].CreateInstance();
+            tooltips.Add(new TTDivider());
+            tooltips.AddRange(artifact.GetTooltips());
+        }
+        
+        if (givenCharacter[pos] != null)
+        {
+            var deck = Archipelago.ItemToDeck[givenCharacter[pos]!];
+            tooltips.Add(new TTCharacter
+            {
+                character = new Character
+                {
+                    type = deck.Key(),
+                    deckType = deck
+                }
+            });
         }
             
         return tooltips;
@@ -135,9 +166,10 @@ public class CheckLocationArtifact : Artifact, IRegisterable
     private bool WillAddCardToDeck(State state, int pos)
     {
         Debug.Assert(Archipelago.Instance.APSaveData != null, "Archipelago.Instance.APSaveData != null");
-        if (givenCard[pos] is null) return false;
+        if (givenCard[pos] is not { } cardName) return false;
         if (!IsLocal(pos)) return false;
-        if (Archipelago.Instance.APSaveData.HasItem(givenCard[pos]!)) return false;
+        if (Archipelago.Instance.APSaveData.HasItem(cardName)) return false;
+        if (Archipelago.InstanceSlotData.ImmediateRewardsBlacklist.Contains(cardName)) return false;
         return Archipelago.InstanceSlotData.ImmediateCardRewards switch
         {
             CardRewardsMode.Always or CardRewardsMode.IfLocal => true,
@@ -149,15 +181,28 @@ public class CheckLocationArtifact : Artifact, IRegisterable
     private bool WillAddArtifact(State state, int pos)
     {
         Debug.Assert(Archipelago.Instance.APSaveData != null, "Archipelago.Instance.APSaveData != null");
-        if (givenArtifact[pos] is null) return false;
+        if (givenArtifact[pos] is not { } artifactName) return false;
         if (!IsLocal(pos)) return false;
-        if (Archipelago.Instance.APSaveData.HasItem(givenArtifact[pos]!)) return false;
+        if (Archipelago.Instance.APSaveData.HasItem(artifactName)) return false;
+        if (Archipelago.InstanceSlotData.ImmediateRewardsBlacklist.Contains(artifactName)) return false;
         return Archipelago.InstanceSlotData.ImmediateArtifactRewards switch
         {
             CardRewardsMode.Always or CardRewardsMode.IfLocal => true,
             CardRewardsMode.IfHasDeck or CardRewardsMode.IfLocalAndHasDeck => HasDeck(state, pos),
             _ => false
         };
+    }
+
+    private bool WillAddModifier(int pos)
+    {
+        Debug.Assert(Archipelago.Instance.APSaveData != null, "Archipelago.Instance.APSaveData != null");
+        if (givenModifier[pos] is not { } modifierName) return false;
+        if (!IsLocal(pos)) return false;
+        if (ItemApplier.StartOnlyModifiers.Contains(Archipelago.ItemToModifier[modifierName])) return false;
+        if (Archipelago.Instance.APSaveData.HasItem(modifierName)) return false;
+        if (Archipelago.InstanceSlotData.ImmediateRewardsBlacklist.Contains(modifierName)) return false;
+        return Archipelago.InstanceSlotData.ModifiersMode is ModifierShuffleMode.Immediate
+                                                             or ModifierShuffleMode.ImmediateAndUnlockable;
     }
 
     internal void LoadInfo(ScoutedItemInfo?[]? infos)
@@ -183,6 +228,10 @@ public class CheckLocationArtifact : Artifact, IRegisterable
                     givenCard[i] = locationItemName[i];
                 else if (Archipelago.ItemToArtifact.ContainsKey(locationItemName[i]!))
                     givenArtifact[i] = locationItemName[i];
+                else if (Archipelago.ItemToModifier.ContainsKey(locationItemName[i]!))
+                    givenModifier[i] = locationItemName[i];
+                else if (Archipelago.ItemToDeck.ContainsKey(locationItemName[i]!))
+                    givenCharacter[i] = locationItemName[i];
             }
         }
     }
