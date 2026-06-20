@@ -57,15 +57,13 @@ public class CheckLocationArtifact : Artifact, IRegisterable
     public override void OnReceiveArtifact(State state)
     {
         Debug.Assert(Archipelago.Instance.APSaveData != null, "Archipelago.Instance.APSaveData != null");
-        foreach (var i in IsDouble() ? (int[])[0] : [0, 1])
+        for (var i = 0; i < MaxItems; i++)
         {
-            Archipelago.Instance.CheckLocation(locationName[i]!);
-            // Tag players we sent a trap to
-            if (locationItemColor[i] == APColors.Trap && locationSlotName[i] is { } playerName)
-            {
-                Archipelago.Instance.APSaveData.PeopleWeWronged.Add(playerName);
-                APSaveData.Save();
-            }
+            if (locationName[i] is not { } locName) continue;
+            Archipelago.Instance.CheckLocation(locName);
+            if (locationItemColor[i] != APColors.Trap || locationSlotName[i] is not { } playerName) continue;
+            Archipelago.Instance.APSaveData.PeopleWeWronged.Add(playerName);
+            APSaveData.Save();
         }
     }
     

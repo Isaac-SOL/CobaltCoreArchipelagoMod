@@ -442,7 +442,7 @@ public class ArtifactOfferingPatch
         ModEntry.Instance.Logger.LogDebug(
             "Artifact reward: {artifactReward}",
             __result.Select(artifact => artifact is CheckLocationArtifact apArti
-                                ? $"[{apArti.locationName}]"
+                                ? $"[{apArti.locationName.Aggregate((a, b) => $"{a}, {b}")}]"
                                 : artifact.ToString())
         );
         
