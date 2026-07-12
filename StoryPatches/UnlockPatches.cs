@@ -188,6 +188,7 @@ internal static class UnlockReplacements
             VaultRenderPatch.CanCompleteGame(Vault.GetVaultMemories(s)))
         {
             Debug.Assert(Archipelago.Instance.Session != null, "Archipelago.Instance.Session != null");
+            ModEntry.Instance.Logger.LogInformation("Victory condition achieved, do_future_memory == false, set AP goal achieved");
             Archipelago.Instance.Session.SetGoalAchieved();
         }
     }
