@@ -32,8 +32,10 @@ and other kinds of suggestions. Look at the [Planned Features](#planned-features
 and [Known Issues](#known-issues) sections for more details.
 
 I mostly did this for fun, so I make no promises as to how responsive I will be
-nor how long I will keep working on this mod. If I were to become inactive, I give
-my blessing to anyone who wants to fork the repository.
+nor how long I will keep working on this mod. If I have become inactive for a
+long time and you wish to fork this repository or build on top of my work in
+general, ask me first. Please note that if you use LLMs or "AI" of any kind,
+I will say no. Do not feed my work to an LLM.
 
 
 ## What is an "Archipelago Randomizer", and why would I want one?
