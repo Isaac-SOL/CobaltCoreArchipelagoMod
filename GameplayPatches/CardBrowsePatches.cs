@@ -115,14 +115,18 @@ public class CardBrowseListPatch
         .ToList();
 
     internal static IEnumerable<string> SeenLocationsFromSlotData() =>
-        Archipelago.InstanceSlotData.PickMissedItemsFromEveryRun
-            ? Archipelago.Instance.APSaveData!.AllSeenLocations
-            : Archipelago.Instance.APSaveData!.ThisRunSeenLocations;
+        Archipelago.InstanceSlotData.SeenItemsAtShop switch
+        {
+            SeenItemsAtShopMode.Off => new List<string>(),
+            SeenItemsAtShopMode.ThisRun => Archipelago.Instance.APSaveData!.ThisRunSeenLocations,
+            _ => Archipelago.Instance.APSaveData!.AllSeenLocations
+        };
 
     internal static List<string> GetPickableAPLocationsList(State s) => SeenLocationsFromSlotData()
         .Intersect(Archipelago.Instance.Session!.Locations.AllMissingLocations
                        .Select(l => Archipelago.Instance.Session.Locations.GetLocationNameFromId(l)))
-        .Where(name => s.characters
+        .Where(name => Archipelago.InstanceSlotData.SeenItemsAtShop != SeenItemsAtShopMode.MyCharacters
+                       || s.characters
                            .Select(c => Archipelago.DeckToItem[c.deckType!.Value])
                            .Append("Basic")
                            .Any(name.StartsWith))

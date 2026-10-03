@@ -40,18 +40,14 @@ public class VaultRenderPatch
 
     internal static bool CanCompleteGame(List<Vault.MemorySet> vaultMemories)
     {
-        if (Archipelago.InstanceSlotData.WinCondition == WinCondition.TotalMemories)
-        {
-            return vaultMemories
-                       .Sum(memorySet => memorySet.memoryKeys
-                                .Sum(entry => entry.unlocked ? 1 : 0))
-                   >= Archipelago.InstanceSlotData.WinReqTotal;
-        }
-        
-        // WinCondition.MemoryPerCharacter
-        return vaultMemories
-            .All(memorySet => memorySet.memoryKeys
-                     .Sum(entry => entry.unlocked ? 1 : 0) >= Archipelago.InstanceSlotData.WinReqPerChar);
+        var countValid = vaultMemories
+                             .Sum(memorySet => memorySet.memoryKeys.Count(entry => entry.unlocked))
+                         >= Archipelago.InstanceSlotData.WinReqTotal;
+        var charactersValid = vaultMemories
+                                  .Count(memorySet => memorySet.memoryKeys.Count(entry => entry.unlocked)
+                                                      >= Archipelago.InstanceSlotData.WinReqPerChar)
+                              >= Archipelago.InstanceSlotData.CharactersRequired;
+        return countValid && charactersValid;
     }
 
     public static void Postfix(Vault __instance, G g)
@@ -59,28 +55,48 @@ public class VaultRenderPatch
         if (__instance.introAnimTime < 2.0) return;
         var slideIn = Vault.GetSlideIn(__instance.introAnimTime - 2.0);
         var memories = Vault.GetVaultMemories(g.state);
-        var winCon = Archipelago.InstanceSlotData.WinCondition;
+        var totalReq = Archipelago.InstanceSlotData.WinReqTotal;
+        var perCharReq = Archipelago.InstanceSlotData.WinReqPerChar;
+        var charsReq = Archipelago.InstanceSlotData.CharactersRequired;
         string goalString;
-        if (winCon == WinCondition.TotalMemories)
+        var mixed = false;
+        if (totalReq <= perCharReq * charsReq)
         {
-            var required = Archipelago.InstanceSlotData.WinReqTotal;
-            var found = memories.Sum(memorySet => memorySet.memoryKeys.Sum(entry => entry.unlocked ? 1 : 0));
+            // Total memory amount is subsumed by per-character settings
+            var completed = memories.Count(memorySet => memorySet.memoryKeys.Count(entry => entry.unlocked) >= perCharReq);
+            goalString = string.Format(
+                ModEntry.Instance.Localizations.Localize([
+                    "vault", perCharReq > 1
+                        ? "goalPerCharacterMemories"
+                        : "goalPerCharacterMemoriesSingular"
+                ]),
+                perCharReq, completed, charsReq);
+        }
+        else if (totalReq / 3 + (totalReq % 3 > 0 ? 1 : 0) >= charsReq)
+        {
+            // Per-character settings are subsumed by total memory amount
+            var found = memories.Sum(memorySet => memorySet.memoryKeys.Count(entry => entry.unlocked));
             goalString = string.Format(
                 ModEntry.Instance.Localizations.Localize(["vault", "goalTotalMemories"]),
-                found, required);
+                found, totalReq);
         }
-        else // WinCondition.MemoryPerCharacter
+        else
         {
-            var required = Archipelago.InstanceSlotData.WinReqPerChar;
-            var completed = memories.Sum(memorySet => memorySet.memoryKeys.Sum(entry => entry.unlocked ? 1 : 0) >= required ? 1 : 0);
-            var charAmount = memories.Count;
+            // Mixed goal
+            var charsCompleted = memories.Count(memorySet => memorySet.memoryKeys.Count(entry => entry.unlocked) >= perCharReq);
+            var totalFound = memories.Sum(memorySet => memorySet.memoryKeys.Count(entry => entry.unlocked));
             goalString = string.Format(
-                ModEntry.Instance.Localizations.Localize(["vault", "goalPerCharacterMemories"]),
-                required, completed, charAmount);
+                ModEntry.Instance.Localizations.Localize([
+                    "vault", perCharReq > 1
+                        ? "goalMixed"
+                        : "goalMixedSingular"
+                ]),
+                totalFound, totalReq, perCharReq, charsCompleted, charsReq);
+            mixed = true;
         }
 
         Draw.Text(goalString,
-                  123.0, (winCon == WinCondition.TotalMemories ? 233.0 : 220.0) + slideIn,
+                  123.0, (mixed ? 215.0 : 228.0) + slideIn,
                   align: TAlign.Center, color: Colors.buttonBoxNormal, outline: Colors.black);
     }
 }

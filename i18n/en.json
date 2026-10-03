@@ -149,7 +149,10 @@
     },
     "vault": {
         "goalTotalMemories": "Memories found:\n{0} / {1}",
-        "goalPerCharacterMemories": "Memories required:\n{0} per character\n\nCharacters completed:\n{1} / {2}"
+        "goalPerCharacterMemories": "Characters with\nat least {0} memories:\n{1} / {2}",
+        "goalPerCharacterMemoriesSingular": "Characters with\nat least {0} memory:\n{1} / {2}",
+        "goalMixed": "Total memories found:\n{0} / {1}\n\nCharacters with\nat least {2} memories:\n{3} / {4}",
+        "goalMixedSingular": "Total memories found:\n{0} / {1}\n\nCharacters with\nat least {2} memory:\n{3} / {4}"
     },
     "deck": {
         "name": "Archipelago",

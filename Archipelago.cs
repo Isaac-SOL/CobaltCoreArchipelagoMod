@@ -509,11 +509,8 @@ public class Archipelago
         
         // Patch memories
         Vault.charsWithLore = Mutil.DeepCopy(ModEntry.BaseCharsWithLore);
-        if (SlotDataHelper.Value.AddCharacterMemories)
-        {
-            Vault.charsWithLore.Add(Deck.shard);
-            Vault.charsWithLore.Add(Deck.colorless);
-        }
+        Vault.charsWithLore.Add(Deck.shard);
+        Vault.charsWithLore.Add(Deck.colorless);
         // Setup Archiprism
         Archiprism.totalPlayers = Session.Players.AllPlayers.Count(info => info.Name != "Server");
 
@@ -833,12 +830,6 @@ public enum ArchipelagoErrorCode
     SlotDataInvalid
 }
 
-public enum WinCondition
-{
-    TotalMemories = 0,
-    MemoryPerCharacter
-}
-
 public enum CardRewardsMode
 {
     Never = 0,
@@ -890,6 +881,21 @@ public enum ModifierShuffleMode
     AllAtStart = 4
 }
 
+public enum UnlockedArtifactBootOptionMode
+{
+    Off = 0,
+    Limited = 1,
+    All = 2
+}
+
+public enum SeenItemsAtShopMode
+{
+    Off = 0,
+    ThisRun = 1,
+    MyCharacters = 2,
+    All = 3
+}
+
 
 public class SlotDataInvalidException(string message) : Exception(message);
 
@@ -904,10 +910,9 @@ public struct SlotDataHelper
     public FrequencyShuffleMode RandomizeStartingCards { get; private set; }
     public List<Type> StartingCards { get; private set; }
     public Dictionary<Deck, List<Type>> DeckStartingCards { get; private set; }
-    public WinCondition WinCondition { get; private set; }
     public int WinReqTotal { get; private set; }
     public int WinReqPerChar { get; private set; }
-    public bool AddCharacterMemories { get; private set; }
+    public int CharactersRequired { get; private set; }
     public bool ShuffleMemories { get; private set; }
     public bool UnlockMemoryForAllCharacters { get; private set; }
     public bool DoFutureMemory { get; private set; }
@@ -919,11 +924,14 @@ public struct SlotDataHelper
     public RewardsTweakMode RewardsTweak { get; private set; }
     public int AutoReleaseCharacters { get; private set; }
     public bool SwapCharacterNode { get; private set; }
-    public bool PickMissedItemsFromEveryRun { get; private set; }
+    public bool UnlockedCardBootOption { get; private set; }
+    public UnlockedArtifactBootOptionMode UnlockedArtifactBootOption { get; private set; }
+    public SeenItemsAtShopMode SeenItemsAtShop { get; private set; }
     public CardRewardsMode ImmediateCardRewards { get; private set; }
     public CardRewardAttribute ImmediateCardAttribute { get; private set; }
     public CardRewardsMode ImmediateArtifactRewards { get; private set; }
     public HashSet<string> ImmediateRewardsBlacklist { get; private set; }
+    public bool SecretCards { get; private set; }
     public uint FixedRandSeed { get; private set; }
 
     public bool HasImmediateCardAttribute(CardRewardAttribute attribute)
@@ -934,7 +942,7 @@ public struct SlotDataHelper
         var res = new SlotDataHelper();
         try
         {
-            const string expectedTag = "1.2.0";
+            const string expectedTag = "1.2.2";
             var hostTag = Convert.ToString(slotData["version_tag"]);
             if (hostTag != expectedTag)
             {
@@ -971,9 +979,9 @@ public struct SlotDataHelper
                 res.DeckStartingCards[deck].Add(card);
             }
             
-            res.WinCondition = (WinCondition)Convert.ToInt32(slotData["win_condition"]);
             res.WinReqTotal = Convert.ToInt32(slotData["memories_required_total"]);
             res.WinReqPerChar = Convert.ToInt32(slotData["memories_required_per_character"]);
+            res.CharactersRequired = Convert.ToInt32(slotData["characters_required"]);
             res.ShuffleMemories = Convert.ToBoolean(slotData["shuffle_memories"]);
             res.UnlockMemoryForAllCharacters = Convert.ToBoolean(slotData["unlock_memory_for_all_characters"]);
             res.DoFutureMemory = Convert.ToBoolean(slotData["do_future_memory"]);
@@ -985,12 +993,15 @@ public struct SlotDataHelper
                 .Select(j => j.ToString()).ToHashSet();
             
             res.CheckCardDifficulty = Convert.ToInt32(slotData["check_card_difficulty"]);
-            res.AddCharacterMemories = Convert.ToBoolean(slotData["add_character_memories"]);
             
             res.RewardsTweak = (RewardsTweakMode)Convert.ToInt32(slotData["rewards_tweak"]);
             res.AutoReleaseCharacters = Convert.ToInt32(slotData["auto_release_characters"]);
             res.SwapCharacterNode = Convert.ToBoolean(slotData["swap_character_node"]);
-            res.PickMissedItemsFromEveryRun = Convert.ToBoolean(slotData["pick_missed_items_from_every_run"]);
+            res.UnlockedCardBootOption = Convert.ToBoolean(slotData["unlocked_card_boot_option"]);
+            res.UnlockedArtifactBootOption =
+                (UnlockedArtifactBootOptionMode)Convert.ToInt32(slotData["unlocked_artifact_boot_option"]);
+            res.SeenItemsAtShop = (SeenItemsAtShopMode)Convert.ToInt32(slotData["seen_items_at_shop"]);
+            res.SecretCards = Convert.ToBoolean(slotData["super_secret_special_cards"]);
             
             res.ImmediateCardRewards = (CardRewardsMode)Convert.ToInt32(slotData["immediate_card_rewards"]);
             var attributes = (JArray)slotData["immediate_card_attributes"];

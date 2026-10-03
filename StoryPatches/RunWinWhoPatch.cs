@@ -16,9 +16,7 @@ public class RunWinWhoPatch
         var decksToAdd = s.characters
             .Where(ch =>
                        ch.deckType is { } deck
-                       && GetMemoryCountForChoiceDisplay(deck, s) < 3
-                       && (Archipelago.InstanceSlotData.AddCharacterMemories
-                           || deck is not (Deck.colorless or Deck.shard)))
+                       && GetMemoryCountForChoiceDisplay(deck, s) < 3)
             .Select(ch => ch.deckType!.Value)
             .ToList();
         __result = decksToAdd
