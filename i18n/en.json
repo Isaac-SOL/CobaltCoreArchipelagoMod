@@ -123,6 +123,7 @@
         "bootOptionUnlockedCardDesc": "unlocked cards",
         "bootOptionUnlockedCardTitle": "Unlocked cards: {0} cards",
         "bootOptionUnlockedArtifactName": "Pick an <c=boldPink>unlocked</c> artifact",
+        "bootOptionUnlockedArtifactRandomName": "Pick 1 of 8 <c=boldPink>unlocked</c> artifacts",
         "bootOptionUnlockedArtifactDesc": "unlocked artifacts",
         "bootOptionUnlockedArtifactTitle": "Unlocked artifacts: {0} artifacts",
         "eventMissedAPItemName": "Pick a missed <c=boldPink>archipelago</c> item",

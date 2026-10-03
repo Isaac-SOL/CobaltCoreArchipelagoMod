@@ -14,8 +14,11 @@ public class BootSequencePatch
     {
         Debug.Assert(Archipelago.Instance.APSaveData != null, "Archipelago.Instance.APSaveData != null");
         
-        if (CardBrowseListPatch.GetPickableUnlockedCardsList(s).Count
-            + CardBrowseListPatch.GetPickableUnlockedArtifactsList(s).Count > 0)
+        if ((Archipelago.InstanceSlotData.UnlockedCardBootOption
+             && CardBrowseListPatch.GetPickableUnlockedCardsList(s).Count > 0)
+            ||
+            (Archipelago.InstanceSlotData.UnlockedArtifactBootOption != UnlockedArtifactBootOptionMode.Off
+             && CardBrowseListPatch.GetPickableUnlockedArtifactsList(s).Count > 0))
         {
             __result.Add(new Choice
             {
@@ -30,7 +33,8 @@ public class BootSequencePatch
         
         List<Choice> choices = [];
 
-        if (CardBrowseListPatch.GetPickableUnlockedCardsList(s).Count > 0)
+        if (Archipelago.InstanceSlotData.UnlockedCardBootOption 
+            && CardBrowseListPatch.GetPickableUnlockedCardsList(s).Count > 0)
         {
             choices.Add(new Choice
             {
@@ -52,19 +56,25 @@ public class BootSequencePatch
             });
         }
 
-        var pickableArtifactsCount = CardBrowseListPatch.GetPickableUnlockedArtifactsList(s).Count;
-        if (pickableArtifactsCount > 0)
+        var artifactMode = Archipelago.InstanceSlotData.UnlockedArtifactBootOption;
+        if (artifactMode != UnlockedArtifactBootOptionMode.Off
+            && CardBrowseListPatch.GetPickableUnlockedArtifactsList(s).Count > 0)
         {
             choices.Add(new Choice
             {
-                label = ModEntry.Instance.Localizations.Localize(["cardBrowse", "bootOptionUnlockedArtifactName"]),
+                label = ModEntry.Instance.Localizations.Localize([
+                    "cardBrowse",
+                    artifactMode == UnlockedArtifactBootOptionMode.Limited
+                        ? "bootOptionUnlockedArtifactRandomName"
+                        : "bootOptionUnlockedArtifactName"
+                ]),
                 key = ".zone_first",
                 actions =
                 [
                     new AAPArtifactSelect
                     {
                         mode = ArtifactPick.Mode.Unlocked,
-                        allowCancel = true
+                        allowCancel = artifactMode != UnlockedArtifactBootOptionMode.Limited
                     }
                 ]
             });

@@ -26,7 +26,12 @@ public class AAPArtifactSelect : CardAction
 
         var artifacts = mode switch
         {
-            ArtifactPick.Mode.Unlocked => CardBrowseListPatch.GetPickableUnlockedArtifactsList(s),
+            ArtifactPick.Mode.Unlocked => Archipelago.InstanceSlotData.UnlockedArtifactBootOption switch
+            {
+                UnlockedArtifactBootOptionMode.Limited => CardBrowseListPatch.GetPickableUnlockedArtifactsList(s)
+                    .Shuffle().Take(8).ToList(),
+                _ => CardBrowseListPatch.GetPickableUnlockedArtifactsList(s)
+            },
             _ => CardBrowseListPatch.GetPickableAPArtifactsList(s)
                 .Select(loc =>
                 {
