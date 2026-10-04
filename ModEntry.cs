@@ -147,6 +147,8 @@ internal class ModEntry : SimpleMod
 
         Archidrone.Sprite = RegisterSprite(package, "assets/Midrow/Archidrone.png").Sprite;
         Archidrone.Icon = RegisterSprite(package, "assets/Midrow/ArchidroneSmall.png").Sprite;
+
+        Archiprism.Art = RegisterSprite(package, "assets/Card/ArchiprismBack.png").Sprite;
         
         CheckLocationArtifact.BaseSpr = RegisterSprite(package, "assets/Artifact/Artifact_ap.png").Sprite;
 

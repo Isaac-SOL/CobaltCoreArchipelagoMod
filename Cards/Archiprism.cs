@@ -11,6 +11,8 @@ namespace CobaltCoreArchipelago.Cards;
 
 public class Archiprism : Card, IRegisterable
 {
+    internal static Spr Art;
+    
     internal static int totalPlayers;
     
     public HashSet<string> playersContributing = [];
@@ -131,11 +133,11 @@ public class Archiprism : Card, IRegisterable
 
         return new CardData
         {
-            art = StableSpr.cards_Prism,
+            art = Art,
             cost = GetCost(),
             description = description,
             exhaust = upgrade == Upgrade.B,
-            artTint = Colors.white.ToString()
+            artTint = "7070CC"
         };
     }
 }
