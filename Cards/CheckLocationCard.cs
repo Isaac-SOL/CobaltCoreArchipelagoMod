@@ -1,12 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using Archipelago.MultiClient.Net.Models;
 using CobaltCoreArchipelago.Actions;
+using FMOD;
 using Nanoray.PluginManager;
 using Nickel;
+using Debug = System.Diagnostics.Debug;
 
 namespace CobaltCoreArchipelago.Cards;
 
@@ -102,11 +103,17 @@ public class CheckLocationCard : Card, IRegisterable
         ModEntry.Instance.Localizations.Localize(new List<string> { "card", "CheckLocationCard" }
                                                      .Concat(key).ToArray());
 
+    internal bool LocationAlreadyChecked()
+    {
+        Debug.Assert(Archipelago.Instance.APSaveData != null, "Archipelago.Instance.APSaveData != null");
+        return Archipelago.Instance.APSaveData.LocationsChecked.Contains(locationName);
+    }
+
     public override CardData GetData(State state)
     {
         Debug.Assert(Archipelago.Instance.APSaveData != null, "Archipelago.Instance.APSaveData != null");
         string? description = null;
-        if (Archipelago.Instance.APSaveData.LocationsChecked.Contains(locationName))
+        if (LocationAlreadyChecked())
         {
             // Location was already checked (this is relevant even if we don't scout)
             description = Localize("descNothing");
@@ -307,6 +314,46 @@ public class CheckLocationCard : Card, IRegisterable
             locationSlotName = info.Player.Name;
             locationGameName = info.ItemGame;
             locationItemColor = itemColor;
+        }
+    }
+
+    public override void AfterWasPlayed(State state, Combat c)
+    {
+        if (!LocationAlreadyChecked())
+        {
+            APFX(GetScreenRect() + pos + new Vec(Combat.marginRect.x, Combat.marginRect.y));
+            Audio.Play(FSPRO.Event.Story_BooksTeleport);
+        }
+    }
+
+    public static void APFX(
+        Rect cardRectScreenPos)
+    {
+        var center = new Vec(cardRectScreenPos.x + cardRectScreenPos.w / 2.0,
+                             cardRectScreenPos.y + cardRectScreenPos.h / 2.0 + 10.0);
+        var colors = new List<Color>
+        {
+            new(0xD9A07D80),
+            new(0x767EBD80),
+            new(0xEEE39180),
+            new(0xC9768280),
+            new(0x77C67780),
+            new(0xCA94C280)
+        };
+        for (var index = 0; index < 50; ++index)
+        {
+            var vel = Mutil.RandVel();
+            var startPos = center + vel * 20.0;
+            PFX.screenSpaceAdd.Add(new Particle
+            {
+                pos = startPos,
+                size = 1.0 + 4.0 * (3.0 * Mutil.NextRand()),
+                vel = vel * 200.0,
+                color = colors[Mutil.random.Next(0, 6)],
+                dragCoef = 2.0 + 4.0 * Mutil.NextRand(),
+                lifetime = 0.7 + 0.6 * Mutil.NextRand(),
+                gravity = 0.2
+            });
         }
     }
 }
