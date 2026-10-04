@@ -16,7 +16,7 @@ public class CheckLocationCard : Card, IRegisterable
     internal static Spr ArtUncommon;
     internal static Spr ArtRare;
     
-    // Note : fields MUST be public to be transferred when the card is upgraded or saved for example
+    // Note: fields MUST be public to be transferred when the card is upgraded or saved for example
     public string locationName = "";
     public string? locationSlotName;
     public string? locationGameName;
@@ -180,15 +180,36 @@ public class CheckLocationCard : Card, IRegisterable
 
     private static int Difficulty => Archipelago.InstanceSlotData.CheckCardDifficulty;
 
-    private int GetCost(State _)
+    private int GetCost(State _) => Math.Max(0, (locationFrom, upgrade) switch
     {
-        return upgrade switch
-        {
-            Upgrade.A => Math.Max(0, Difficulty - 2),
-            Upgrade.B => Math.Max(0, Difficulty - 1),
-            _ => Difficulty
-        };
-    }
+        (Deck.dizzy, Upgrade.A) => Difficulty - 2,
+        (Deck.dizzy, Upgrade.B) => Difficulty - 1,
+
+        (Deck.riggs, Upgrade.A) => Difficulty - 2,
+        (Deck.riggs, Upgrade.B) => Difficulty - 1,
+
+        (Deck.peri, Upgrade.A) => Difficulty - 2,
+        (Deck.peri, Upgrade.B) => Difficulty - 1,
+
+        (Deck.goat, Upgrade.A) => Difficulty - 2,
+        (Deck.goat, Upgrade.B) => Difficulty - 1,
+
+        (Deck.eunice, Upgrade.A) => Difficulty - 2,
+        (Deck.eunice, Upgrade.B) => Difficulty - 1,
+
+        (Deck.hacker, Upgrade.A) => Difficulty - 2,
+        (Deck.hacker, Upgrade.B) => Difficulty - 1,
+
+        (Deck.shard, Upgrade.A) => Difficulty - 2,
+        (Deck.shard, Upgrade.B) => Difficulty - 1,
+
+        (Deck.colorless, Upgrade.A) => Difficulty - 2,
+        (Deck.colorless, Upgrade.B) => Difficulty - 1,
+
+        (_, Upgrade.A) => Difficulty - 2,
+        (_, Upgrade.B) => Difficulty - 1,
+        _ => Difficulty
+    });
 
     private int GetShield(State _) => Difficulty switch
         {

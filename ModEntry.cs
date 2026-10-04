@@ -53,7 +53,8 @@ internal class ModEntry : SimpleMod
     private static List<Type> DemoRareCardTypes = [
         typeof(CheckLocationCardRare),
         typeof(DeathLinkBoros),
-        typeof(Archiprism)
+        typeof(Archiprism),
+        typeof(ArchidroneCard)
     ];
     private static IEnumerable<Type> DemoCardTypes =
         DemoCommonCardTypes
@@ -143,6 +144,9 @@ internal class ModEntry : SimpleMod
         CheckLocationCard.ArtRare = RegisterSprite(package, "assets/Card/ArchipelagoBack7.png").Sprite;
 
         DeathLinkBoros.Art = RegisterSprite(package, "assets/Card/DeathLinkBorosBack.png").Sprite;
+
+        Archidrone.Sprite = RegisterSprite(package, "assets/Midrow/Archidrone.png").Sprite;
+        Archidrone.Icon = RegisterSprite(package, "assets/Midrow/ArchidroneSmall.png").Sprite;
         
         CheckLocationArtifact.BaseSpr = RegisterSprite(package, "assets/Artifact/Artifact_ap.png").Sprite;
 

@@ -11,6 +11,7 @@ using Archipelago.MultiClient.Net.Enums;
 using Archipelago.MultiClient.Net.Helpers;
 using Archipelago.MultiClient.Net.MessageLog.Messages;
 using Archipelago.MultiClient.Net.Models;
+using CobaltCoreArchipelago.Actions;
 using CobaltCoreArchipelago.Cards;
 using CobaltCoreArchipelago.Features;
 using CobaltCoreArchipelago.GameplayPatches;
@@ -746,14 +747,17 @@ public class Archipelago
             lastDeathLink = null;
         }
 
-        // Notify archiprisms of items found
+        // Notify archiprisms and archidrones of items found
         lock (playersFoundItemToNotify)
         {
             if (!playersFoundItemToNotify.IsEmpty)
             {
                 if (g.state.IsOutsideRun()) return;
+                
+                // Notify archiprisms
                 var fullDeck = new List<Card>(g.state.deck);
-                if (g.state.route is Combat combat)
+                var combat = g.state.route as Combat;
+                if (combat != null)
                 {
                     fullDeck.AddRange(combat.hand);
                     fullDeck.AddRange(combat.discard);
@@ -765,6 +769,24 @@ public class Archipelago
                     foreach (var (name, flags) in playersFoundItemToNotify)
                     {
                         archiprism.PlayerFoundItem(name, flags);
+                    }
+                }
+                
+                // Notify Archidrones
+                if (combat != null)
+                {
+                    if (combat.stuff.Values.Any(v => v is Archidrone))
+                    {
+                        foreach (var (_, flags) in playersFoundItemToNotify)
+                        {
+                            if (combat.cardActions.Count < 30)
+                            {
+                                combat.Queue(new AArchidroneShoot
+                                {
+                                    reverse = flags == ItemFlags.Trap
+                                });
+                            }
+                        }
                     }
                 }
             }

@@ -206,6 +206,11 @@
             "desc": "Attack for {0} dmg per player who has found an item since last use",
             "descA": "Attack for {0} dmg per player who has found a <c=DDA0DD>progression item</c>",
             "descB": "Multi attack for {0} dmg per player who has found a <c=redd>trap</c>"
+        },
+        "Archidrone": {
+            "cardName": "Archidrone",
+            "droneName": "ARCHIDRONE",
+            "droneDesc": "Shoots a <c=attack>1</c> damage shot every time someone finds an <c=boldPink>archipelago item</c>.\n<c=attack>Shoots in reverse if it's a trap.</c>"
         }
     },
     "artifact": {

@@ -31,13 +31,25 @@ public class CardOfferingPatch
     private static int DeathLinkBorosChance => Archipelago.Instance.APSaveData!.DeathLinkMode switch
     {
         DeathLinkMode.Off => 0,
-        _ => 3
+        _ => Archiprism.totalPlayers switch
+        {
+            <= 10 => 2,
+            _ => 3
+        }
     };
 
     private static int ArchiprismChance => Archiprism.totalPlayers switch
     {
         < 2 => 0,
+        <= 10 => 2,
         <= 15 => 3,
+        _ => 0
+    };
+
+    private static int ArchidroneChance => Archiprism.totalPlayers switch
+    {
+        < 2 => 0,
+        <= 10 => 2,
         _ => 0
     };
 
@@ -140,11 +152,14 @@ public class CardOfferingPatch
 
             Card card;
             // Sometimes replace rare cards with a special one
-            var specialRoll = s.rngCardOfferings.NextUint() % 100;
-            if (rarity == Rarity.rare && specialRoll < DeathLinkBorosChance)
+            var canRollSpecial = rarity == Rarity.rare && Archipelago.InstanceSlotData.SecretCards;
+            var specialRoll = canRollSpecial ? s.rngCardOfferings.NextUint() % 100 : 100;
+            if (specialRoll < DeathLinkBorosChance)
                 card = new DeathLinkBoros();
-            else if (rarity == Rarity.rare && specialRoll < DeathLinkBorosChance + ArchiprismChance)
+            else if (specialRoll < DeathLinkBorosChance + ArchiprismChance)
                 card = new Archiprism();
+            else if (specialRoll < DeathLinkBorosChance + ArchiprismChance + ArchidroneChance)
+                card = new ArchidroneCard();
             else
             {
                 // But most of the time we add an actual check card with a set location
