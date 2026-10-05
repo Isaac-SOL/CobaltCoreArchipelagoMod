@@ -248,7 +248,7 @@
         "cat": {
             "1": "Detecting a spatial rift made by {1}!\nLooks like we've got {0} now, sweet.",
             "2": "Ah, looks like {1} sent us {0}.\nShould come in handy if we use it.",
-            "3": "We've recieved {0} over from {1}!\nHopefully we can use it to its full potential. "
+            "3": "We've received {0} over from {1}!\nHopefully we can use it to its full potential. "
         },
         "backup": {
             "1": "CARGO (Class: {0}) INCOMING.\nSENDER: {1}",
@@ -345,7 +345,7 @@
                     "2": "Heads-up from {1}, Dizzy's now part of the crew for later!\nMake sure there aren't any too many big glowy buttons in the next ship."
                 },
                 "backup": {
-                    "1": "DETECTED: RESEARCHER <c=dizzy>DIZZY</c> ON STANDBY  FROM {1}.\nREBOOTING ON-BOARD LABRATORY."
+                    "1": "DETECTED: RESEARCHER <c=dizzy>DIZZY</c> ON STANDBY  FROM {1}.\nREBOOTING ON-BOARD LABORATORY."
                 }
             },
             "riggs": {
@@ -399,7 +399,7 @@
                     "2": "Hey, Books is here now! She wants her regards to be sent to\n{1}...so uh, regards sent?"
                 },
                 "backup": {
-                    "1": "TEMPORAL ANAMOLY DETECTED FROM {1}.\nDESIGNATION: <c=shard>BOOKS.</c> TEMPORARY PERMISSIONS GRANTED."
+                    "1": "TEMPORAL ANOMALY DETECTED FROM {1}.\nDESIGNATION: <c=shard>BOOKS.</c> TEMPORARY PERMISSIONS GRANTED."
                 }
             },
             "colorless": {
@@ -426,7 +426,7 @@
             "shard": {
                 "memory1": {
                     "cat": {
-                        "1": "...Huh? Did Books really need the memory booster here too? \nDoubt {1} is a doctor, but if they think its important..."
+                        "1": "...Huh? Did Books really need the memory booster here too? \nDoubt {1} is a doctor, but if they think it's important..."
                     },
                     "backup": {
                         "1": "MEMORY ENHANCERS DEPLOYED FOR <c=shard>BOOKS</c>. ADAPTING TO UNKNOWN PHYSIOLOGY. "
@@ -524,7 +524,7 @@
                 "cat": {
                     "once1": "{1} sent us a Missing Trap...like the trap is missing?\nSeems like we should be perfectly fine then! ...Wait a second.",
                     "1": "And one of us just got poofed because of {1}.\nWell, good thing it can't be me this time around!!!",
-                    "2": "Ah, one of the crew just vanished! ...{1} was reponsible\nfor that. Maybe we should send them something 'good' as a thank you!"
+                    "2": "Ah, one of the crew just vanished! ...{1} was responsible\nfor that. Maybe we should send them something 'good' as a thank you!"
                 },
                 "backup": {
                     "1": "ALERT: MINIATURE POCKET DIMENSION ON-BOARD.",

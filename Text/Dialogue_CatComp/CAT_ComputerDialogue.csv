@@ -5,7 +5,7 @@ Type,Trigger,Character,Dialogue,,,
 Looks like we've got <ItemName> now, sweet.",,,
 ,,CAT,"Ah, looks like <SenderName> sent us <ItemName>.
 Should come in handy if we use it.",,,
-,,CAT,"We've recieved <ItemName> over from <SenderName>!
+,,CAT,"We've received <ItemName> over from <SenderName>!
 Hopefully we can use it to its full potential. ",,,
 ,,Backup,"CARGO (Class: <ItemName>) INCOMING.
 SENDER: <SenderName>",,,
@@ -15,7 +15,7 @@ SENDER: <SenderName>",,,
 SENDER: <SenderName>","// Yeah, the back-up computer will always have 
 SENDER: <SenderName>
 In the second line, I imagine. Will omit from future back-up computer lines.",,
-,Character-Specific:,,,,,
+,Character-Specific (Character in party):,,,,,
 ,,CAT,"<CharacterName>, you got <ItemName>.
 Make sure to thank <SenderName> for that.",,,
 ,,CAT,"Oh, we've received <ItemName> for <CharacterName>!
@@ -77,8 +77,8 @@ The drone bay was kind of collecting dust, overall. "
 Make sure there aren't any too many big glowy buttons in the next ship.",,CAT,"Isaac's back in action, since <SenderName> worked some spacial magic.
 Nobody touched Isaac Jr. while he was gone, right? "
 ,,Backup,"DETECTED: RESEARCHER <c=dizzy>DIZZY</c> ON STANDBY  FROM <SenderName>.
-REBOOTING ON-BOARD LABRATORY. ",,Backup,"DETECTED: ENGINEER <c=goat>ISAAC</c> ON STANDBY FROM <SenderName>.
-INTIALIZING DRONE BAY STERILIZATION. "
+REBOOTING ON-BOARD LABORATORY. ",,Backup,"DETECTED: ENGINEER <c=goat>ISAAC</c> ON STANDBY FROM <SenderName>.
+INITIALIZING DRONE BAY STERILIZATION. "
 ,Max,,,Drake,,
 ,,CAT,"We've got Max on-board now because of <SenderName>!
 Just going to ignore the requested Max wanted to play for that occasion. ",,CAT,"Oh boy, looks like Drake is back due to <SenderName>...
@@ -95,7 +95,7 @@ Or maybe she just warped back in all by herself...right into the cryo pod. ",,CA
 ,,CAT,"Hey, Books is here now! She wants her regards to be sent to
 <SenderName>...so uh, regards sent? ",,CAT,"<c=keyword><SenderName></c>@AP~REMOTE: ~/CC CAT.EXE -unlock
 Log: Successfully unlocked <c=comp>CAT</c> for use in run-- WHAT???"
-,,Backup,"TEMPORAL ANAMOLY DETECTED FROM <SenderName>.
+,,Backup,"TEMPORAL ANOMALY DETECTED FROM <SenderName>.
 DESIGNATION: <c=shard>BOOKS.</c> TEMPORARY PERMISSIONS GRANTED. ",(only possible during cobalt fight),Backup,"ERROR: <c=comp>CAT</c> MATRIX UNRECOVERABLE DESPITE <SenderName>
 INSTATING TEMPORAL FLAG FOR STANDARD CREW ACCESS; GRANTED. "
 ,GENERIC:,,// Suppose generics can be used for custom crew in the future? Just as generic fallback. ,,,
@@ -114,7 +114,7 @@ to remember better. Let's get them to the Cobalt when we can!",,,
 ,,Backup,DEPLOYED MEMORY ENHANCERS FOR <CharacterName>.,,,
 ,Books Memory 1 ,,,CAT Memory 1,,
 ,// Once per run.,CAT,"...Huh? Did Books really need the memory booster here too? 
-Doubt <SenderName> is a doctor, but if they think its important...",,CAT,"What the...! One of my memory banks was already encrypted, and then DECRYPTED???
+Doubt <SenderName> is a doctor, but if they think it's important...",,CAT,"What the...! One of my memory banks was already encrypted, and then DECRYPTED???
 <SenderName> activated that logic...what does that mean?"
 ,,Backup,MEMORY ENHANCERS DEPLOYED FOR BOOKS. ADAPTING TO UNKNOWN PHYSIOLOGY. ,,Backup,"REQUEST FROM: <SenderName>
 UNENCRYPTED: CAT MEMORY DATABANK 0x434F42414C54FFFF. "
@@ -156,7 +156,7 @@ Looks like we've got...got...trash. Just those stupid containers. Great!!!",,,
 Seems like we should be perfectly fine then! ...Wait a second. ",,,
 ,,CAT,"And one of us is just about to get poofed because of <SenderName>.
 Well, good thing it can't be me this time around!!!",,,
-,,CAT,"Ah, one of the crew just vanished! ...<SenderName> was reponsible
+,,CAT,"Ah, one of the crew just vanished! ...<SenderName> was responsible
 for that. Maybe we should send them something 'good' as a thank you!",,,
 ,,Backup,ALERT: MINIATURE POCKET DIMENSION ON-BOARD.,,,
 ,,Backup,ALERT: CREW MEMBER MOMENTARILY ON SHORE LEAVE. ,,,
@@ -178,7 +178,7 @@ Who could've guessed that would've happened???",,,
 It was sent by <SenderName>...who we messed with earlier. Coincidence???",,,
 ,GENERIC:,,,,,
 ,,CAT,"Would you look at that, <SenderName> activated a <TrapName> on us.
-Nice!!! Maybe reconsider looking for one of their shiny anomolies!",,,
+Nice!!! Maybe reconsider looking for one of their shiny anomalies!",,,
 ,,CAT,"Wow! <SenderName> decided to send us a <TrapName>!
 Aren't we supposed to be working together???",,,
 ,,CAT,"Ugh, <SenderName> launched a <TrapName> through the temporalstream.

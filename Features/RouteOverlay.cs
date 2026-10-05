@@ -142,8 +142,9 @@ internal class RouteOverlay
         else if (Archipelago.ItemToCard.TryGetValue(item.ItemName, out var cardType))
         {
             var cardDeck = DB.cardMetas[cardType.Name].deck;
+            var deckInParty = s.characters.Any(c => c.deckType == cardDeck);
             messageStr = AdaptiveShoutCache.GetLocalizedRandomLine(
-                ["compShouts", "card", "character"],
+                deckInParty ? ["compShouts", "card", "character"] : ["compShouts", "card"],
                 catBackup: catBackup,
                 $"<c=card>{CBU(item.ItemName)}</c>",
                 $"<c={APColors.FromPlayerName(item.Player.Name)}>{CBU(item.Player.Name)}</c>",
