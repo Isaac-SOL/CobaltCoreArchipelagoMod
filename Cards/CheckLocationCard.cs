@@ -45,6 +45,189 @@ public class CheckLocationCard : Card, IRegisterable
         });
     }
 
+    private (int cost, IEnumerable<CardAction> actions, string desc) GetUpgradeData(State s)
+    {
+        var partialRes = (locationFrom, upgrade) switch
+        {
+            (_, Upgrade.None) => (Difficulty, new List<CardAction>(), ""),
+
+            (Deck.dizzy, Upgrade.A) => (
+                Difficulty - 2,
+                [
+                    new AStatus
+                    {
+                        status = IsShieldTemp(s) ? Status.tempShield : Status.shield,
+                        statusAmount = GetShield(s),
+                        targetPlayer = true
+                    }
+                ],
+                string.Format(Localize("descCont", IsShieldTemp(s) ? "TempShield" : "Shield"), GetShield(s))
+            ),
+            (Deck.dizzy, Upgrade.B) => (
+                1,
+                [new ASpawn { thing = new Missile { missileType = MissileType.corrode } }],
+                Localize("descCont", "AcidMissile")
+            ),
+
+            (Deck.riggs, Upgrade.A) => (Difficulty - 2, [], ""),  // Covered externally by GetDraw()
+            (Deck.riggs, Upgrade.B) => (
+                Difficulty - 1,
+                [
+                    new AStatus
+                    {
+                        status = Status.evade,
+                        statusAmount = GetMove(s),
+                        targetPlayer = true
+                    }
+                ],
+                string.Format(Localize("descCont", "Evade"), GetMove(s))
+            ),
+
+            (Deck.peri, Upgrade.A) => (
+                Difficulty > 2 ? 2 : 1,
+                [
+                    new AStatus
+                    {
+                        status = Status.overdrive,
+                        statusAmount = Difficulty > 2 ? 2 : 1,
+                        targetPlayer = true
+                    }
+                ],
+                string.Format(Localize("descCont", "Overdrive"), Difficulty > 2 ? 2 : 1)
+            ),
+            (Deck.peri, Upgrade.B) => (
+                Difficulty - 1,
+                Enumerable.Repeat(new AAttack { damage = GetAttack(s) }, GetAttackTimes(s)).Cast<CardAction>(),
+                string.Format(Localize("descCont", "Attack"), GetAttack(s), GetAttackTimes(s))
+                ),
+            
+            (Deck.goat, Upgrade.A) => (
+                Difficulty - 2,
+                [
+                    new AStatus
+                    {
+                        status = Status.droneShift,
+                        statusAmount = GetDroneshift(s),
+                        targetPlayer = true
+                    }
+                ],
+                string.Format(Localize("descCont", "Droneshift"), GetDroneshift(s))
+            ),
+            (Deck.goat, Upgrade.B) => (
+                Difficulty > 2 ? 2 : 1,
+                [
+                    new ASpawn
+                    {
+                        thing = new Missile { missileType = Difficulty > 2 ? MissileType.heavy : MissileType.normal }
+                    }
+                ],
+                Localize("descCont", Difficulty > 2 ? "HeavyMissile" : "Missile")
+            ),
+
+            (Deck.eunice, Upgrade.A) => (
+                1,
+                [
+                    new AStatus
+                    {
+                        status = Status.heat,
+                        statusAmount = -2,
+                        targetPlayer = true
+                    }
+                ],
+                string.Format(Localize("descCont", "Heat"), -2)
+            ),
+            (Deck.eunice, Upgrade.B) => (
+                Difficulty - 1,
+                [
+                    new AAttack
+                    {
+                        damage = GetStunAttack(s),
+                        stunEnemy = true
+                    }
+                ],
+                string.Format(Localize("descCont", "StunAttack"), GetStunAttack(s))
+            ),
+
+            (Deck.hacker, Upgrade.A) => (
+                Difficulty - 2,
+                [
+                    new AStatus
+                    {
+                        status = Status.boost,
+                        statusAmount = GetBoost(s),
+                        targetPlayer = true
+                    }
+                ],
+                string.Format(Localize("descCont", "Boost"), GetBoost(s))
+            ),
+            (Deck.hacker, Upgrade.B) => (
+                2,
+                [
+                    new AStatus
+                    {
+                        status = Status.autopilot,
+                        statusAmount = 2,
+                        targetPlayer = true
+                    }
+                ],
+                string.Format(Localize("descCont", "Autopilot"), 2)
+            ),
+
+            (Deck.shard, Upgrade.A) => (
+                Difficulty - 2,
+                [
+                    new AStatus
+                    {
+                        status = Status.shard,
+                        statusAmount = GetShard(s),
+                        targetPlayer = true
+                    }
+                ],
+                string.Format(Localize("descCont", "Shard"), GetShard(s))
+            ),
+            (Deck.shard, Upgrade.B) => (
+                Difficulty - 2,
+                [
+                    new AStatus
+                    {
+                        status = IsShieldTemp(s) ? Status.tempShield : Status.shield,
+                        statusAmount = GetShield(s),
+                        targetPlayer = true
+                    }
+                ],
+                string.Format(Localize("descCont",  IsShieldTemp(s) ? "TempShield" : "Shield"), GetShield(s))
+            ),
+
+            (Deck.colorless, Upgrade.A) => (
+                Difficulty > 2 ? 2 : 1,
+                [
+                    new AHeal
+                    {
+                        healAmount = 1,
+                        targetPlayer = true
+                    }
+                ],
+                string.Format(Localize("descCont", "Heal"), 1)
+            ),
+            (Deck.colorless, Upgrade.B) => (
+                2,
+                [
+                    new AStatus
+                    {
+                        status = Status.perfectShield,
+                        statusAmount = 1,
+                        targetPlayer = true
+                    }
+                ],
+                Localize("descCont", "PerfectShield")
+            ),
+
+            _ => (Difficulty, [], "")
+        };
+        partialRes.Item1 = Math.Max(0, partialRes.Item1);
+        return partialRes;
+    }
+
     public override List<CardAction> GetActions(State s, Combat c)
     {
         Debug.Assert(Archipelago.Instance.Session != null, "Archipelago.Instance.Session != null");
@@ -72,29 +255,13 @@ public class CheckLocationCard : Card, IRegisterable
         
         var list = new List<CardAction> { checkAction };
         
-        if (Difficulty < 0)
+        if (GetDraw(s) > 0)
             list.Add(new ADrawCard
             {
                 count = GetDraw(s)
             });
-
-        switch (upgrade)
-        {
-            case Upgrade.A:
-                list.Add(new AStatus
-                {
-                    status = IsShieldTemp(s) ? Status.tempShield : Status.shield,
-                    statusAmount = GetShield(s),
-                    mode = AStatusMode.Add,
-                    targetPlayer = true
-                });
-                break;
-            case Upgrade.B:
-                var attack = new AAttack { damage = GetAttack(s) };
-                for (var i = 0; i < GetAttackTimes(s); i++)
-                    list.Add(attack);
-                break;
-        }
+        
+        list.AddRange(GetUpgradeData(s).actions);
         
         return list;
     }
@@ -112,7 +279,7 @@ public class CheckLocationCard : Card, IRegisterable
     public override CardData GetData(State state)
     {
         Debug.Assert(Archipelago.Instance.APSaveData != null, "Archipelago.Instance.APSaveData != null");
-        string? description = null;
+        string? description;
         if (LocationAlreadyChecked())
         {
             // Location was already checked (this is relevant even if we don't scout)
@@ -148,26 +315,18 @@ public class CheckLocationCard : Card, IRegisterable
                                         $"<c={APColors.OtherPlayer}>{locationSlotName}</c>");
         }
 
-        if (Difficulty < 0)
+        if (GetDraw(state) > 0)
         {
-            description += string.Format(Localize("descDraw"), GetDraw(state));
+            description += "\n" + string.Format(Localize("descDraw"), GetDraw(state));
         }
-        
-        switch (upgrade)
-        {
-            case Upgrade.A:
-                description += string.Format(
-                    Localize(IsShieldTemp(state) ? "descContTempShield" : "descContShield"),
-                    GetShield(state));
-                break;
-            case Upgrade.B:
-                description += string.Format(Localize("descContAttack"), GetAttack(state), GetAttackTimes(state));
-                break;
-        }
+
+        var upgradeData = GetUpgradeData(state);
+
+        if (upgradeData.desc != "") description += "\n" + upgradeData.desc;
         
         return new CardData
         {
-            cost = GetCost(state),
+            cost = upgradeData.cost,
             singleUse = true,
             description = description,
             art = this switch
@@ -186,37 +345,6 @@ public class CheckLocationCard : Card, IRegisterable
     }
 
     private static int Difficulty => Archipelago.InstanceSlotData.CheckCardDifficulty;
-
-    private int GetCost(State _) => Math.Max(0, (locationFrom, upgrade) switch
-    {
-        (Deck.dizzy, Upgrade.A) => Difficulty - 2,
-        (Deck.dizzy, Upgrade.B) => Difficulty - 1,
-
-        (Deck.riggs, Upgrade.A) => Difficulty - 2,
-        (Deck.riggs, Upgrade.B) => Difficulty - 1,
-
-        (Deck.peri, Upgrade.A) => Difficulty - 2,
-        (Deck.peri, Upgrade.B) => Difficulty - 1,
-
-        (Deck.goat, Upgrade.A) => Difficulty - 2,
-        (Deck.goat, Upgrade.B) => Difficulty - 1,
-
-        (Deck.eunice, Upgrade.A) => Difficulty - 2,
-        (Deck.eunice, Upgrade.B) => Difficulty - 1,
-
-        (Deck.hacker, Upgrade.A) => Difficulty - 2,
-        (Deck.hacker, Upgrade.B) => Difficulty - 1,
-
-        (Deck.shard, Upgrade.A) => Difficulty - 2,
-        (Deck.shard, Upgrade.B) => Difficulty - 1,
-
-        (Deck.colorless, Upgrade.A) => Difficulty - 2,
-        (Deck.colorless, Upgrade.B) => Difficulty - 1,
-
-        (_, Upgrade.A) => Difficulty - 2,
-        (_, Upgrade.B) => Difficulty - 1,
-        _ => Difficulty
-    });
 
     private int GetShield(State _) => Difficulty switch
         {
@@ -237,7 +365,54 @@ public class CheckLocationCard : Card, IRegisterable
 
     private int GetAttackTimes(State _) => Difficulty <= 3 ? 2 : 3;
 
-    private int GetDraw(State _) => 1;
+    private int GetStunAttack(State s) => GetDmg(s, Difficulty switch
+    {
+        <= 1 => 1,
+        2 => 2,
+        _ => 3
+    });
+
+    private int GetDraw(State _)
+    {
+        var total = 0;
+        if (locationFrom == Deck.riggs && upgrade == Upgrade.A)
+            total += Difficulty switch
+            {
+                <= 2 => 1,
+                3 => 2,
+                _ => 3
+            };
+        if (Difficulty < 0) total += 1;
+        return total;
+    }
+
+    private int GetMove(State _) => Difficulty switch
+    {
+        <= 1 => 1,
+        2 => 2,
+        3 => 3,
+        _ => 4
+    };
+
+    private int GetDroneshift(State _) => Difficulty switch
+    {
+        <= 2 => 1,
+        3 => 2,
+        _ => 3
+    };
+
+    private int GetShard(State _) => Difficulty switch
+    {
+        <= 2 => 2,
+        _ => 3
+    };
+
+    private int GetBoost(State _) => Difficulty switch
+    {
+        <= 2 => 1,
+        3 => 2,
+        _ => 3
+    };
     
     private bool IsLocal()
     {
@@ -319,14 +494,12 @@ public class CheckLocationCard : Card, IRegisterable
 
     public override void AfterWasPlayed(State state, Combat c)
     {
-        if (!LocationAlreadyChecked())
-        {
-            APFX(GetScreenRect() + pos + new Vec(Combat.marginRect.x, Combat.marginRect.y));
-            Audio.Play(FSPRO.Event.Story_BooksTeleport);
-        }
+        if (LocationAlreadyChecked()) return;
+        APFX(GetScreenRect() + pos + new Vec(Combat.marginRect.x, Combat.marginRect.y));
+        Audio.Play(FSPRO.Event.Story_BooksTeleport);
     }
 
-    public static void APFX(
+    private static void APFX(
         Rect cardRectScreenPos)
     {
         var center = new Vec(cardRectScreenPos.x + cardRectScreenPos.w / 2.0,
