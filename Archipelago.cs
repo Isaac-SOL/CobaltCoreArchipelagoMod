@@ -415,6 +415,7 @@ public class Archipelago
     private static readonly object itemReceivedLock = new();
     private static DeathLink? lastDeathLink;
     private static readonly object deathLinkLock = new();
+    private List<double> lastDeathlinkTimestamps = [];
     internal static readonly object messagesReceivedLock = new();
     private const int MaxMessages = 2000;
     internal ConcurrentDictionary<string, (PlayerInfo info, ArchipelagoClientState status)> mainMenuPlayers = [];
@@ -733,15 +734,32 @@ public class Archipelago
         {
             if (lastDeathLink is not null && !state.IsOutsideRun() && state.ship.hull > 0)
             {
-                DeathLinkManager.ApplyDeathLink(g, lastDeathLink, out var kills);
-                if (!kills)
+                DeathLinkManager.ApplyDeathLink(g, lastDeathLink, out var kills, out var critical);
+                bool thatsALot = false;
+                if (kills)
                 {
-                    MessagesToAnnounce.Add(new MessageToAnnounce
-                    {
-                        type = MessageToAnnounce.DeathlinkReceived,
-                        deathlink = lastDeathLink
-                    });
+                    lastDeathlinkTimestamps.Clear();
                 }
+                else
+                {
+                    if (lastDeathlinkTimestamps.Count(t => state.storyVars.runTimer - t < 120.0) >= 3)
+                        thatsALot = true;
+                    lastDeathlinkTimestamps.Add(state.storyVars.runTimer);
+                    if (lastDeathlinkTimestamps.Count > 10)
+                        lastDeathlinkTimestamps.RemoveAt(0);
+                }
+                MessagesToAnnounce.Add(new MessageToAnnounce
+                {
+                    type = MessageToAnnounce.DeathlinkReceived,
+                    deathlink = lastDeathLink,
+                    deathlinkType = APSaveData.DeathLinkMode == DeathLinkMode.Missing
+                        ? MessageToAnnounce.DeathlinkType.Missing
+                        : kills
+                            ? MessageToAnnounce.DeathlinkType.Death
+                            : MessageToAnnounce.DeathlinkType.Damage,
+                    lottaDeathlinks = thatsALot,
+                    critical = critical
+                });
             }
 
             lastDeathLink = null;

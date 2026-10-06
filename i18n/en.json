@@ -258,10 +258,79 @@
         
         "deathlink": {
             "cat": {
-                "1": "We just got hit by a deathlink from {0}!\nIt was caused by: {1}."
+                "1": "Ouch, looks like {0} died...and we have a deathlink.",
+                "2": "{0} sent us...a deathlink. Uh-oh.",
+                "3": "We have a deathlink that comes from {0}!"
             },
             "backup": {
-                "1": "RECEIVED DEATHLINK. CAUSE: {0}\nSENDER: {1}"
+                "1": "DEATHLINK RECEIVED FROM {0}."
+            },
+            
+            "cause": {
+                "cat": {
+                    "1": "Dang, we got a deathlink since \"{0}\".",
+                    "2": "Oh no, \"{0}\"...we got hit by a deathlink!",
+                    "3": "\"{0}\"...okay, looks like that's a deathlink!"
+                },
+                "backup": {
+                    "1": "DEATHLINK RECEIVED. CAUSE: {0}"
+                }
+            },
+            
+            "missing": {
+                "cat": {
+                    "1": "We're about to have someone vanish!",
+                    "2": "Get ready for someone to blip out for a moment!",
+                    "3": "Blame Wizbro or whatever their name was for this!",
+                    "4": "We'll need to get our crew back ASAP!"
+                },
+                "backup": {
+                    "1": "SUMMONING TEMPORARY POCKET DIMENSION.",
+                    "2": "INITIATING \"Vanishity-Voop!\" SPELL."
+                },
+                
+                "thatsalot": {
+                    "cat": {
+                        "1": "I'm VERY worried about all this vanishing!",
+                        "2": "We're going to be in trouble if the crew keeps disappearing!",
+                        "3": "With all these deathlinks, I'm afraid the ship will go next!!!"
+                    }
+                }
+            },
+            
+            "hull_damage": {
+                "cat": {
+                    "1": "The anguish of the spatialstream strikes us! Or... something. ",
+                    "2": "Looks like we're taking some damage here!",
+                    "3": "Ouch!",
+                    "4": "Our ship isn't going to like that..."
+                },
+                "backup": {
+                    "1": "STARTING SELF-SLAP PROTOCOLS.",
+                    "2": "DISMANTLING MOSTLY UNNECESSARY HULL."
+                },
+                
+                "critical": {
+                    "cat": {
+                        "1": "Can we tell {0} to get good before we explode, please?",
+                        "2": "We can't take much more death! Physically, not emotionally! ",
+                        "3": "We're about to be sending our own deathlink if this keeps up!",
+                        "4": "It's going to really suck if THIS is the way we go out!"
+                    }
+                }
+            },
+            
+            "die": {
+                "cat": {
+                    "1": "See you all on the other side! Or I guess this same side...",
+                    "2": "Guess it's our time to die too, wonderful!",
+                    "3": "Hasta la vista!",
+                    "4": "Well... it was a good loop while it lasted."
+                },
+                "backup": {
+                    "1": "ACTIVATING SELF-DESTRUCT SEQUENCE!!!",
+                    "2": "SUMMONING BLACK HOLE IN THE ENGINE CORE."
+                }
             }
         },
         

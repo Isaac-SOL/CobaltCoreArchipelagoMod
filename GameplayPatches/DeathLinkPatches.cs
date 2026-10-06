@@ -38,9 +38,11 @@ public static class CheckDeathPatch
         else
         {
             Debug.Assert(Archipelago.Instance.DeathLinkService != null, "Archipelago.Instance.DeathLinkService != null");
-            var deathCause = state.route is Combat { otherShip.ai: not null } combat
-                ? $"was killed by {combat.otherShip.ai.GetLocName()}"
-                : "died suddenly";
+            Debug.Assert(Archipelago.Instance.APSaveData != null, "Archipelago.Instance.APSaveData != null");
+            var deathCause = Archipelago.Instance.APSaveData.Slot;
+            deathCause += state.route is Combat { otherShip.ai: not null } combat
+                ? $" was killed by {combat.otherShip.ai.GetLocName()}"
+                : " died suddenly";
             var combats = state.storyVars.combatsThisRun - Archipelago.Instance.APSaveData!.LastCombatCount;
             var loop = state.storyVars.runCount; 
             deathCause +=

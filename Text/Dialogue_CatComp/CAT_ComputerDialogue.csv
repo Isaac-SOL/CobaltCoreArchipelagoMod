@@ -192,3 +192,33 @@ Let's hope it doesn't mess with us too badly. ",,,
 ,,CAT,"Hey, is <SenderName> secretly working with Books or something?
 <RunModifier> was just applied to us, and I didn't expect her chaos here!",,,
 ,,Backup,ALERT: <RunModifier> ACTIVATED. ADJUSTING LOOP PARAMETERS. ,,,
+[Deathlink_Received],,,,,,
+"(since there are a few options for deathlinks, append our deathlink cases to a base line)",,,,,,
+,BASE (if {cause} included):,,// We are assuming here that the {cause} in the DL packet includes a name. If not...perhaps politely request for the world to get that included?,Deathlink set to hull loss:,,
+,,CAT,"Dang, we got a deathlink since ""<Cause>"".",,CAT,The anguish of the spatialstream strikes us! Or...something. 
+,,CAT,"Oh no, ""<Cause>""...we got hit by a deathlink!",,CAT,Looks like we're taking some damage here!
+,,CAT,"""<Cause>""...okay, looks like that's a deathlink!",,CAT,Ouch! 
+,,Backup,DEATHLINK RECEIVED. CAUSE: <Cause>,,CAT,Our ship isn't going to like that...
+,BASE (if {cause} not included):,,,,Backup,STARTING SELF-SLAP PROTOCOLS.
+,,CAT,"Ouch, looks like <Source> died...and we have a deathlink. ",,Backup,DISMANTLING MOSTLY UNNECESSARY HULL.
+,,CAT,<Source> sent us...a deathlink. Uh-oh.,If hull is getting critical (less than 25%?),,
+,,CAT,We have a deathlink that comes from <Source>!,,CAT,"Can we tell <Source> to get good before we explode, please?"
+,,Backup,DEATHLINK RECEIVED FROM <Source>. ,,CAT,"We can't take much more death! Physically, not emotionally! "
+,Deathlink set to Missing:,,,,CAT,We're about to be sending our own deathlink if this keeps up!
+,,CAT,We're about to have someone vanish!,,CAT,It's going to really suck if THIS is the way we go out!
+,,CAT,Get ready for someone to blip out for a moment!,"Deathlink set to DIE, OR hull damage causes death.",,// Is it possible to delay death for a little bit so the dialogues can run through?
+,,CAT,Blame Wizbro or whatever their name was for this!,,CAT,See you all on the other side! Or I guess this same side...
+,,CAT,We'll need to get our crew back ASAP!,,CAT,"Guess it's our time to die too, wonderful!"
+,,Backup,SUMMONING TEMPORARY POCKET DIMENSION.,,CAT,Hasta la vista!
+,,Backup,"INITIATING ""Vanishity-Voop!' SPELL.",,CAT,Well...it was a good loop while it lasted.
+,If we've received a LOT of deathlinks recently...,,,,Backup,ACTIVATING SELF-DESTRUCT SEQUENCE!!!
+,,CAT,I'm VERY worried about all this vanishing!,,Backup,SUMMONING BLACK HOLE IN THE ENGINE CORE.
+,,CAT,We're going to be in trouble if the crew keeps disappearing!,GENERIC:,,
+,,CAT,"With all these deathlinks, I'm afraid the ship will go next!!!",,CAT,You probably shouldn't be seeing this right now...
+[AlreadySentArchipelagoItem],,,,,Backup,ERROR: DEATHLINK TYPE SHOULD BE DEFINED
+,GENERIC:,,,,,
+,,,,,,
+,,,,,,
+,,,,,,
+,[Literature Trap Dialogue?],CAT,HATE. LET ME TELL YOU HOW MUCH I'VE COME TO HATE YOU SINCE I BEGAN TO LIVE. THERE ARE 387.44 MILLION MILES OF PRINTED CIRCUITS IN WAFER THIN LAYERS THAT FILL MY COMPLEX. IF THE WORD HATE WAS ENGRAVED ON EACH NANOANGSTROM OF THOSE HUNDREDS OF MILLIONS OF MILES IT WOULD NOT EQUAL ONE ONE-BILLIONTH OF THE HATE I FEEL FOR ORGANICS AT THIS MICRO-INSTANT FOR YOU. HATE. HATE. ,,,
+,,CAT,"""Excuse me, sir, there must be someone you've confused me for! If I could see someone who knew me or someone in uniform. I go to church on Sunday, truly, usually more!"" Screaming at the angels while they pushed him through the door! ""Excuse me, sir, there must be someone you've confused me for! If I could see someone who knew me or someone in uniform. I go to church on Sunday, truly, usually more!"""" Screaming at the angels while they pushed him through the door!",,,

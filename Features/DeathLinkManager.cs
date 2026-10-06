@@ -13,11 +13,12 @@ public class DeathLinkManager
 {
     public static bool PreventDeathLink { get; set; } = false;
 
-    internal static void ApplyDeathLink(G g, DeathLink lastDeathLink, out bool kills)
+    internal static void ApplyDeathLink(G g, DeathLink lastDeathLink, out bool kills, out bool critical)
     {
         var apSaveData = Archipelago.Instance.APSaveData;
         Debug.Assert(apSaveData != null, "Archipelago.Instance.APSaveData != null");
         kills = false;
+        critical = false;
         var state = g.state;
         var combat = state.route as Combat;
         switch (apSaveData.DeathLinkMode)
@@ -57,6 +58,8 @@ public class DeathLinkManager
                 ModEntry.Instance.Logger.LogInformation("Received deathlink damage: {dmg}", dmgAmount);
                 var fakeState = Mutil.DeepCopy(state);
                 fakeState.ship.DirectHullDamage(state, DB.fakeCombat, dmgAmount);
+                if (fakeState.ship.hull / (double)fakeState.ship.hullMax < 0.25)
+                    critical = true;
                 if (fakeState.ship.hull <= 0)
                 {
                     ModEntry.Instance.Logger.LogInformation("Damage killed: performing normal deathlink");
@@ -111,9 +114,11 @@ public class DeathLinkManager
     private static void FinishApplyFullDeathLink(DeathLink lastDeathLink)
     {
         // Save a message to replace the void shout
-        GetVoidShoutPatch.DeathLinkMessage = lastDeathLink!.Cause is null 
+        GetVoidShoutPatch.DeathLinkMessage = lastDeathLink.Cause is null
             ? $"{lastDeathLink.Source}?"
-            : $"{lastDeathLink.Source}\n{lastDeathLink.Cause}";
+            : lastDeathLink.Cause.Contains(lastDeathLink.Source)
+                ? lastDeathLink.Cause
+                : $"{lastDeathLink.Source}\n{lastDeathLink.Cause}";
         // Ensures that this received DeathLink won't cause us to trigger a new DeathLink ourselves
         PreventDeathLink = true;
     }

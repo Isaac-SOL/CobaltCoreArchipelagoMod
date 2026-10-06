@@ -132,12 +132,60 @@ internal class RouteOverlay
         string messageStr;
         if (message.type == MessageToAnnounce.DeathlinkReceived)
         {
-            messageStr = AdaptiveShoutCache.GetLocalizedRandomLine(
-                ["compShouts", "deathlink"],
-                catBackup: catBackup,
-                $"<c={APColors.OtherPlayer}>{CBU(message.deathlink!.Source)}</c>",
-                CBU(message.deathlink!.Cause)
-            );
+            switch (message.deathlinkType)
+            {
+                case MessageToAnnounce.DeathlinkType.Missing:
+                    messageStr = AdaptiveShoutCache.GetLocalizedRandomLine(
+                        message.lottaDeathlinks!.Value
+                            ? ["compShouts", "deathlink", "missing", "thatsalot"]
+                            : ["compShouts", "deathlink", "missing"],
+                        catBackup: catBackup,
+                        $"<c={APColors.OtherPlayer}>{CBU(message.deathlink!.Source)}</c>",
+                        CBU(message.deathlink!.Cause)
+                    );
+                    break;
+                case MessageToAnnounce.DeathlinkType.Damage:
+                    messageStr = AdaptiveShoutCache.GetLocalizedRandomLine(
+                        message.critical!.Value
+                        ? ["compShouts", "deathlink", "hull_damage", "critical"]
+                        : ["compShouts", "deathlink", "hull_damage"],
+                        catBackup: catBackup,
+                        $"<c={APColors.OtherPlayer}>{CBU(message.deathlink!.Source)}</c>",
+                        CBU(message.deathlink!.Cause)
+                    );
+                    break;
+                case MessageToAnnounce.DeathlinkType.Death:
+                    messageStr = AdaptiveShoutCache.GetLocalizedRandomLine(
+                        ["compShouts", "deathlink", "die"],
+                        catBackup: catBackup,
+                        $"<c={APColors.OtherPlayer}>{CBU(message.deathlink!.Source)}</c>",
+                        CBU(message.deathlink!.Cause)
+                    );
+                    break;
+                default:
+                    if (message.deathlink!.Cause != null)
+                    {
+                        var mergedCause = message.deathlink!.Cause;
+                        if (!mergedCause.Contains(message.deathlink!.Source))
+                            mergedCause = message.deathlink!.Source + ": " + mergedCause;
+                        messageStr = AdaptiveShoutCache.GetLocalizedRandomLine(
+                            ["compShouts", "deathlink", "cause"],
+                            catBackup: catBackup,
+                            CBU(mergedCause),
+                            $"<c={APColors.OtherPlayer}>{CBU(message.deathlink!.Source)}</c>"
+                        );
+                    }
+                    else
+                    {
+                        messageStr = AdaptiveShoutCache.GetLocalizedRandomLine(
+                            ["compShouts", "deathlink"],
+                            catBackup: catBackup,
+                            $"<c={APColors.OtherPlayer}>{CBU(message.deathlink!.Source)}</c>",
+                            ""
+                        );
+                    }
+                    break;
+            }
         }
         else if (Archipelago.ItemToCard.TryGetValue(item.ItemName, out var cardType))
         {
