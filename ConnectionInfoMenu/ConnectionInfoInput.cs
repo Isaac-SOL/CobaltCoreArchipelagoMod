@@ -107,8 +107,8 @@ public class ConnectionInfoInput : Route, OnInputPhase, OnMouseDown
                 onMouseDown: this,
                 rightHint: paste_uk
             );
-            if (immButton.isHover) g.tooltips.Add(new Vec(), new TTText(Localize(["connectionMenu", "tooltip", key])));
-            // TODO tooltips currently can't show if state is null
+            if (immButton.isHover) g.tooltips.Add(immButton.v + new Vec(x: 100),
+                                                  new TTText(Localize(["connectionMenu", "tooltip", key])));
             
             // Paste button
             var pasteButton = SharedArt.ButtonSprite(
@@ -121,7 +121,8 @@ public class ConnectionInfoInput : Route, OnInputPhase, OnMouseDown
                 leftHint: uk,
                 rightHint: ArchipelagoUK.connection_seePassword.ToUK()
             );
-            if (pasteButton.isHover) g.tooltips.Add(new Vec(), new TTText(pasteTooltip));
+            if (pasteButton.isHover) g.tooltips.Add(pasteButton.v - new Vec(x: 120),
+                                                    new TTText(pasteTooltip));
             
             // Get text data from storage
             var textToDraw = ConnectionInfo[line];
@@ -150,7 +151,8 @@ public class ConnectionInfoInput : Route, OnInputPhase, OnMouseDown
                     onMouseDown: this,
                     leftHint: paste_uk
                 );
-                if (spoilerButton.isHover) g.tooltips.Add(new Vec(), new TTText(spoilerTooltip));
+                if (spoilerButton.isHover) g.tooltips.Add(spoilerButton.v - new Vec(x: 120),
+                                                          new TTText(spoilerTooltip));
             }
 
             // Add blinking cursor if selected
