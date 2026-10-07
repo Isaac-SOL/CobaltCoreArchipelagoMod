@@ -16,5 +16,6 @@ public class OnBeatFinalePatch
         Debug.Assert(Archipelago.Instance.Session != null, "Archipelago.Instance.Session != null");
         ModEntry.Instance.Logger.LogInformation("FinaleFrienemy beaten, set AP goal achieved");
         Archipelago.Instance.Session.SetGoalAchieved();
+        ModEntry.Instance.Logger.LogInformation("AP goal has been set.");
     }
 }
