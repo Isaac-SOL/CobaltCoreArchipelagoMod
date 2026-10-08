@@ -107,7 +107,7 @@ public class ConnectionInfoInput : Route, OnInputPhase, OnMouseDown
                 onMouseDown: this,
                 rightHint: paste_uk
             );
-            if (immButton.isHover) g.tooltips.Add(immButton.v + new Vec(x: 100),
+            if (immButton.isHover) g.tooltips.Add(immButton.v + new Vec(x: 120),
                                                   new TTText(Localize(["connectionMenu", "tooltip", key])));
             
             // Paste button
