@@ -502,7 +502,7 @@ public class Archipelago
             EndRunShufflePatch.ShuffleStartingShipsInSave(new Rand(SlotDataHelper.Value.FixedRandSeed));
         
         // Loading/reloading existing runs: patch starting decks and ships
-        if (SlotDataHelper.Value.RandomizeStartingCards == FrequencyShuffleMode.Off)
+        if (SlotDataHelper.Value.RandomizeStartingCards == FrequencyShuffleModeCards.Off)
             EndRunShufflePatch.ApplyNonRandomizedSoloSets();
         else
             EndRunShufflePatch.ApplyShuffledStarterSets();
@@ -912,6 +912,14 @@ public enum FrequencyShuffleMode
     EveryRun = 2
 }
 
+public enum FrequencyShuffleModeCards
+{
+    Off = 0,
+    AtStart = 1,
+    EveryRun = 2,
+    EveryRunForced = 3
+}
+
 public enum ModifierShuffleMode
 {
     Off = 0,
@@ -947,9 +955,10 @@ public struct SlotDataHelper
     public List<Deck> StartingCharacters { get; private set; }
     public string StartingShip { get; private set; }
     public FrequencyShuffleMode ShuffleShipParts { get; private set; }
-    public FrequencyShuffleMode RandomizeStartingCards { get; private set; }
+    public FrequencyShuffleModeCards RandomizeStartingCards { get; private set; }
     public List<Type> StartingCards { get; private set; }
     public Dictionary<Deck, List<Type>> DeckStartingCards { get; private set; }
+    public Dictionary<Deck, List<Type>> DeckForcedStartingCards { get; private set; }
     public int WinReqTotal { get; private set; }
     public int WinReqPerChar { get; private set; }
     public int CharactersRequired { get; private set; }
@@ -1004,19 +1013,31 @@ public struct SlotDataHelper
             res.StartingCharacters.AddRange(startingCharacters.Select(s => Archipelago.ItemToDeck[s.ToString()]));
             res.StartingShip = Archipelago.ItemToStartingShip[(string)slotData["starting_ship"]];
             res.ShuffleShipParts = (FrequencyShuffleMode)Convert.ToInt32(slotData["shuffle_ship_parts"]);
-            res.RandomizeStartingCards = (FrequencyShuffleMode)Convert.ToInt32(slotData["randomize_starting_cards"]);
+            res.RandomizeStartingCards = (FrequencyShuffleModeCards)Convert.ToInt32(slotData["randomize_starting_cards"]);
+            
             var startingCards = (JArray)slotData["starting_cards"];
             res.StartingCards = [];
             res.StartingCards.AddRange(startingCards.Select(s => Archipelago.ItemToCard[s.ToString()]));
             res.DeckStartingCards = new Dictionary<Deck, List<Type>>();
+            res.DeckForcedStartingCards = new Dictionary<Deck, List<Type>>();
             foreach (var deck in Archipelago.ItemToDeck.Values)
             {
                 res.DeckStartingCards[deck] = [];
+                res.DeckForcedStartingCards[deck] = [];
             }
             foreach (var card in res.StartingCards)
             {
                 var deck = ((CardMeta)Attribute.GetCustomAttribute(card, typeof(CardMeta))!).deck;
                 res.DeckStartingCards[deck].Add(card);
+            }
+            
+            var forcedStartingCards = new List<Type>();
+            forcedStartingCards.AddRange(((JArray)slotData["forced_starting_cards"])
+                                         .Select(s => Archipelago.ItemToCard[s.ToString()]));
+            foreach (var card in forcedStartingCards)
+            {
+                var deck = ((CardMeta)Attribute.GetCustomAttribute(card, typeof(CardMeta))!).deck;
+                res.DeckForcedStartingCards[deck].Add(card);
             }
             
             res.WinReqTotal = Convert.ToInt32(slotData["memories_required_total"]);

@@ -46,14 +46,19 @@ public static class EndRunShufflePatch
         Archipelago.Instance.APSaveData.ThisRunSeenLocations.Clear();
         APSaveData.Save();
         
-        if (Archipelago.InstanceSlotData.RandomizeStartingCards == FrequencyShuffleMode.EveryRun)
+        switch (Archipelago.InstanceSlotData.RandomizeStartingCards)
         {
-            ShuffleStarterSetsInSave(__instance.rngActions);
-            ApplyShuffledStarterSets();
-        }
-        else if (Archipelago.InstanceSlotData.RandomizeStartingCards == FrequencyShuffleMode.Off)
-        {
-            ApplyNonRandomizedSoloSets();
+            case FrequencyShuffleModeCards.EveryRun:
+                ShuffleStarterSetsInSave(__instance.rngActions, false);
+                ApplyShuffledStarterSets();
+                break;
+            case FrequencyShuffleModeCards.EveryRunForced:
+                ShuffleStarterSetsInSave(__instance.rngActions, true);
+                ApplyShuffledStarterSets();
+                break;
+            case FrequencyShuffleModeCards.Off:
+                ApplyNonRandomizedSoloSets();
+                break;
         }
         
         if (Archipelago.InstanceSlotData.ShuffleShipParts == FrequencyShuffleMode.EveryRun)
@@ -111,7 +116,7 @@ public static class EndRunShufflePatch
         APSaveData.Save();
     }
 
-    internal static void ShuffleStarterSetsInSave(Rand rand)
+    internal static void ShuffleStarterSetsInSave(Rand rand, bool useForced)
     {
         Debug.Assert(Archipelago.Instance.APSaveData != null, "Archipelago.Instance.APSaveData != null");
         ModEntry.Instance.Logger.LogInformation("Shuffling starting cards with seed: {cardSeed}", rand.seed);
@@ -122,16 +127,40 @@ public static class EndRunShufflePatch
         foreach (var deck in Archipelago.ItemToDeck.Values)
         {
             if (deck == Deck.colorless) continue;
+            Card offC, secC;
             var defaultStartingCards = Archipelago.InstanceSlotData.DeckStartingCards[deck];
             var possibleCards = unlockedCards.Where(c => c.GetMeta().deck == deck).ToList();
             var offensiveCards = possibleCards.Where(c => OffensiveCards.Contains(c.GetType())).ToList();
             var generatorCards = possibleCards.Where(c => GeneratorCards.Contains(c.GetType())).ToList();
-            var offC = RandomOrNull(offensiveCards, rand) ?? (Card)defaultStartingCards[0].CreateInstance();
-            var effSecondCards = generatorCards.Count > 0 && !generatorCards.Contains(offC)
-                ? generatorCards
-                : possibleCards;
-            effSecondCards.Remove(offC);
-            var secC = RandomOrNull(effSecondCards, rand) ?? (Card)defaultStartingCards[1].CreateInstance();
+            var forcedSet = Archipelago.InstanceSlotData.DeckForcedStartingCards[deck];
+            if (useForced && forcedSet.Count == 2)
+            {
+                // Both are forced: just put them in
+                offC = (Card)forcedSet[0].CreateInstance();
+                secC = (Card)forcedSet[1].CreateInstance();
+            }
+            else if (useForced && forcedSet.Count == 1)
+            {
+                // One is forced: find another one that fulfills the missing attributes
+                offC = (Card)forcedSet[0].CreateInstance();
+                var effSecondCards = OffensiveCards.Contains(offC.GetType())
+                    ? possibleCards
+                    : offensiveCards;
+                if (generatorCards.Count > 0 && !generatorCards.Contains(offC))
+                    effSecondCards = effSecondCards.Intersect(generatorCards).ToList();
+                effSecondCards.Remove(offC);
+                secC = RandomOrNull(effSecondCards, rand) ?? (Card)defaultStartingCards[1].CreateInstance();
+            }
+            else
+            {
+                // None are forced: Try to get one offensive and one generator
+                offC = RandomOrNull(offensiveCards, rand) ?? (Card)defaultStartingCards[0].CreateInstance();
+                var effSecondCards = generatorCards.Count > 0 && !generatorCards.Contains(offC)
+                    ? generatorCards
+                    : possibleCards;
+                effSecondCards.Remove(offC);
+                secC = RandomOrNull(effSecondCards, rand) ?? (Card)defaultStartingCards[1].CreateInstance();
+            }
             var startKeys = new List<string> { offC.Key(), secC.Key() };
             Archipelago.Instance.APSaveData.NextCardRando[deck] = startKeys
                 .Concat(possibleCards
