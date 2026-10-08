@@ -4,7 +4,7 @@
 
 A Cobalt Core mod for [the Archipelago multi-game randomizer system](https://archipelago.gg/).
 
-- Version: 1.2.1
+- Version: 1.2.2
 - Archipelago version: 0.6.6
 - Cobalt Core version: 1.2.9
 - Nickel Version: 1.20.3+
@@ -15,11 +15,10 @@ The mod may work with other versions, but has not been tested on them.
 
 [Associated APWorld repository](https://github.com/Isaac-SOL/Archipelago-CobaltCore/tree/cobalt-core/worlds/cobalt_core) (direct link to the relevant folder/branch)
 
-## Current Status (June 2026)
+## Current Status (October 2026)
 
-The mod is stable. I will keep an eye out for small bugs and suggestions,
-but I'm taking a break from the mod for the moment. I expect to start working
-on new features again within the year.
+The mod is stable. I'm collecting bug reports and small suggestions, and
+implementing them in batched updates once every sometimes.
 
 If you encounter any issues while playing,
 please ping me on Discord (`saltyisaac`) in the Cobalt Core channel on the
@@ -34,7 +33,7 @@ and [Known Issues](#known-issues) sections for more details.
 I mostly did this for fun, so I make no promises as to how responsive I will be
 nor how long I will keep working on this mod. If I have become inactive for a
 long time and you wish to fork this repository or build on top of my work in
-general, ask me first. Please note that if you use LLMs or "AI" of any kind,
+general, ask me first. Note that if you use LLMs or "AI" of any kind,
 I will say no. Do not feed my work to an LLM.
 
 
@@ -159,10 +158,14 @@ one game in a multiworld.
 
 I don't know for sure yet. If there are compatibility issues with "utility"
 or "quality of life" type mods, I will try my best to fix them. However, the AP
-protocol cannot support added characters or cards as a generic thing, as far as
-I am aware. They would have to each be added individually. If someone can work
-out a solution for this we can discuss it, but if it proves to be too big of
-an undertaking I will probably not do it myself.
+protocol cannot support added characters, cards or ships as a generic thing.
+They would have to each be added individually.
+
+This would require refactoring a significant portion of this mod, and the
+collaboration of the modders that made the additional content to make it
+compatible with Archipelago.
+Right now, my plan is to evaluate the possibility of supporting these mods after
+Cobalt Core 1.3 releases, as well as its corresponding Nickel version.
 
 ## Planned features (no promises!)
 
@@ -181,18 +184,18 @@ an undertaking I will probably not do it myself.
 
 ## Credits
 
-- Mufflebuns: Writing for CAT's announcements
-- popouleto: Linkboros card art and help with the card frames
-- Shockah for making Nickel and helping me with various issues
-- rft50 for making the DemoMod that eased me into modding Cobalt Core
+- **Mufflebuns**: Writing for CAT's announcements
+- **popouleto**: Linkboros card art and help with the card frames
+- **Shockah** for making Nickel and helping me with various issues
+- **rft50** for making the DemoMod that eased me into modding Cobalt Core
   considering I had no idea what I was doing
-- All players who have tested the mod and given feedback, notably JyGein and Exuno
-- Ixrec for making the great Nine Sols AP mod whose code helped
+- All players who have tested the mod and given feedback, notably **JyGein** and **Exuno**
+- **Ixrec** for making the great Nine Sols AP mod whose code helped
   me figure out how an AP integration is supposed to work considering I *also* had no
   idea what I was doing on that front either
-- Landmaster who first started a Cobalt Core Archipelago project which was never
+- **Landmaster** who first started a Cobalt Core Archipelago project which was never
   finished but can be found [here](https://github.com/Landmaster/CobaltCoreArchipelago)
 - All the people in the CC modding community who answered my many questions
 - All the Archipelago contributors for making this frankly absurd project
-- Everyone at Rocket Rat Games for making a very cool and cute game that is not only
+- Everyone at **Rocket Rat Games** for making a very cool and cute game that is not only
   very fun to play but also very fun to mod
