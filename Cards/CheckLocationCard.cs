@@ -317,7 +317,7 @@ public class CheckLocationCard : Card, IRegisterable
 
         if (GetDraw(state) > 0)
         {
-            description += "\n" + string.Format(Localize("descDraw"), GetDraw(state));
+            description += "\n" + string.Format(Localize("descCont", "Draw"), GetDraw(state));
         }
 
         var upgradeData = GetUpgradeData(state);
