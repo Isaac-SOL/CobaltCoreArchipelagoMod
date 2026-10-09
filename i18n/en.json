@@ -195,7 +195,7 @@
                 "AcidMissile": "<c=midrow>Acid Miss.</c>",
                 "Evade": "<c=status>+{0} Evade.</c>",
                 "Overdrive": "<c=status>Overdrive {0}.</c>",
-                "Droneshift": "<c=status>+{0} Droneshift.</c>",
+                "Droneshift": "<c=status>+{0} Drnshift</c>.",
                 "Missile": "<c=midrow>Missile.</c>",
                 "HeavyMissile": "<c=midrow>Heavy Miss.</c>",
                 "Heat": "<c=status>{0} Heat.</c>",
